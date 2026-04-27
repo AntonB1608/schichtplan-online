@@ -1,7 +1,22 @@
 import re
+from dotenv import load_dotenv
 import os
+import requests
+import smtplib
+from email.mime.text import MIMEText
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv()
+def wetter():
+    key = os.getenv("OPENWEATHER_KEY")
+    url = f"https://api.openweathermap.org/data/2.5/weather?q=Mannheim&appid={key}&units=metric&lang=de"
+    response = requests.get(url)
+    response = response.json()
+    weather = []
+    temp = response["main"]["temp"]
+    beschreibung = response["weather"][0]["description"]
+    luftfeuchtigkeit = response["main"]["humidity"]
+    return temp, beschreibung, luftfeuchtigkeit
 
 def datei_lesen(pfad):
     with open(pfad, "r", encoding="utf-8") as f:
@@ -19,3 +34,5 @@ def zeit_extrahieren(text):
     print(result)
 text = datei_lesen("/Users/macbook/VS Code/Projekt Schwimmplan/schichten.txt")
 zeit_extrahieren(text)
+temp, beschreibung, luftfeuchtigkeit = wetter()
+print(f"Wetter in Mannheim: {temp}°C, {beschreibung}, Luftfeuchtigkeit: {luftfeuchtigkeit}%")
