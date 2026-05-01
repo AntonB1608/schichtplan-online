@@ -4,7 +4,14 @@ import os
 import requests
 import smtplib
 from email.mime.text import MIMEText
+from datetime import datetime, timedelta
 
+heute = datetime.today()
+
+morgen = heute + timedelta(days=1)
+morgen_str = morgen.strftime("%d.%m.%Y")
+
+print(f"Morgen ist der {morgen_str}")
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv()
 def wetter():
@@ -30,9 +37,41 @@ def zeit_extrahieren(text):
         datum = m.group(1)
         zeit = m.group(2).strip()
         result.append((datum, zeit))
+    print(f"{result}")
     return result
-    print(result)
+def Datum_heute(result):
+    datum = None
+    zeit = None
+    for element in result:
+        if element[0] == morgen_str:
+            datum = element[0]
+            zeit = element[1]
+    return datum, zeit
+def Aufstehen(zeit):
+    if "frei" in zeit:
+        Aufstehzeit = "Du kannst heute ausschlafen!"
+    elif "06:00" in zeit:
+        Aufstehzeit = "5 Uhr!"
+    elif "07:00" in zeit:
+        Aufstehzeit = "6 Uhr!"
+    elif "08:00" in zeit:
+        Aufstehzeit = "7 Uhr!"
+    else:
+        Aufstehzeit = "7:30 !"
+    return Aufstehzeit
+def Mail(Aufstehzeit, zeit, temp, beschreibung, luftfeuchtigkeit):
+    gmail_passwort = os.getenv("GMAILPASSWORT")
+    betreff = "Erinnerung für Morgen"
+    empfaenger = os.getenv("GMAILEMAIL")
+    absender = os.getenv("GMAILEMAIL")
+    if "frei" in zeit:
+        inhalt = f"Morgen hast du frei, schlaf aus!"
+    else:
+        inhalt = f"Schlaf gut, du musst morgen um {Aufstehzeit} aufstehen. Du arbeitest von {zeit} Uhr. Es hat morgen voraussichtlich {temp}°C mit einer Luftfeuchtigkeit von {luftfeuchtigkeit}%. Das Wetter wird {beschreibung}."
+    print(f"{inhalt}")
 text = datei_lesen("/Users/macbook/VS Code/Projekt Schwimmplan/schichten.txt")
-zeit_extrahieren(text)
+result = zeit_extrahieren(text)
 temp, beschreibung, luftfeuchtigkeit = wetter()
-print(f"Wetter in Mannheim: {temp}°C, {beschreibung}, Luftfeuchtigkeit: {luftfeuchtigkeit}%")
+datum, zeit = Datum_heute(result)
+Aufstehzeit = Aufstehen(result)
+Mail(Aufstehzeit, zeit, temp, beschreibung, luftfeuchtigkeit)
