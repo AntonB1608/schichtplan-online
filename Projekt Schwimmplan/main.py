@@ -5,7 +5,7 @@ import requests
 import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
-load_dotenv()
+
 
 def Datum():
     heute = datetime.today()
@@ -60,7 +60,7 @@ def Mailchecken():
     temp = response["main"]["temp"]
     beschreibung = response["weather"][0]["description"]
     luftfeuchtigkeit = response["main"]["humidity"]
-    return temp, beschreibung, luftfeuchtigkeit
+    return temp, beschreibung, luftfeuchtigkeit, response
 
 
 def Mail_Vorbereitung():
@@ -84,10 +84,11 @@ def aufstehzeit(Aufstehzeit, zeit, temp, luftfeuchtigkeit):
 
 def wetter_beschreibung(response):
     beschreibung = response["weather"][0]["main"]
+    print(f"beschreibung")
     if beschreibung == "Thunderstorm": 
-        wetter_beschreibung = f"Es gewittert morgen."
+        wetter_beschreibung == f"Es gewittert morgen."
     elif beschreibung == "Drizzle":
-        wetter_beschreibung = f"Es nieselt morgen leicht."
+        wetter_beschreibung == f"Es nieselt morgen leicht."
     elif beschreibung == "Rain":
         wetter_beschreibung == f"Es wird morgen regnen."
     elif beschreibung == "Snow":
@@ -99,7 +100,7 @@ def wetter_beschreibung(response):
     elif beschreibung == "Clouds":
         wetter_beschreibung == "Es wird morgen wolkig."
     else: 
-        wetter_beschreibung == f""
+        pass 
     return wetter_beschreibung
 
 
@@ -108,23 +109,27 @@ def Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort):
     msg["Subject"] = betreff
     msg["From"] = absender
     msg["To"] = empfaenger
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.ehlo()
+        server.starttls()
         server.login(absender, gmail_passwort)
-        server.send_message(msg)
-print("Mail gesendet!")
+        server.setnd_message(msg)
+    print("Mail gesendet!")
 
 def Mail_verschicken(mailinhalt, absender, empfaenger, betreff, gmail_passwort, aufstehzeit, temperatur ):
     Mail_inhalt(aufstehzeit, temperatur)
     Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort)
 
 
-
+#main 
+load_dotenv()
 text = datei_lesen("/Users/macbook/VS Code/Projekt Schwimmplan/schichten.txt")
 morgen_str = Datum()
 result = zeit_extrahieren(text)
 datum, zeit = Datum_heute(result, morgen_str)
-temp, beschreibung, luftfeuchtigkeit = Mailchecken()
+temp, beschreibung, luftfeuchtigkeit, response = Mailchecken()
 Aufstehzeit = Aufstehen(zeit)
+
 gmail_passwort, betreff, empfaenger, absender = Mail_Vorbereitung()
 aufstehzeit_text, temperatur = aufstehzeit(Aufstehzeit, zeit, temp, luftfeuchtigkeit)
 mailinhalt = Mail_inhalt(aufstehzeit_text, temperatur)
