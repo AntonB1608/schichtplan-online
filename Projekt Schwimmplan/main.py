@@ -39,13 +39,13 @@ def Aufstehen(zeit):
     if "frei" in zeit:
         Aufstehzeit = "Du kannst heute ausschlafen!"
     elif "06:00" in zeit:
-        Aufstehzeit = "5 Uhr!"
+        Aufstehzeit = "5 Uhr"
     elif "07:00" in zeit:
-        Aufstehzeit = "6 Uhr!"
+        Aufstehzeit = "6 Uhr"
     elif "08:00" in zeit:
-        Aufstehzeit = "7 Uhr!"
+        Aufstehzeit = "7 Uhr"
     else:
-        Aufstehzeit = "7:30!"
+        Aufstehzeit = "7:30 Uhr"
     return Aufstehzeit
 
 Datum()
@@ -70,38 +70,37 @@ def Mail_Vorbereitung():
     absender = os.getenv("GMAILEMAIL")
     return gmail_passwort, betreff, empfaenger, absender
 
-def Mail_inhalt(aufstehzeit, temperatur):
-    mailinhalt= f"{aufstehzeit} \n {temperatur}"
+def Mail_inhalt(aufstehzeit, temperatur, wetter_text):
+    mailinhalt= f"{aufstehzeit} {wetter_text} {temperatur}"
     return mailinhalt
 
 def aufstehzeit(Aufstehzeit, zeit, temp, luftfeuchtigkeit):
     if "frei" in zeit:
         aufstehzeit = f"Morgen hast du frei, schlaf aus!"
     else:
-        aufstehzeit = f"Schlaf gut, du musst morgen um {Aufstehzeit} aufstehen.\n" 
-    temperatur = f"Es hat außerdem morgen voraussichtlich {temp}°C,\n mit einer Luftfeuchtigkeit von {luftfeuchtigkeit}%. ."
+        aufstehzeit = f"Schlaf gut, du musst morgen um {Aufstehzeit} aufstehen." 
+    temperatur = f"Es hat außerdem morgen voraussichtlich {temp}°C, mit einer Luftfeuchtigkeit von {luftfeuchtigkeit}%. ."
     return aufstehzeit, temperatur
 
 def wetter_beschreibung(response):
     beschreibung = response["weather"][0]["main"]
-    print(f"beschreibung")
     if beschreibung == "Thunderstorm": 
-        wetter_beschreibung == f"Es gewittert morgen."
+        wetter_text = "Es gewittert morgen."
     elif beschreibung == "Drizzle":
-        wetter_beschreibung == f"Es nieselt morgen leicht."
+        wetter_text = "Es nieselt morgen leicht."
     elif beschreibung == "Rain":
-        wetter_beschreibung == f"Es wird morgen regnen."
+        wetter_text = "Es wird morgen regnen."
     elif beschreibung == "Snow":
-        wetter_beschreibung == "Es schneit morgen!"
+        wetter_text = "Es schneit morgen!"
     elif beschreibung == "Atmosphere":
-        wetter_beschreibung == f"Es wird nebelig morgen."
+        wetter_text = "Es wird nebelig morgen."
     elif beschreibung == "Clear":
-        wetter_beschreibung == f"Es wird morgen klar und wolkenlos"
+        wetter_text = "Es wird morgen klar und wolkenlos"
     elif beschreibung == "Clouds":
-        wetter_beschreibung == "Es wird morgen wolkig."
+        wetter_text = "Es wird morgen wolkig."
     else: 
         pass 
-    return wetter_beschreibung
+    return wetter_text
 
 
 def Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort):
@@ -113,11 +112,11 @@ def Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort):
         server.ehlo()
         server.starttls()
         server.login(absender, gmail_passwort)
-        server.setnd_message(msg)
+        server.send_message(msg)
     print("Mail gesendet!")
 
 def Mail_verschicken(mailinhalt, absender, empfaenger, betreff, gmail_passwort, aufstehzeit, temperatur ):
-    Mail_inhalt(aufstehzeit, temperatur)
+    Mail_inhalt(aufstehzeit, temperatur, wetter_text)
     Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort)
 
 
@@ -129,8 +128,8 @@ result = zeit_extrahieren(text)
 datum, zeit = Datum_heute(result, morgen_str)
 temp, beschreibung, luftfeuchtigkeit, response = Mailchecken()
 Aufstehzeit = Aufstehen(zeit)
-
+wetter_text = wetter_beschreibung(response)
 gmail_passwort, betreff, empfaenger, absender = Mail_Vorbereitung()
 aufstehzeit_text, temperatur = aufstehzeit(Aufstehzeit, zeit, temp, luftfeuchtigkeit)
-mailinhalt = Mail_inhalt(aufstehzeit_text, temperatur)
+mailinhalt = Mail_inhalt(aufstehzeit_text, temperatur, wetter_text)
 Mail_verschicken(mailinhalt, absender, empfaenger, betreff, gmail_passwort, aufstehzeit_text, temperatur)
