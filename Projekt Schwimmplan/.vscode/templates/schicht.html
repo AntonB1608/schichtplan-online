@@ -3,22 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schichtzeiten-Planer</title>
-<link rel="stylesheet" href="styles.css">
-
-</head>
-<body>
-<div class="wrapper">
-  <form action="">
-    <div class="input-box">
-        <input type="text" placeholder = "Zeiten" required>
-        </div>
-    <div class="input-box">
-        <input type="text" placeholder = "Zeiten" required>
-        </div>
+<title>Zeitplan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  background:black;--surface:#1a1a1a;--surface2:#222;--border:#2e2e2e;
+  --accent:#c8f060;--text:#f0ede6;--text-muted:#666;--danger:#ff5555;
+  --radius:10px;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:2rem 1rem;}
+.container{max-width:680px;margin:0 auto;}
+h1{font-family:'DM Mono',monospace;font-size:1rem;font-weight:400;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.75rem;}
+ 
+.time-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.time-bar label{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;}
+.time-bar input[type=time]{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:15px;padding:8px 12px;outline:none;transition:border-color .15s;width:130px;}
+.time-bar input[type=time]:focus{border-color:var(--accent);}
+.time-bar input[type=time]::-webkit-calendar-picker-indicator{filter:invert(.5);cursor:pointer;}
+.sep{color:var(--text-muted);font-size:18px;}
  
 
-   
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.cal-header h2{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;letter-spacing:.05em;}
+.nav-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-size:18px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s;}
+.nav-btn:hover{border-color:var(--accent);background:rgba(200,240,96,.07);}
+ 
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-day-name{text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.08em;padding-bottom:8px;}
+.day{background:var(--surface);border:1px solid var(--border);border-radius:8px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .12s;user-select:none;position:relative;}
+.day:hover:not(.empty):not(.past){border-color:#555;background:var(--surface2);}
+.day.empty{background:transparent;border-color:transparent;cursor:default;}
+.day.past{opacity:.3;cursor:default;}
+.day.selected{background:rgba(200,240,96,.15);border-color:var(--accent);color:var(--accent);font-weight:500;}
+.day.today{border-color:#555;}
+.day.today::after{content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent);}
+ 
+
+.export-bar{margin-top:1.5rem;display:flex;gap:10px;flex-wrap:wrap;}
+.count-info{font-size:13px;color:var(--text-muted);padding:10px 0;flex:1;display:flex;align-items:center;}
+.export-btn{background:var(--accent);color:#0f0f0f;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.05em;padding:10px 18px;cursor:pointer;transition:background .15s,transform .1s;}
+.export-btn:hover{background:#a8d040;}
+.export-btn:active{transform:scale(.98);}
+.clear-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;cursor:pointer;transition:border-color .15s,color .15s;}
+.clear-btn:hover{border-color:var(--danger);color:var(--danger);}
+ 
+
+.preview{margin-top:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;}
+.preview-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
+.preview-list{font-family:'DM Mono',monospace;font-size:13px;color:var(--text-muted);line-height:2;max-height:200px;overflow-y:auto;}
+.preview-list span{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>// Zeitplan-Export</h1>
+ 
+  <div class="time-bar">
+    <label>Von</label>
+    <input type="time" id="von" value="09:00">
+    <span class="sep">–</span>
+    <label>Bis</label>
+    <input type="time" id="bis" value="17:00">
+  </div>
+ 
+  <div class="cal-header">
+    <button class="nav-btn" onclick="changeMonth(-1)">&#8592;</button>
+    <h2 id="monat-label"></h2>
+    <button class="nav-btn" onclick="changeMonth(1)">&#8594;</button>
+  </div>
+ 
+  <div class="cal-grid" id="cal-grid">
+    <div class="cal-day-name">Mo</div>
+    <div class="cal-day-name">Di</div>
+    <div class="cal-day-name">Mi</div>
+    <div class="cal-day-name">Do</div>
+    <div class="cal-day-name">Fr</div>
+    <div class="cal-day-name">Sa</div>
+    <div class="cal-day-name">So</div>
+  </div>
+ 
+  <div class="export-bar">
+    <span class="count-info" id="count-info">0 Tage ausgewählt</span>
+    <button class="clear-btn" onclick="clearAll()">Alles leeren</button>
+    <button class="export-btn" onclick="exportTxt()">&#8595; TXT exportieren</button>
+  </div>
+ 
+  <div class="preview" id="preview" style="display:none">
+    <div class="preview-label">Vorschau</div>
+    <div class="preview-list" id="preview-list"></div>
+  </div>
+</div>
+ 
+<script>
+const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+let heute = new Date();
+let aktJahr = heute.getFullYear();
+let aktMonat = heute.getMonth();
+let selected = new Set(); // keys: "YYYY-MM-DD"
+ 
+function pad(n){ return String(n).padStart(2,'0'); }
+function toKey(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
+function keyToLabel(k){
+  const [y,m,d] = k.split('-');
+  return `${d}.${m}.${y}`;
+}
+ 
+function changeMonth(dir){
+  aktMonat += dir;
+  if(aktMonat > 11){ aktMonat = 0; aktJahr++; }
+  if(aktMonat < 0){ aktMonat = 11; aktJahr--; }
+  renderKal();
+}
+ 
+function renderKal(){
+  document.getElementById('monat-label').textContent = `${MONATE[aktMonat]} ${aktJahr}`;
+  const grid = document.getElementById('cal-grid');
+  // keep day-name headers (first 7 children)
+  while(grid.children.length > 7) grid.removeChild(grid.lastChild);
+ 
+  const ersterTag = new Date(aktJahr, aktMonat, 1);
+  // Monday=0 offset
+  let startOffset = ersterTag.getDay() - 1;
+  if(startOffset < 0) startOffset = 6;
+ 
+  for(let i=0;i<startOffset;i++){
+    const e = document.createElement('div');
+    e.className='day empty';
+    grid.appendChild(e);
+  }
+ 
+  const tageImMonat = new Date(aktJahr, aktMonat+1, 0).getDate();
+  const heuteKey = toKey(heute.getFullYear(), heute.getMonth(), heute.getDate());
+ 
+  for(let d=1;d<=tageImMonat;d++){
+    const key = toKey(aktJahr, aktMonat, d);
+    const div = document.createElement('div');
+    div.className = 'day';
+    div.textContent = d;
+ 
+    const tagDatum = new Date(aktJahr, aktMonat, d);
+    const istVergangenheit = tagDatum < new Date(heute.getFullYear(), heute.getMonth(), heute.getDate());
+ 
+    if(key === heuteKey) div.classList.add('today');
+    if(istVergangenheit) div.classList.add('past');
+    if(selected.has(key)) div.classList.add('selected');
+ 
+    if(!istVergangenheit){
+      div.onclick = () => toggleDay(key, div);
+    }
+    grid.appendChild(div);
+  }
+}
+ 
+function toggleDay(key, el){
+  if(selected.has(key)){
+    selected.delete(key);
+    el.classList.remove('selected');
+  } else {
+    selected.add(key);
+    el.classList.add('selected');
+  }
+  updateInfo();
+}
+ 
+function updateInfo(){
+  const n = selected.size;
+  document.getElementById('count-info').textContent = `${n} Tag${n!==1?'e':''} ausgewählt`;
+  const preview = document.getElementById('preview');
+  const list = document.getElementById('preview-list');
+  if(n === 0){ preview.style.display='none'; return; }
+  preview.style.display='block';
+  const von = document.getElementById('von').value;
+  const bis = document.getElementById('bis').value;
+  const zeilen = getSortedLines(von, bis);
+  list.innerHTML = zeilen.map(z=>`<div><span>${z}</span></div>`).join('');
+}
+ 
+function getSortedLines(von, bis){
+  return [...selected].sort().map(k => `${keyToLabel(k)} ${von} - ${bis}`);
+}
+ 
+function clearAll(){
+  selected.clear();
+  renderKal();
+  updateInfo();
+}
+ 
+function exportTxt(){
+  const von = document.getElementById('von').value;
+  const bis = document.getElementById('bis').value;
+  if(selected.size === 0){ alert('Keine Tage ausgewählt.'); return; }
+  const zeilen = getSortedLines(von, bis);
+  const inhalt = zeilen.join('\n');
+  const blob = new Blob([inhalt], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'zeitplan.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+ 
+// live preview update when time changes
+document.getElementById('von').addEventListener('change', updateInfo);
+document.getElementById('bis').addEventListener('change', updateInfo);
+ 
+renderKal();
+updateInfo();
 </script>
 </body>
 </html>
