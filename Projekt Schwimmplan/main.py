@@ -117,6 +117,7 @@ def erstelle_Mail_inhalt(aufstehzeit, temperatur, wetter_text, morgen_str):
     </html>
     """
     return mailinhalt
+
 #zweite Mail (am selben Tag)
 
 def erstelle_zweite_Mailinhalt(aufstehzeit, arbeit):
