@@ -37,7 +37,7 @@ def finde_paar_heute(paare, morgen_str):
     except: 
         print(f"Es gibt keine Zeiteinträge für den {morgen_str}")
 
-def finde_Aufstehzeit(zeit):
+def finde_aufstehzeit(zeit):
     if "frei" in zeit:
         aufstehzeit = "Du kannst heute ausschlafen!"
         arbeit = False
@@ -63,12 +63,8 @@ def lese_datei(pfad):
     with open(pfad, "r", encoding="utf-8") as f:
         return f.read()
 
-text = lese_datei("/Users/macbook/VS Code/Projekt Schwimmplan/schichten.txt")
 
 
-###Wetter finden, Aufstehzeit finden, Mailinhalt vorbereiten
-
-#Aufstehzeit finden
 
 def zeige_aufstehzeit(Aufstehzeit, zeit, temp, luftfeuchtigkeit):
     if "frei" in zeit:
@@ -79,7 +75,7 @@ def zeige_aufstehzeit(Aufstehzeit, zeit, temp, luftfeuchtigkeit):
    
     return aufstehzeit, temperatur
 
-#Wettertypen beschreiben
+
 
 def wähle_wetter_beschreibung(response):
     beschreibung = response["weather"][0]["main"]
@@ -101,8 +97,7 @@ def wähle_wetter_beschreibung(response):
         pass 
     return wetter_text
 
-###Mailinhalt mit HMTL verbessern
-#erste Mail (am Tag vorher)
+
 
 def erstelle_Mail_inhalt(aufstehzeit, temperatur, wetter_text, morgen_str):
     mailinhalt = f"""
@@ -118,7 +113,7 @@ def erstelle_Mail_inhalt(aufstehzeit, temperatur, wetter_text, morgen_str):
     """
     return mailinhalt
 
-#zweite Mail (am selben Tag)
+
 
 def erstelle_zweite_Mailinhalt(aufstehzeit, arbeit):
     if arbeit:
@@ -170,7 +165,7 @@ def bereite_zweite_Mail():
 
 
 
-#Mailverschicken
+
 def sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort):
     msg = MIMEText(mailinhalt, "html")
     msg["Subject"] = betreff
@@ -201,10 +196,15 @@ def sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, zweiter_betreff, 
 
 
 if __name__ == "__main__":
+    text = lese_datei("/Users/macbook/Schichtplan_tool/Projekt Schwimmplan/schichten.txt")
     morgen_str = hole_datum_heute()
     paare = extrahiere_zeit(text)
-    datum, zeit = finde_paar_heute(paare, morgen_str)
-    aufstehzeit_roh, arbeit = finde_Aufstehzeit(zeit)
+    try:
+        datum, zeit = finde_paar_heute(paare, morgen_str)
+    except:
+        print("Kein passender Eintrag für morgen vorhanden")
+        exit()
+    aufstehzeit_roh, arbeit = finde_aufstehzeit(zeit)
     temp, beschreibung, luftfeuchtigkeit, response = finde_wetterdaten(text)
     wetter_text = wähle_wetter_beschreibung(response)
     aufstehzeit_text, temperatur = zeige_aufstehzeit(aufstehzeit_roh, zeit, temp, luftfeuchtigkeit)
