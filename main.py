@@ -196,7 +196,7 @@ def sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, zweiter_betreff, 
 
 
 if __name__ == "__main__":
-    text = lese_datei("/Users/macbook/Schichtplan_tool/Projekt Schwimmplan/schichten.txt")
+    text = lese_datei("/Users/macbook/Schichtplan_tool/schichten.txt")
     morgen_str = hole_datum_heute()
     paare = extrahiere_zeit(text)
     try:
