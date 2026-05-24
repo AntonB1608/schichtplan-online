@@ -8,10 +8,10 @@ The second one reminds you of your shift time on the morning of your workday.
 
 ## How can I automate the programm?
 
-1.Clone the repository
-2.Install dependencies from requirements.txt
-3.Fill out schichten.txt (work time and date)
-4.Run program daily automatically with:
+1. Clone the repository
+2. Install dependencies from requirements.txt
+3. Fill out schichten.txt (work time and date)
+4. Run program daily automatically with:
 **Mac** / **Linux:** Use cron job:
 --> For a tutorial visit <https://www.youtube.com/watch?v=QZJ1drMQz1A&t=67s>
 **Windows:** Use Task Scheduler:
@@ -29,4 +29,4 @@ Second email:
 
 ## Planned Features
 
-1.Flask web interface to register work time pairs via browser
+1. Flask web interface to register work time pairs via browser
