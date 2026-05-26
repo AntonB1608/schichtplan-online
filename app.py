@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request
+from datetime import datetime
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -6,10 +8,14 @@ def index():
     return render_template("/index.html")
 
 @app.route("/schicht", methods=["POST"])
-datum = request.form["datum"]
-zeit = request.form["zeit"]
 def schicht_eintragen():
-    index()
-
+    pfad = "/Users/macbook/Schichtplan_tool/schichten.txt"
+    datum = request.form["datum"]
+    zeit = request.form["zeit"]
+    datum_formatiert = datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
+    with open(pfad, "a", encoding="utf-8") as f:
+        f.write(f"{datum_formatiert} {zeit}\n")
+    return "Schicht eingetragen!"
 if __name__ == "__main__":
     app.run(host = '0.0.0.0', port = 5555, debug=True)
+    
