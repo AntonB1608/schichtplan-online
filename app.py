@@ -11,10 +11,11 @@ def index():
 def schicht_eintragen():
     pfad = "/Users/macbook/Schichtplan_tool/schichten.txt"
     datum = request.form["datum"]
-    zeit = request.form["zeit"]
+    zeit_anfang = request.form["zeit_anfang"]
+    zeit_ende = request.form["zeit_ende"]
     datum_formatiert = datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
     with open(pfad, "a", encoding="utf-8") as f:
-        f.write(f"{datum_formatiert} {zeit}\n")
+        f.write(f"{datum_formatiert} {zeit_anfang}-{zeit_ende}\n")
     return "Schicht eingetragen!"
 if __name__ == "__main__":
     app.run(host = '0.0.0.0', port = 5555, debug=True)
