@@ -17,13 +17,10 @@ def schicht_eintragen():
     frei = request.form.get("frei")
     if frei:
         with open(pfad, "a", encoding="utf-8") as f:
-            f.write(f"{datum_formatiert} frei\n")
+            f.write(f"\n{datum_formatiert} frei\n")
     else:
         with open(pfad, "a", encoding="utf-8") as f:
-            f.write(f"{datum_formatiert} {zeit_anfang}-{zeit_ende}\n")
-
-    
+            f.write(f"\n{datum_formatiert} {zeit_anfang}-{zeit_ende}\n")
     return "Schicht eingetragen!"
 if __name__ == "__main__":
     app.run(host = '0.0.0.0', port = 5555, debug=True)
-    
