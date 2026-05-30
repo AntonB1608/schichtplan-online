@@ -22,7 +22,7 @@ The second one reminds you of your shift time on the morning of your workday.
 First email (evening):
 
 ![Mail Preview](screenshots/Erinnerung_für_morgen.jpeg)
- 
+
 Second email:
 
 ![Mail Preview](screenshots/Erinnerung_für_heute.jpeg)
