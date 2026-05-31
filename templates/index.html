@@ -9,11 +9,23 @@
 <body>
     <h1>Schichtplantool</h1>
 <form method="POST" action="/schicht">
-    <input type="date" name="datum">
-    <input type="time" name="zeit_anfang">
-    <input type="time" name="zeit_ende">
-    <input type="checkbox" name="frei"> Freier Tag
-    <button type="submit">Eintragen</button>
+    <div class = "Felder">
+        <div class="datum-feld">
+            <input type="date" name="datum">
+        </div>
+        <div class = "zeit">
+            <input type="time" name="zeit_anfang">
+        </div>
+        <div class = "zeit">
+            <input type="time" name="zeit_ende">
+        </div>
+        <div class = "checkbox">
+            <input type="checkbox" name="frei"> Freier Tag
+        </div>
+        <div class = "eintragen">
+            <button type="submit">Eintragen</button>
+        </div>
+    </div>
 
 </form>
 </body>
