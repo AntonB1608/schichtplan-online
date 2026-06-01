@@ -5,19 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  
 </head>
 <body>
-    <h1>Schichtplantool</h1>
+  <h1>Schichtplantool</h1>
 <form method="POST" action="/schicht">
     <div class = "Felder">
         <div class="datum-feld">
             <input type="date" name="datum">
+            <div class="Name"><label> Datum</label></div>
         </div>
         <div class = "zeit">
             <input type="time" name="zeit_anfang">
+            <div class="Name"><label> Schicht Anfang</label></div>
         </div>
         <div class = "zeit">
             <input type="time" name="zeit_ende">
+            <div class="Name"><label> Schicht Ende</label></div>
         </div>
         <div class = "checkbox">
             <input type="checkbox" name="frei"> Freier Tag
