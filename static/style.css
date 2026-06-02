@@ -1,5 +1,5 @@
 body {
-    background-color: white;
+    background-color: #002029;
     display: flex;
     flex-direction: column;
     justify-content: center; 
@@ -13,10 +13,10 @@ h1 {
     font-size: 60px;
     font-family: Impact, Haettenschweiler, 'Arial Sans Serif';
     font-weight: bold;
-    color: green;
+    color: white;
 }
 .Felder {
-    background: rgba(210,105,30);
+    background: #004052;
     border-radius: 12px;
     padding: 4rem;
     display: flex;
