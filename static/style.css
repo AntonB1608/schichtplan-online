@@ -1,24 +1,26 @@
 body {
-    background-color: black;
+    background-color: white;
     display: flex;
     flex-direction: column;
     justify-content: center; 
     align-items: center;
     min-height: 100vh;
-    color: white,
+    color: black,
   
 }
+
 h1 {
-    font-size: 20px;
-    font-family: Georgia;
-    color: white;
+    font-size: 60px;
+    font-family: Impact, Haettenschweiler, 'Arial Sans Serif';
+    font-weight: bold;
+    color: green;
 }
 .Felder {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(210,105,30);
     border-radius: 12px;
     padding: 4rem;
     display: flex;
-    margin: 2rem;
+    margin:  2rem;
 }
 .datum-feld, .zeit, .checkbox, .eintragen {
     padding: 0.25rem;
@@ -32,4 +34,9 @@ h1 {
     margin-top: 20px;
     margin-bottom: 20px;
     align-items: center;
+    font-size: 15px;
+    font-family: Tahoma;
+}
+.button {
+    color: rgba(59, 213, 227, 0.1)
 }
