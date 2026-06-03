@@ -14,6 +14,7 @@ h1 {
     font-family: Impact, Haettenschweiler, 'Arial Sans Serif';
     font-weight: bold;
     color: #FEFCFB;
+    text-align: center;
 }
 .Felder {
     background: #034078;
@@ -22,7 +23,9 @@ h1 {
     display: flex;
     margin:  2rem;
     width: 100%;
+    max-width: 700px;
 }
+
 .datum-feld, .zeit, .checkbox, .eintragen {
     padding: 5px;
     margin: 5rem;
