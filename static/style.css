@@ -59,7 +59,13 @@ h1 {
     border: var(--border);
     padding: 5px;
     margin: 5px;
-    width: 100%;
-    
-
+    width: 100%;   
+}
+input {
+    background-color: #748cab;
+    border: black;
+    border-radius: 200px;
+    border-width: 20px;
+    color: white;
+    border-radius: 2px;
 }
