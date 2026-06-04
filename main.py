@@ -99,13 +99,14 @@ def wähle_wetter_beschreibung(response):
 
 
 
-def erstelle_Mail_inhalt(aufstehzeit, temperatur, wetter_text, morgen_str):
+def erstelle_Mail_inhalt(aufstehzeit, temperatur, wetter_text, morgen_str, zeit):
     mailinhalt = f"""
     <html>
     <body style="font-family: Georgia;">
     <meta charset="UTF-8">
     <h1>Erinnerung für Morgen den {morgen_str}</h1>
     <p>{aufstehzeit}</p>
+    <p>Du arbeitest morgen von {zeit} Uhr</p>
     <p>{wetter_text}</p>
     <p>{temperatur}</p>
     </body>
@@ -115,14 +116,14 @@ def erstelle_Mail_inhalt(aufstehzeit, temperatur, wetter_text, morgen_str):
 
 
 
-def erstelle_zweite_Mailinhalt(aufstehzeit, arbeit):
+def erstelle_zweite_Mailinhalt(arbeit, zeit):
     if arbeit:
         zweitemailinhalt = f"""
         <html>
         <body style="font-family: Georgia;">
         <meta charset="UTF-8">
         <h1>Erinnerung für heute</h1>
-        <p>Du arbeitest heute um {aufstehzeit}.</p>
+        <p>Du arbeitest heute um {zeit} Uhr.</p>
         </body>
         </html>
         """
@@ -208,8 +209,8 @@ if __name__ == "__main__":
     temp, beschreibung, luftfeuchtigkeit, response = finde_wetterdaten(text)
     wetter_text = wähle_wetter_beschreibung(response)
     aufstehzeit_text, temperatur = zeige_aufstehzeit(aufstehzeit_roh, zeit, temp, luftfeuchtigkeit)
-    mailinhalt = erstelle_Mail_inhalt(aufstehzeit_text, temperatur, wetter_text, morgen_str)
-    zweite_mailinhalt = erstelle_zweite_Mailinhalt(aufstehzeit_roh, arbeit)
+    mailinhalt = erstelle_Mail_inhalt(aufstehzeit_text, temperatur, wetter_text, morgen_str, zeit)
+    zweite_mailinhalt = erstelle_zweite_Mailinhalt(arbeit, zeit)
     gmail_passwort, betreff, empfaenger, absender = bereite_Mail()
     gmail_passwort, zweiter_betreff, empfaenger, absender = bereite_zweite_Mail()
     sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort)
