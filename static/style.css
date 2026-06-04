@@ -10,11 +10,13 @@ body {
 }
 
 h1 {
-    font-size: 80px;
+    font-size: 100px;
     font-family: Gill Sans;
     font-weight: bolder;
     color: #ffffff;
     text-align: center;
+    width: 100%;
+    max-width: 700px;
 }
 .Felder {
     background: #034078;
@@ -27,6 +29,8 @@ h1 {
     color: #ffffff;
     font-family: 'Space grotesk';
     font-weight: bold;
+    width: 100%;
+    max-width: 700px;
 }
 
 .datum-feld, .zeit, .checkbox, .eintragen {
