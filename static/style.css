@@ -19,7 +19,7 @@ h1 {
     max-width: 700px;
 }
 .Felder {
-    background: #034078;
+    background: #065A82;
     border-radius: 12px;
     padding: 4rem;
     display: flex;
@@ -75,10 +75,13 @@ h1 {
     width: 100%;   
 }
 input {
-    background-color: #33415C;
+    background-color: #1B3B6F;
     border: black;
-    border-radius: 200px;
-    border-width: 20px;
-    color: white;
-    border-radius: 15px;
+    border-width: 1px solid;
+    color: #ffffff;
+    border-radius: 25px;
+    width: 120px;
+    height: 45px;
+    text-align: center;
+    padding: 5px;
 }
