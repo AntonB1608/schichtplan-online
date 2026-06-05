@@ -52,6 +52,19 @@ h1 {
     border-radius: 80px;
 }
 .button {
+    box-sizing: border-box;
+    background-image: none;
+    cursor: pointer;
+    font-size: 100%;
+    line-height: 1.5;
+    margin: 0;
+    outline: #000000;
+    display: block;
+    border-radius: 999px;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 1.2rem 3rem;
+    position: relative;
     background-color: #E9C46A;
     border-color: #33415C;
     font-size: 12.5px;
