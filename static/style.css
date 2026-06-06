@@ -8,15 +8,18 @@ body {
 
   
 }
-
+u {
+    color: white;
+}
 h1 {
-    font-size: 100px;
+    font-size: 80px;
     font-family: Gill Sans;
     font-weight: bolder;
     color: #ffffff;
     text-align: center;
     width: 100%;
     max-width: 700px;
+    margin-bottom: 200px;
 }
 .Felder {
     background: #065A82;
@@ -46,6 +49,9 @@ h1 {
 .checkbox {
     padding: 5px;
     margin: 5px;
+    font-size: 13px;
+    text-align: center;
+    
 }
 
 
@@ -53,10 +59,12 @@ h1 {
     margin-top: 20px;
     margin-bottom: 20px;
     align-items: center;
-    font-size: 15px;
     font-family: Tahoma;
     padding: 0.5px;
     border-radius: 80px;
+    font-family: 'Space Grotesk';
+    font-size: 13px;
+    text-align: center;
 }
 .button {
     background-image: none;
