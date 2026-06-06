@@ -37,36 +37,27 @@ def finde_paar_heute(paare, morgen_str):
     except: 
         print(f"Es gibt keine Zeiteinträge für den {morgen_str}")
 
-def finde_aufstehzeit(zeit):
-    erste_zeit = datetime.strptime(zeit.split("-")[0], "%H:%M")
-    erste_zeit = erste_zeit.hour
-    if erste_zeit <= 12:
-        aufstehzeit = erste_zeit - 1
+def finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit):
+    if "frei" in zeit:
+        aufstehzeit_str = f"Morgen hast du frei, schlaf aus!"
     else: 
-        aufstehzeit = 10
-    return aufstehzeit
+        erste_zeit = datetime.strptime(zeit.split("-")[0], "%H:%M")
+        erste_zeit = erste_zeit.hour
+        if erste_zeit <= 12:
+            aufstehzeit = erste_zeit - 1
+        else: 
+            aufstehzeit = 10
+        aufstehzeit_str = f"Schlaf gut, du musst morgen um {aufstehzeit} aufstehen." 
+    temperatur = f"Es hat außerdem morgen voraussichtlich {temp}°C, mit einer Luftfeuchtigkeit von {luftfeuchtigkeit}%. ."
+    return aufstehzeit_str, temperatur
 
 
 
-###Dateilesen
+
 
 def lese_datei(pfad):        
     with open(pfad, "r", encoding="utf-8") as f:
         return f.read()
-
-
-
-
-def zeige_aufstehzeit(Aufstehzeit, zeit, temp, luftfeuchtigkeit):
-    if "frei" in zeit:
-        aufstehzeit = f"Morgen hast du frei, schlaf aus!"
-    else:
-        aufstehzeit = f"Schlaf gut, du musst morgen um {Aufstehzeit} aufstehen." 
-    temperatur = f"Es hat außerdem morgen voraussichtlich {temp}°C, mit einer Luftfeuchtigkeit von {luftfeuchtigkeit}%. ."
-   
-    return aufstehzeit, temperatur
-
-
 
 def wähle_wetter_beschreibung(response):
     beschreibung = response["weather"][0]["main"]
@@ -90,13 +81,13 @@ def wähle_wetter_beschreibung(response):
 
 
 
-def erstelle_Mail_inhalt(aufstehzeit, temperatur, wetter_text, morgen_str, zeit):
+def erstelle_Mail_inhalt(aufstehzeit_str, temperatur, wetter_text, morgen_str, zeit):
     mailinhalt = f"""
     <html>
     <body style="font-family: Georgia;">
     <meta charset="UTF-8">
     <h1>Erinnerung für Morgen den {morgen_str}</h1>
-    <p>{aufstehzeit}</p>
+    <p>{aufstehzeit_str}</p>
     <p>Du arbeitest morgen von {zeit} Uhr</p>
     <p>{wetter_text}</p>
     <p>{temperatur}</p>
