@@ -22,13 +22,12 @@ The second one reminds you of your shift time on the morning of your workday.
 
 First email (evening):
 
-![Mail Preview](screenshots/Erinnerung_für_morgen.jpeg)
+![Mail Preview](screenshots/Erinnerung_morgen.jpeg)
 
 Second email:
 
-![Mail Preview](screenshots/Erinnerung_für_heute.jpeg)
+![Mail Preview](screenshots/Erinnerung_heute.jpeg)
 
 ## Planned Features
 
-1. Flask web interface to register work time pairs via browser
-
+1. individual configuration via browser app
