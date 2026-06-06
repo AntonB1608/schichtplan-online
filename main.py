@@ -81,12 +81,13 @@ def wähle_wetter_beschreibung(response):
 
 
 
-def erstelle_Mail_inhalt(aufstehzeit_str, temperatur, wetter_text, morgen_str, zeit):
+def erstelle_Mail_inhalt(aufstehzeit_str, temperatur, wetter_text, morgen_str, zeit, name):
     mailinhalt = f"""
     <html>
     <body style="font-family: Georgia;">
     <meta charset="UTF-8">
     <h1>Erinnerung für Morgen den {morgen_str}</h1>
+    <Hallo {name}</p>
     <p>{aufstehzeit_str}</p>
     <p>Du arbeitest morgen von {zeit} Uhr</p>
     <p>{wetter_text}</p>
@@ -98,14 +99,15 @@ def erstelle_Mail_inhalt(aufstehzeit_str, temperatur, wetter_text, morgen_str, z
 
 
 
-def erstelle_zweite_Mailinhalt(arbeit, zeit):
+def erstelle_zweite_Mailinhalt(arbeit, zeit, name):
     if arbeit:
         zweitemailinhalt = f"""
         <html>
         <body style="font-family: Georgia;">
         <meta charset="UTF-8">
         <h1>Erinnerung für heute</h1>
-        <p>Du arbeitest heute um {zeit} Uhr.</p>
+        <p>Hallo {name},</p>
+        <p> Du arbeitest heute um {zeit} Uhr.</p>
         </body>
         </html>
         """
@@ -115,6 +117,7 @@ def erstelle_zweite_Mailinhalt(arbeit, zeit):
         <body style="font-family: Georgia;">
         <meta charset="UTF-8">
         <h1>Erinnerung für heute</h1>
+        <p>Guten Morgen {name}</p>
         <p>Du arbeitest heute nicht. Genieße dein freien Tag!</p>
         </body>
         </html>
@@ -137,7 +140,7 @@ def bereite_Mail():
     betreff = "Erinnerung für Morgen"
     empfaenger = os.getenv("GMAILEMAIL")
     absender = os.getenv("GMAILEMAIL")
-    return gmail_passwort, betreff, empfaenger, absender
+    return gmail_passwort, betreff, empfaenger, absender, name
 
 def bereite_zweite_Mail():
     gmail_passwort = os.getenv("GMAILPASSWORT")
@@ -182,17 +185,18 @@ if __name__ == "__main__":
     text = lese_datei("/Users/macbook/Schichtplan_tool/schichten.txt")
     morgen_str = hole_datum_heute()
     paare = extrahiere_zeit(text)
+    name = os.getenv("NAME")
     try:
         datum, zeit = finde_paar_heute(paare, morgen_str)
     except:
         print("Kein passender Eintrag für morgen vorhanden")
         exit()
-    aufstehzeit_roh, arbeit = finde_aufstehzeit(zeit)
+    aufstehzeit_roh, arbeit = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit):
     temp, beschreibung, luftfeuchtigkeit, response = finde_wetterdaten(text)
     wetter_text = wähle_wetter_beschreibung(response)
-    aufstehzeit_text, temperatur = zeige_aufstehzeit(aufstehzeit_roh, zeit, temp, luftfeuchtigkeit)
-    mailinhalt = erstelle_Mail_inhalt(aufstehzeit_text, temperatur, wetter_text, morgen_str, zeit)
-    zweite_mailinhalt = erstelle_zweite_Mailinhalt(arbeit, zeit)
+    aufstehzeit_text, temperatur = finde_aufstehzeit_temp(aufstehzeit_roh, zeit, temp, luftfeuchtigkeit)
+    mailinhalt = erstelle_Mail_inhalt(aufstehzeit_text, temperatur, wetter_text, morgen_str, zeit, name)
+    zweite_mailinhalt = erstelle_zweite_Mailinhalt(arbeit, zeit, name)
     gmail_passwort, betreff, empfaenger, absender = bereite_Mail()
     gmail_passwort, zweiter_betreff, empfaenger, absender = bereite_zweite_Mail()
     sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort)
