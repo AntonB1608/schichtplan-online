@@ -11,7 +11,8 @@ The second one reminds you of your shift time on the morning of your workday.
 1. Clone the repository
 2. Install dependencies from requirements.txt
 3. Fill out schichten.txt (work time and date)
-4. Run program daily automatically with:
+4. Fill out example.env, change ist to .env
+5. Run program daily automatically with:
 **Mac** / **Linux:** Use cron job:
 --> For a tutorial visit <https://www.youtube.com/watch?v=QZJ1drMQz1A&t=67s>
 **Windows:** Use Task Scheduler:

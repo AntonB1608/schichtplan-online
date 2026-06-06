@@ -56,7 +56,7 @@ def finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit):
 
 def lese_datei(pfad):        
     with open(pfad, "r", encoding="utf-8") as f:
-        return f.read()
+        return f.read().strip()
 
 def wähle_wetter_beschreibung(response):
     beschreibung = response["weather"][0]["main"]
@@ -104,7 +104,7 @@ def erstelle_zweite_Mailinhalt(arbeit, zeit, name):
         <html>
         <body style="font-family: Georgia;">
         <meta charset="UTF-8">
-        <h1>Erinnerung für heute</h1>
+        <h1>Erinnerung für heute den {heute_str}</h1>
         <p>Hallo {name},</p>
         <p> Du arbeitest heute um {zeit} Uhr.</p>
         </body>
@@ -115,7 +115,7 @@ def erstelle_zweite_Mailinhalt(arbeit, zeit, name):
         <html>
         <body style="font-family: Georgia;">
         <meta charset="UTF-8">
-        <h1>Erinnerung für heute</h1>
+        <h1>Erinnerung für heute den {heute_str}</h1>
         <p>Guten Morgen {name}</p>
         <p>Du arbeitest heute nicht. Genieße dein freien Tag!</p>
         </body>
@@ -136,17 +136,15 @@ def finde_wetterdaten(text):
 
 def bereite_Mail():
     gmail_passwort = os.getenv("GMAILPASSWORT")
-    empfaenger = os.getenv("GMAILEMAIL")
-    absender = os.getenv("GMAILEMAIL")
-    gmail_passwort = os.getenv("GMAILPASSWORT")
-    return gmail_passwort, zweiter_betreff, empfaenger, absender
+    empfaenger = absender = os.getenv("GMAILEMAIL")
+    return gmail_passwort, empfaenger, absender
 
 
 
 
-def sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort, heute_str):
+def sende_erste_Mail(mailinhalt, absender, empfaenger, gmail_passwort, heute_str):
     msg = MIMEText(mailinhalt, "html")
-    betreff = f"Erinnerung für morgen, den {heute_str}"
+    betreff = f"Erinnerung für morgen, den {morgen_str}"
     msg["Subject"] = betreff
     msg["From"] = absender
     msg["To"] = empfaenger
@@ -159,7 +157,7 @@ def sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort, 
 
 def sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, zweiter_betreff, gmail_passwort):
     msg = MIMEText(zweite_mailinhalt, "html")
-    zweiter_betreff = f"Erinnerung für heute, den {morgen_str}"
+    zweiter_betreff = f"Erinnerung für heute, den {heute_str}"
     msg["Subject"] = zweiter_betreff
     msg["From"] = absender
     msg["To"] = empfaenger
@@ -169,11 +167,6 @@ def sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, zweiter_betreff, 
         server.login(absender, gmail_passwort)
         server.send_message(msg)
     print("Zweite Mail gesendet!")
-
-
-#main 
-
-
 
 if __name__ == "__main__":
     text = lese_datei("/Users/macbook/Schichtplan_tool/schichten.txt")
@@ -189,9 +182,9 @@ if __name__ == "__main__":
     temp, beschreibung, luftfeuchtigkeit, response = finde_wetterdaten(text)
     aufstehzeit_roh, arbeit = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit)
     wetter_text = wähle_wetter_beschreibung(response)
-    aufstehzeit_text, temperatur = finde_aufstehzeit_temp(aufstehzeit_roh, zeit, temp, luftfeuchtigkeit)
+    aufstehzeit_text, temperatur = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit)
     mailinhalt = erstelle_Mail_inhalt(aufstehzeit_text, temperatur, wetter_text, morgen_str, zeit, name)
     zweite_mailinhalt = erstelle_zweite_Mailinhalt(arbeit, zeit, name)
-    gmail_passwort, betreff, empfaenger, absender = bereite_Mail()
-    sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort, heute_str)
-    sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger,gmail_passwort)
+    gmail_passwort, empfaenger, absender = bereite_Mail()
+    sende_erste_Mail(mailinhalt, absender, empfaenger, gmail_passwort, heute_str)
+    sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, morgen_str, gmail_passwort)
