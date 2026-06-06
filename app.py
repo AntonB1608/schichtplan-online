@@ -26,8 +26,7 @@ def schicht_eintragen():
         with open(pfad, "a", encoding="utf-8") as f:
             f.write(f"\n{datum_formatiert} {zeit_anfang}-{zeit_ende}\n")
     return "Schicht eingetragen!"
-    with open(pfadenv, "a", encoding="utf-8") as f:
-        f.write(f"\nGMAILEMAIL = {email}\n")
+
 
 
 if __name__ == "__main__":

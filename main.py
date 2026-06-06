@@ -8,14 +8,13 @@ from datetime import datetime, timedelta
 import emoji
 load_dotenv()
 
-###def
 
-#Datum, Uhrzeit finden
 def hole_datum_heute():
     heute = datetime.today()
     morgen = heute + timedelta(days=1)
+    heute_str = heute.strftime("%d.%m.%Y")
     morgen_str = morgen.strftime("%d.%m.%Y")
-    return morgen_str
+    return morgen_str, heute_str
 
 def extrahiere_zeit(text):
     muster = r"(\d{2}\.\d{2}\.\d{4})\s+([\d:freiF][\d:\-free i]+)"
@@ -137,23 +136,17 @@ def finde_wetterdaten(text):
 
 def bereite_Mail():
     gmail_passwort = os.getenv("GMAILPASSWORT")
-    betreff = "Erinnerung für Morgen"
     empfaenger = os.getenv("GMAILEMAIL")
     absender = os.getenv("GMAILEMAIL")
-    return gmail_passwort, betreff, empfaenger, absender, name
-
-def bereite_zweite_Mail():
     gmail_passwort = os.getenv("GMAILPASSWORT")
-    zweiter_betreff = "Erinnerung für Heute"
-    empfaenger = os.getenv("GMAILEMAIL")
-    absender = os.getenv("GMAILEMAIL")
     return gmail_passwort, zweiter_betreff, empfaenger, absender
 
 
 
 
-def sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort):
+def sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort, heute_str):
     msg = MIMEText(mailinhalt, "html")
+    betreff = f"Erinnerung für morgen, den {heute_str}"
     msg["Subject"] = betreff
     msg["From"] = absender
     msg["To"] = empfaenger
@@ -166,6 +159,7 @@ def sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort):
 
 def sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, zweiter_betreff, gmail_passwort):
     msg = MIMEText(zweite_mailinhalt, "html")
+    zweiter_betreff = f"Erinnerung für heute, den {morgen_str}"
     msg["Subject"] = zweiter_betreff
     msg["From"] = absender
     msg["To"] = empfaenger
@@ -183,7 +177,7 @@ def sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, zweiter_betreff, 
 
 if __name__ == "__main__":
     text = lese_datei("/Users/macbook/Schichtplan_tool/schichten.txt")
-    morgen_str = hole_datum_heute()
+    morgen_str, heute_str = hole_datum_heute()
     paare = extrahiere_zeit(text)
     name = os.getenv("NAME")
     try:
@@ -191,13 +185,13 @@ if __name__ == "__main__":
     except:
         print("Kein passender Eintrag für morgen vorhanden")
         exit()
-    aufstehzeit_roh, arbeit = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit):
+    
     temp, beschreibung, luftfeuchtigkeit, response = finde_wetterdaten(text)
+    aufstehzeit_roh, arbeit = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit)
     wetter_text = wähle_wetter_beschreibung(response)
     aufstehzeit_text, temperatur = finde_aufstehzeit_temp(aufstehzeit_roh, zeit, temp, luftfeuchtigkeit)
     mailinhalt = erstelle_Mail_inhalt(aufstehzeit_text, temperatur, wetter_text, morgen_str, zeit, name)
     zweite_mailinhalt = erstelle_zweite_Mailinhalt(arbeit, zeit, name)
     gmail_passwort, betreff, empfaenger, absender = bereite_Mail()
-    gmail_passwort, zweiter_betreff, empfaenger, absender = bereite_zweite_Mail()
-    sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort)
-    sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, zweiter_betreff, gmail_passwort)
+    sende_erste_Mail(mailinhalt, absender, empfaenger, betreff, gmail_passwort, heute_str)
+    sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger,gmail_passwort)
