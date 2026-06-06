@@ -31,6 +31,7 @@ h1 {
     font-weight: bold;
     width: 100%;
     max-width: 700px;
+    align-items: flex-end
 }
 
 .datum-feld, .zeit, .checkbox, .eintragen {
@@ -58,16 +59,12 @@ h1 {
     border-radius: 80px;
 }
 .button {
-    box-sizing: border-box;
     background-image: none;
     cursor: pointer;
     font-size: 100%;
     line-height: 1.5;
-    margin: 0;
     outline: #000000;
-    display: block;
-    border-radius: 999px;
-    box-sizing: border-box;
+    border-radius: 99px;
     overflow: hidden;
     padding: 1.2rem 3rem;
     position: relative;
@@ -78,10 +75,9 @@ h1 {
     border-radius: 25px;
     padding: 9px;
     text-align: center;
-    text-decoration: none;
     cursor: pointer;
-    width: auto;
-    align-self: flex-end;
+    width: 100px;
+    height: 30px;
     font-family: 'Space grotesk';
     font-weight: bold;
 

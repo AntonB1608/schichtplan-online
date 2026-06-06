@@ -10,15 +10,15 @@ def index():
 @app.route("/schicht", methods=["POST"])
 def schicht_eintragen():
     pfad = "/Users/macbook/Schichtplan_tool/schichten.txt"
-    pfadenv = "/Users/macbook/Schichtplan_tool/.env"
+    #pfadenv = "/Users/macbook/Schichtplan_tool/.env"
     datum = request.form["datum"]
     zeit_anfang = request.form["zeit_anfang"]
     zeit_ende = request.form["zeit_ende"]
     datum_formatiert = datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
     frei = request.form.get("frei")
-    name = request.form.get("name")
-    email = request.form.get("email")
-    weckzeit = request.form.get("weckzeit")
+    #name = request.form.get("name")
+    #email = request.form.get("email")
+    #weckzeit = request.form.get("weckzeit")
     if frei:
         with open(pfad, "a", encoding="utf-8") as f:
             f.write(f"\n{datum_formatiert} frei\n")
