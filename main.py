@@ -38,22 +38,13 @@ def finde_paar_heute(paare, morgen_str):
         print(f"Es gibt keine Zeiteinträge für den {morgen_str}")
 
 def finde_aufstehzeit(zeit):
-    if "frei" in zeit:
-        aufstehzeit = "Du kannst heute ausschlafen!"
-        arbeit = False
-    elif "06:00" in zeit:
-        aufstehzeit = "5 Uhr"
-        arbeit = True
-    elif "07:00" in zeit:
-        aufstehzeit = "6 Uhr"
-        arbeit = True
-    elif "08:00" in zeit:
-        aufstehzeit = "7 Uhr"
-        arbeit = True
-    else:
-        aufstehzeit = "7:30 Uhr"
-        arbeit = True
-    return aufstehzeit, arbeit
+    erste_zeit = datetime.strptime(zeit.split("-")[0], "%H:%M")
+    erste_zeit = erste_zeit.hour
+    if erste_zeit <= 12:
+        aufstehzeit = erste_zeit - 1
+    else: 
+        aufstehzeit = 10
+    return aufstehzeit
 
 
 

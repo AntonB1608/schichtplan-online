@@ -42,6 +42,12 @@ h1 {
     display: flex;
     border-radius: 80px;
 }
+.checkbox {
+    padding: 5px;
+    margin: 5px;
+}
+
+
 .Name {
     margin-top: 20px;
     margin-bottom: 20px;
