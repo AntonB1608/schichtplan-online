@@ -39,7 +39,9 @@ def finde_paar_heute(paare, morgen_str):
 def finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit):
     if "frei" in zeit:
         aufstehzeit_str = f"Morgen hast du frei, schlaf aus!"
+        arbeit = False
     else: 
+        arbeit = True
         erste_zeit = datetime.strptime(zeit.split("-")[0], "%H:%M")
         erste_zeit = erste_zeit.hour
         if erste_zeit <= 12:
@@ -48,7 +50,7 @@ def finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit):
             aufstehzeit = 10
         aufstehzeit_str = f"Schlaf gut, du musst morgen um {aufstehzeit} aufstehen." 
     temperatur = f"Es hat außerdem morgen voraussichtlich {temp}°C, mit einer Luftfeuchtigkeit von {luftfeuchtigkeit}%. ."
-    return aufstehzeit_str, temperatur
+    return aufstehzeit_str, temperatur, arbeit
 
 
 
@@ -86,7 +88,7 @@ def erstelle_Mail_inhalt(aufstehzeit_str, temperatur, wetter_text, morgen_str, z
     <body style="font-family: Georgia;">
     <meta charset="UTF-8">
     <h1>Erinnerung für Morgen den {morgen_str}</h1>
-    <Hallo {name}</p>
+    <p>Hallo {name}</p>
     <p>{aufstehzeit_str}</p>
     <p>Du arbeitest morgen von {zeit} Uhr</p>
     <p>{wetter_text}</p>
@@ -178,13 +180,15 @@ if __name__ == "__main__":
     except:
         print("Kein passender Eintrag für morgen vorhanden")
         exit()
+    try: 
+        temp, beschreibung, luftfeuchtigkeit, response = finde_wetterdaten(text)
+        wetter_text = wähle_wetter_beschreibung(response)
+        arbeit, aufstehzeit_str, temperatur = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit)
+        mailinhalt = erstelle_Mail_inhalt(aufstehzeit_str, temperatur, wetter_text, morgen_str, zeit, name)
+        zweite_mailinhalt = erstelle_zweite_Mailinhalt(arbeit, zeit, name)
+        gmail_passwort, empfaenger, absender = bereite_Mail()
+        sende_erste_Mail(mailinhalt, absender, empfaenger, gmail_passwort, heute_str)
+        sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, morgen_str, gmail_passwort)
+    except: 
+        print("Wetterdaten nicht verfügbar. Überprüfe dein Internet / API key / URL")
     
-    temp, beschreibung, luftfeuchtigkeit, response = finde_wetterdaten(text)
-    aufstehzeit_roh, arbeit = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit)
-    wetter_text = wähle_wetter_beschreibung(response)
-    aufstehzeit_text, temperatur = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit)
-    mailinhalt = erstelle_Mail_inhalt(aufstehzeit_text, temperatur, wetter_text, morgen_str, zeit, name)
-    zweite_mailinhalt = erstelle_zweite_Mailinhalt(arbeit, zeit, name)
-    gmail_passwort, empfaenger, absender = bereite_Mail()
-    sende_erste_Mail(mailinhalt, absender, empfaenger, gmail_passwort, heute_str)
-    sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, morgen_str, gmail_passwort)
