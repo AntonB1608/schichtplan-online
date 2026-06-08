@@ -42,7 +42,7 @@ def finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit):
         arbeit = False
     else: 
         arbeit = True
-        erste_zeit = datetime.strptime(zeit.split("-")[0], "%H:%M")
+        erste_zeit = datetime.strptime(zeit.split("-")[0].strip(), "%H:%M")
         erste_zeit = erste_zeit.hour
         if erste_zeit <= 12:
             aufstehzeit = erste_zeit - 1
@@ -100,7 +100,7 @@ def erstelle_Mail_inhalt(aufstehzeit_str, temperatur, wetter_text, morgen_str, z
 
 
 
-def erstelle_zweite_Mailinhalt(arbeit, zeit, name):
+def erstelle_zweite_Mailinhalt(arbeit, zeit, name, heute_str):
     if arbeit:
         zweitemailinhalt = f"""
         <html>
@@ -183,12 +183,11 @@ if __name__ == "__main__":
     try: 
         temp, beschreibung, luftfeuchtigkeit, response = finde_wetterdaten(text)
         wetter_text = wähle_wetter_beschreibung(response)
-        arbeit, aufstehzeit_str, temperatur = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit)
+        aufstehzeit_str, temperatur, arbeit = finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit)
         mailinhalt = erstelle_Mail_inhalt(aufstehzeit_str, temperatur, wetter_text, morgen_str, zeit, name)
         zweite_mailinhalt = erstelle_zweite_Mailinhalt(arbeit, zeit, name)
         gmail_passwort, empfaenger, absender = bereite_Mail()
         sende_erste_Mail(mailinhalt, absender, empfaenger, gmail_passwort, heute_str)
         sende_zweite_Mail(zweite_mailinhalt, absender, empfaenger, morgen_str, gmail_passwort)
-    except: 
-        print("Wetterdaten nicht verfügbar. Überprüfe dein Internet / API key / URL")
-    
+    except Exception as e:
+        print(f"Fehler: {e}")

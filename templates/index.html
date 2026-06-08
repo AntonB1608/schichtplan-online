@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,30 +8,40 @@
   
 </head>
 <body>
-  <u><b>><h1>Schichtplantool</h1></u></b>
-<form method="POST" action="/schicht">
-    <div class = "Felder">
-        <div class="Eintrag">
-            <div class="Name"><label> Datum:</label></div>
-            <input type="date" name="datum">
-        </div>
-        <div class = "Eintrag">
-            <div class="Name"><label> Schicht Anfang</label></div>
-            <input type="time" name="zeit_anfang">
-        </div>
-        <div class = "Eintrag">
-            <div class="Name"><label> Schicht Ende</label></div>
-            <input type="time" name="zeit_ende">
-        </div>
-        <div class = "Eintrag">
-            <div class="checkbox"><label> Freier Tag</label></div>
-            <input type="checkbox" name="frei"> 
-        </div>
-        <div class = "Eintrag">
-        <div class = "button">
-            <button type="submit" class="button">Eintragen</button>
-        </div>
-        </div>
-</form>
+<div class="container">
+    <b><h1>Schichtplantool</h1></b>
+    <form method="POST" action="/schicht">
+        <div class = "Felder">
+            <div class="Eintrag">
+                <label>
+                    Datum:
+                </label>
+                <input type="date" name="datum">
+            </div>
+            <div class="Eintrag">
+                <label>
+                    Schicht Anfang
+                </label>
+                <input type="time" name="zeit_anfang">
+            </div>
+            <div class = "Eintrag">
+                <label> 
+                    Schicht Ende
+                </label>
+                <input type="time" name="zeit_ende">
+            </div>
+            <div class = "Eintrag">
+                <label> 
+                    Freier Tag
+                </label>
+                <input type="checkbox" name="frei"> 
+            </div>
+            <div class="Eintrag">
+                <label></label>
+                <button type="submit" class="button">Eintragen</button>
+            </div>
+    </form>
+</div>
 </body>
+
 </html>

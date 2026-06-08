@@ -12,29 +12,43 @@ u {
     color: white;
 }
 h1 {
-    font-size: 80px;
+    font-size: 5rem;
     font-family: Gill Sans;
     font-weight: bolder;
     color: #ffffff;
     text-align: center;
     width: 100%;
+    margin-bottom: 2rem;
     max-width: 700px;
-    margin-bottom: 200px;
+}
+.container {
+    width: fit-content;
+    align-items: center;
+    margin: 0 auto;
 }
 .Felder {
     background: #065A82;
     border-radius: 12px;
     padding: 4rem;
     display: flex;
-    margin:  2rem;
-    width: 100%;
-    max-width: 700px;
     color: #ffffff;
     font-family: 'Space grotesk';
     font-weight: bold;
-    width: 100%;
-    max-width: 700px;
-    align-items: flex-end
+    align-items: flex-end;
+    box-sizing: border-box;
+    max-width: fit-content
+}
+.checkbox, .S_anfang, .S_ende {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    align-items: center;
+    font-family: Tahoma;
+    padding: 0.5px;
+    border-radius: 80px;
+    font-family: 'Space Grotesk';
+    font-size: 13px;
+    text-align: center;
+    display: flex;
 }
 
 .datum-feld, .zeit, .checkbox, .eintragen {
@@ -45,6 +59,7 @@ h1 {
 .label {
     display: flex;
     border-radius: 80px;
+    margin-bottom: 2rem;
 }
 .checkbox {
     padding: 5px;
@@ -55,17 +70,7 @@ h1 {
 }
 
 
-.Name {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    align-items: center;
-    font-family: Tahoma;
-    padding: 0.5px;
-    border-radius: 80px;
-    font-family: 'Space Grotesk';
-    font-size: 13px;
-    text-align: center;
-}
+
 .button {
     background-image: none;
     cursor: pointer;
@@ -73,9 +78,7 @@ h1 {
     line-height: 1.5;
     outline: #000000;
     border-radius: 99px;
-    overflow: hidden;
     padding: 1.2rem 3rem;
-    position: relative;
     background-color: #E9C46A;
     border-color: #33415C;
     font-size: 12.5px;
@@ -96,6 +99,9 @@ h1 {
     padding: 5px;
     margin: 5px;
     width: 100%;   
+    flex-direction: column;
+    display: flex;
+    text-align: center;
 }
 input {
     background-color: #1B3B6F;
