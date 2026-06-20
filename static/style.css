@@ -36,7 +36,8 @@ h1 {
     font-weight: bold;
     align-items: flex-end;
     box-sizing: border-box;
-    max-width: fit-content
+    max-width: fit-content;
+    margin-top: 4rem;
 }
 .checkbox, .S_anfang, .S_ende {
     margin-top: 20px;
@@ -59,7 +60,9 @@ h1 {
 .label {
     display: flex;
     border-radius: 80px;
-    margin-bottom: 2rem;
+    margin-top: 8rem;
+    margin-bottom: 8rem;
+
 }
 .checkbox {
     padding: 5px;
