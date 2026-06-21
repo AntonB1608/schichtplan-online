@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  
+</head>
+<body>
+<div class="container">
+    <b><h1>Schichtplantool</h1></b>
+    <form method="POST" action="/schicht">
+        <div class = "Felder">
+            <div class="Eintrag">
+                <label>
+                    Username
+                </label>
+                <input type="text" name="username">
+            </div>
+            <div class="Eintrag">
+                <label>
+                    Password
+                </label>
+                <input type="password" name="password">
+            </div>
+            <div class="Eintrag">
+                <label>
+                    Repeat your Password
+                </label>
+                <input type="password" name="password_again">
+            </div>
+            <div class="Eintragen">
+                <label></label>
+                <button type="submit" class="button">Eintragen</button>
+            </div>
+    </form>
+</div>
+</body>
+
+</html>
+
+ 
+
+    password = request.form["password"]
+    password_again = request.form["password_again"]
+    if len(password) < 15:
+        return render_template("registeruser.html", fehlermeldung = "password to short")
+    has_sonderzeichen = any(zeichen in password for zeichen in sonderzeichen)
+    if not has_sonderzeichen:
+        return render_template("registeruser.html", fehlermeldung = "password doesn't contain sonderzeichen")
+    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    if password == password_again:
+        new_password = Register(user_password = password_hash)
+        db.session.add(new_password)           
+        db.session.commit()
+        return redirect("/login")
+    else:
+        return render_template("registeruser.html", fehlermeldung = "passwords dont match", password=password)

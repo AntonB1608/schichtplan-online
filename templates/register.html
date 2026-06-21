@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  
+</head>
+<body>
+<div class="container">
+    <b><h1>Schichtplantool</h1></b>
+    <form method="POST" action="/register">
+        <div class = "Felder">
+            <div class="Eintrag">
+                <label>
+                    Username
+                </label>
+                <input type="text" name="username" placeholder: enter a username>
+            </div>
+            <div class="Eintrag">
+                <label>
+                    Email
+                </label>
+                <input type="email" name="email" placeholder: yourmail@example.com>
+            </div>
+            <div class="Eintragen">
+                <label></label>
+                <button type="submit" class="button">Eintragen</button>
+            </div>
+    {{fehlermeldung}}
+    </form>
+</div>
+</body>
+
+</html>
+
+ 
