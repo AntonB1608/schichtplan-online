@@ -28,7 +28,7 @@
                 <label></label>
                 <button type="submit" class="button">Eintragen</button>
             </div>
-            {{Fehlermeldung}}
+            {{error_message}}
     </form>
 </div>
 </body>
@@ -36,26 +36,4 @@
 </html>
 
  
-    current_date_time = dt.datetime.today()
-    username = request.form["username"]
-    password = request.form["password"]
-    user_exists = Register.query.filter_by(user_name=username).first()
-    if user_exists:
-        if Register.userlockeduntil and current_date_time < Register.userlockeduntil:
-            return render_template("login.html", fehlermeldung=f"You are blocked until {user.locked_until}")
-        if Register.userlockeduntil and current_date_time > Register.userlockeduntil:
-            Register.usertrys = 0
-            db.session.commit()
-        if bcrypt.checkpw(password.encode("utf-8"), Register.userpasswordhash):
-            User_user_locked_until = None
-            session["username"] = username
-            db.session.commit()
-            return redirect("/index.html")
-        User_user_trys += 1
-        if Register.usertrys >= 5: 
-            Register.userlocked_until = dt.datetime.today() + dt.timedelta(minutes=15)
-            db.session.commit()
-            return render_template("login.html", fehlermeldung=f"wrong password, you are blocked until {user.locked_until}", username=username)            
-        db.session.commit()
-        return render_template("login.html", fehlermeldung="wrong password", username=username)
-    else:
+    

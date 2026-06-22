@@ -10,7 +10,7 @@
 <body>
 <div class="container">
     <b><h1>Schichtplantool</h1></b>
-    <form method="POST" action="/schicht">
+    <form method="POST" action="/registeruser">
         <div class = "Felder">
             <div class="Eintrag">
                 <label>
@@ -34,6 +34,7 @@
                 <label></label>
                 <button type="submit" class="button">Eintragen</button>
             </div>
+            {{Fehlermeldung}}
     </form>
 </div>
 </body>
@@ -42,18 +43,5 @@
 
  
 
-    password = request.form["password"]
-    password_again = request.form["password_again"]
-    if len(password) < 15:
-        return render_template("registeruser.html", fehlermeldung = "password to short")
-    has_sonderzeichen = any(zeichen in password for zeichen in sonderzeichen)
-    if not has_sonderzeichen:
-        return render_template("registeruser.html", fehlermeldung = "password doesn't contain sonderzeichen")
-    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    if password == password_again:
-        new_password = Register(user_password = password_hash)
-        db.session.add(new_password)           
-        db.session.commit()
-        return redirect("/login")
-    else:
-        return render_template("registeruser.html", fehlermeldung = "passwords dont match", password=password)
+  
+   

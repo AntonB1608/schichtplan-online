@@ -14,38 +14,40 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///schichtplan.db"
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = os.getenv("GMAIL_USER")
-app.config['MAIL_PASSWORD'] = os.getenv("GMAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("gmail_email")
+app.config['MAIL_USERNAME'] = os.getenv("gmail_email")
+app.config['MAIL_PASSWORD'] = os.getenv("gmail_password")
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config['SECRET_KEY'] = os.getenv("secret_key")
 
 db = SQLAlchemy(app)
+mail = Mail(app)
 
 class Register(db.Model):
-    userid = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(40), unique = True, nullable = False, )
-    usermail = db.Column(db.String(40), unique = True, nullable = False)
-    userverification = db.Column(db.Boolean)
-    userpassword = db.Column(db.String, nullable = False)
-    userpasswordhash = db.Column(db.String)
-    userlockeduntil = db.Column(db.String(40))
-    usertrys = db.Column(db.String(5))
+    user_id = db.Column(db.Integer, primary_key = True)
+    user_name = db.Column(db.String(40), unique = True)
+    user_mail = db.Column(db.String(40), unique = True)
+    user_verification = db.Column(db.Boolean)
+    user_password = db.Column(db.String, nullable = True)
+    user_password_hash = db.Column(db.String)
+    user_locked_until = db.Column(db.String(40))
+    user_trys = db.Column(db.String(5))
 
 
 class Date(db.Model):
-    dateid = db.Column(db.Integer, primary_key = True)
-    userid = db.Column(db.Integer, db.ForeignKey("register.userid"))
-    date = db.Column(db.String(10), nullable = False)
-    timebegin = db.Column(db.String(12))
-    timeend = db.Column(db.String(12))
+    date_id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey("register.user_id"))
+    date = db.Column(db.String(10))
+    time_begin = db.Column(db.String(12))
+    time_end = db.Column(db.String(12))
     frei = db.Column(db.Boolean)
 
 
 class Verification(db.Model):
-    userverification_id = db.Column(db.Integer, primary_key = True)
-    userid = db.Column(db.Integer, db.ForeignKey("register.userid"))
-    token = db.Column(db.Integer)
+    user_verification_id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey("register.user_id"))
+    user_token = db.Column(db.Integer)
 with app.app_context():
     db.create_all()
 @app.route("/register", methods =["POST", "GET"])
@@ -54,56 +56,71 @@ def register():
         username = request.form["username"]
         email = request.form["email"]
         if len(username) > 20:
-            return render_template("register.html", fehlermeldung="username too long")
-        user_exists = Register.query.filter_by(username=username).first()
+            return render_template("register.html", error_message = "username too long")
+        user_exists = Register.query.filter_by(user_name=username).first()
         if user_exists:
-            return render_template("register.html", fehlermeldung = "username already exists")
-        email_exists = Register.query.filter_by (usermail = email).first()
+            return render_template("register.html", error_message = "username already exists")
+        email_exists = Register.query.filter_by (user_mail = email).first()
         if not email_exists:
             token = secrets.token_urlsafe(64)
-            new_user = Register(username = username, usermail = email)
+            new_user = Register(user_name = username, user_mail = email)
             db.session.add(new_user)
             db.session.commit()
-            user_verification = Verification(token = token)
+            user_verification = Verification(user_token=token, user_id=new_user.user_id)
             db.session.add(user_verification)
             db.session.commit()
             msg = Message(
             subject="Verify your email",
-            sender=os.getenv("GMAIL_USER"),
+            sender=os.getenv("gmail_email"),
             recipients=[email]
             )
-            msg.body = f" Dear {username}, /n Click this link to verify your email: http://localhost:5555/verify/{token}"
+            msg.body = f" Dear {username}, Click this link to verify your email: http://localhost:5555/verify/{token}"
             mail.send(msg)
-            return render_template("registeruser.html", fehlermeldung = "Verification email send.")
-        else:
-            return render_template("register.html", fehlermeldung = "Error: email already exists", user_name = username)
+            return render_template("verifyregister.html", error_message = "Verification email send.")
+        else: 
+            return render_template("register.html", error_message = "Error: email already exists", user_name = username)
          
         
     else:
         return render_template("register.html")
+        
+@app.route('/verify/<token>')
+def verifiy_user(token):    
+    user = Verification.query.filter_by(user_token = token).first()
+    if not user:
+        return render_template("register.html", error_message = "Invalid token")
+    user.user_email_verified = True
+    user.user_token = None
+    real_user = Register.query.filter_by(user_id=user.user_id).first()
+    session["user_id"] = real_user.user_id
+    db.session.commit()
+    return redirect("/registeruser")
 
-@app.route("/registeruser", methods = ["POST"])
+@app.route("/registeruser", methods = ["GET", "POST"])
 def registeruser():
-    username = request.form["username"]
-    user_exists = Register.query.filter_by(username = username)
-    if not user_exists:
-        return render_template("/registeruser.html", fehlermeldung = "User not found")
-    sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
-    password = request.form["password"]
-    password_again = request.form["password_again"]
-    if len(password) < 15:
-        return render_template("registeruser.html", fehlermeldung = "password to short")
-    has_sonderzeichen = any(zeichen in password for zeichen in sonderzeichen)
-    if not has_sonderzeichen:
-        return render_template("registeruser.html", fehlermeldung = "password doesn't contain sonderzeichen")
-    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    if password == password_again:
-        new_password = Register(user_password = password_hash)
-        db.session.add(new_password)           
-        db.session.commit()
-        return redirect("/login")
+    if request.method == ["POST"]:
+        username = request.form["username"]
+        user_exists = Register.query.filter_by(user_name = username)
+        if not user_exists:
+            return render_template("/registeruser.html", error_message = "User not found")
+        sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
+        password = request.form["password"]
+        password_again = request.form["password_again"]
+        if len(password) < 15:
+            return render_template("registeruser.html", error_message = "password to short")
+        has_sonderzeichen = any(zeichen in password for zeichen in sonderzeichen)
+        if not has_sonderzeichen:
+            return render_template("registeruser.html", error_message = "password doesn't contain sonderzeichen")
+        password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        if password == password_again:
+            new_password = Register(user_password = password_hash)
+            db.session.add(new_password)           
+            db.session.commit()
+            return redirect("/login")
+        else:
+            return render_template("registeruser", fehlermeldung = "passwords dont match", password=password)
     else:
-        return render_template("registeruser.html", fehlermeldung = "passwords dont match", password=password)
+        return render_template("register")
 @app.route("/login", methods = ["POST"])
 def login():
     current_date_time = dt.datetime.today()
@@ -130,17 +147,7 @@ def login():
         return render_template("login.html", fehlermeldung="wrong password", username=username)
     else:
         return render_template("login.html") 
-        
-@app.route('/verify/<token>')
-def verifiy_user(token):    
-    user = Register.query.filter_by(token = token).first()
-    if not user:
-        return "Invalid token"
-    user.email_verified = True
-    user.token = None
-    session["username"] = user.username
-    db.session.commit()
-    return redirect("/registeruser.html")
+
            
 @app.route("/schicht", methods=["POST"])
 def schicht_eintragen():
