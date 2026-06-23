@@ -98,7 +98,7 @@ def verifiy_user(token):
 
 @app.route("/registeruser", methods = ["GET", "POST"])
 def registeruser():
-    if request.method == ["POST"]:
+    if request.method == "POST":
         username = request.form["username"]
         user_exists = Register.query.filter_by(user_name = username)
         if not user_exists:
@@ -118,52 +118,55 @@ def registeruser():
             db.session.commit()
             return redirect("/login")
         else:
-            return render_template("registeruser", fehlermeldung = "passwords dont match", password=password)
+            return render_template("registeruser.html", fehlermeldung = "passwords dont match", password=password)
     else:
-        return render_template("register")
-@app.route("/login", methods = ["POST"])
+        return render_template("registeruser.html")
+@app.route("/login", methods = ["GET", "POST"])
 def login():
-    current_date_time = dt.datetime.today()
-    username = request.form["username"]
-    password = request.form["password"]
-    user_exists = Register.query.filter_by(user_name=username).first()
-    if user_exists:
-        if Register.userlockeduntil and current_date_time < Register.userlockeduntil:
-            return render_template("login.html", fehlermeldung=f"You are blocked until {user.locked_until}")
-        if Register.userlockeduntil and current_date_time > Register.userlockeduntil:
-            Register.usertrys = 0
+    if request.method == "POST":
+        current_date_time = dt.datetime.today()
+        username = request.form["username"]
+        password = request.form["password"]
+        user_exists = Register.query.filter_by(user_name=username).first()
+        if user_exists:
+            if Register.userlockeduntil and current_date_time < Register.userlockeduntil:
+                return render_template("login.html", fehlermeldung=f"You are blocked until {user.locked_until}")
+            if Register.userlockeduntil and current_date_time > Register.userlockeduntil:
+                Register.usertrys = 0
+                db.session.commit()
+            if bcrypt.checkpw(password.encode("utf-8"), Register.userpasswordhash):
+                User_user_locked_until = None
+                session["username"] = username
+                db.session.commit()
+                return redirect("/index.html")
+            User_user_trys += 1
+            if Register.usertrys >= 5: 
+                Register.userlocked_until = dt.datetime.today() + dt.timedelta(minutes=15)
+                db.session.commit()
+                return render_template("login.html", fehlermeldung=f"wrong password, you are blocked until {user.locked_until}", username=username)            
             db.session.commit()
-        if bcrypt.checkpw(password.encode("utf-8"), Register.userpasswordhash):
-            User_user_locked_until = None
-            session["username"] = username
-            db.session.commit()
-            return redirect("/index.html")
-        User_user_trys += 1
-        if Register.usertrys >= 5: 
-            Register.userlocked_until = dt.datetime.today() + dt.timedelta(minutes=15)
-            db.session.commit()
-            return render_template("login.html", fehlermeldung=f"wrong password, you are blocked until {user.locked_until}", username=username)            
-        db.session.commit()
-        return render_template("login.html", fehlermeldung="wrong password", username=username)
-    else:
-        return render_template("login.html") 
+            return render_template("login.html", fehlermeldung="wrong password", username=username)
 
-           
-@app.route("/schicht", methods=["POST"])
-def schicht_eintragen():
-    datum = request.form["datum"]
-    zeit_anfang = request.form["zeit_anfang"]
-    zeit_ende = request.form["zeit_ende"]
-    datum_formatiert = datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
-    frei = request.form.get("frei")
-    if frei:
-        new_date = Date(date = datum_formatiert, frei = True)
-        db.session.add(new_date)           
-        db.session.commit()
     else:
-        new_date = Date(date = datum_formatiert, time_begin = zeit_anfang, time_end = zeit_ende, frei = False)
-        db.session.add(new_date)           
-        db.session.commit()
+        return render_template("login.html")   
+@app.route("/schicht", methods=["GET", "POST"])
+def schicht_eintragen():
+    if request.method == "POST":
+        datum = request.form["datum"]
+        zeit_anfang = request.form["zeit_anfang"]
+        zeit_ende = request.form["zeit_ende"]
+        datum_formatiert = datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
+        frei = request.form.get("frei")
+        if frei:
+            new_date = Date(date = datum_formatiert, frei = True)
+            db.session.add(new_date)           
+            db.session.commit()
+        else:
+            new_date = Date(date = datum_formatiert, time_begin = zeit_anfang, time_end = zeit_ende, frei = False)
+            db.session.add(new_date)           
+            db.session.commit()
+    else:
+        return render_template("schicht_eintragen")
         
 
 
