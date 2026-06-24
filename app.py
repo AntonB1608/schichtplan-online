@@ -48,15 +48,17 @@ class Verification(db.Model):
     user_verification_id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey("register.user_id"))
     user_token = db.Column(db.Integer)
+    
 with app.app_context():
     db.create_all()
-@app.route("/register", methods =["POST", "GET"])
+@app.route("/register", methods =["POST", "GET"])  
 def register():
     if request.method == "POST":
         username = request.form["username"]
         email = request.form["email"]
-        if len(username) > 20:
+        if len(username) > 20:   
             return render_template("register.html", error_message = "username too long")
+
         user_exists = Register.query.filter_by(user_name=username).first()
         if user_exists:
             return render_template("register.html", error_message = "username already exists")
@@ -113,12 +115,12 @@ def registeruser():
             return render_template("registeruser.html", error_message = "password doesn't contain sonderzeichen")
         password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         if password == password_again:
-            new_password = Register(user_password = password_hash)
-            db.session.add(new_password)           
+            user = Register.query.filter_by(user_id=session["user_id"]).first()
+            user.user_password_hash = password_hash
             db.session.commit()
-            return redirect("/login")
+            return render_template("login.html")
         else:
-            return render_template("registeruser.html", fehlermeldung = "passwords dont match", password=password)
+            return render_template("registeruser.html", error_message = "passwords dont match", password=password)
     else:
         return render_template("registeruser.html")
 @app.route("/login", methods = ["GET", "POST"])
@@ -129,44 +131,49 @@ def login():
         password = request.form["password"]
         user_exists = Register.query.filter_by(user_name=username).first()
         if user_exists:
-            if Register.userlockeduntil and current_date_time < Register.userlockeduntil:
-                return render_template("login.html", fehlermeldung=f"You are blocked until {user.locked_until}")
-            if Register.userlockeduntil and current_date_time > Register.userlockeduntil:
-                Register.usertrys = 0
+            if user_exists.user_locked_until and current_date_time < user_exists.user_locked_until:
+                return render_template("login.html", error_message=f"You are blocked until {user_exists.user_locked_until}")
+            if user_exists.user_locked_until and current_date_time > user_exists.user_locked_until:
+                user_exists.usertrys = 0
                 db.session.commit()
-            if bcrypt.checkpw(password.encode("utf-8"), Register.userpasswordhash):
-                User_user_locked_until = None
+            if bcrypt.checkpw(password.encode("utf-8"), user_exists.user_password_hash):
+                user_exists.user_locked_until = None
                 session["username"] = username
                 db.session.commit()
-                return redirect("/index.html")
-            User_user_trys += 1
-            if Register.usertrys >= 5: 
-                Register.userlocked_until = dt.datetime.today() + dt.timedelta(minutes=15)
+                return render_template("verifyregister.html", error_message = "Login successful!")
+            user_exists.user_trys += 1
+            if user_exists.user_trys >= 5: 
+                user_exists.user_locked_until = dt.datetime.today() + dt.timedelta(minutes=15)
                 db.session.commit()
-                return render_template("login.html", fehlermeldung=f"wrong password, you are blocked until {user.locked_until}", username=username)            
+                return render_template("login.html", error_message=f"wrong password, you are blocked until {user.locked_until}", username=username)            
             db.session.commit()
-            return render_template("login.html", fehlermeldung="wrong password", username=username)
+            return render_template("login.html", error_message="wrong password", username=username)
 
     else:
         return render_template("login.html")   
 @app.route("/schicht", methods=["GET", "POST"])
 def schicht_eintragen():
+    if "user_id" not in session:
+        return redirect("/login")
+    user_id = session["user_id"]
     if request.method == "POST":
+
         datum = request.form["datum"]
         zeit_anfang = request.form["zeit_anfang"]
         zeit_ende = request.form["zeit_ende"]
-        datum_formatiert = datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
+        datum_formatiert = dt.datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
         frei = request.form.get("frei")
         if frei:
-            new_date = Date(date = datum_formatiert, frei = True)
+            new_date = Date(user_id = user_id, date = datum_formatiert, frei = True)
             db.session.add(new_date)           
             db.session.commit()
+            return render_template("index.html", error_message = "Schicht eingetragen")
         else:
-            new_date = Date(date = datum_formatiert, time_begin = zeit_anfang, time_end = zeit_ende, frei = False)
+            new_date = Date(user_id = user_id, date = datum_formatiert, time_begin = zeit_anfang, time_end = zeit_ende, frei = False)
             db.session.add(new_date)           
             db.session.commit()
     else:
-        return render_template("schicht_eintragen")
+        return render_template("index.html")
         
 
 
