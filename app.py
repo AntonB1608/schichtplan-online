@@ -140,18 +140,18 @@ def login():
                 user_exists.user_locked_until = None
                 session["username"] = username
                 db.session.commit()
-                return render_template("verifyregister.html", error_message = "Login successful!")
+                return render_template("index.html", error_message = "Login successful!")
             user_exists.user_trys += 1
             if user_exists.user_trys >= 5: 
                 user_exists.user_locked_until = dt.datetime.today() + dt.timedelta(minutes=15)
                 db.session.commit()
-                return render_template("login.html", error_message=f"wrong password, you are blocked until {user.locked_until}", username=username)            
+                return render_template("login.html", error_message=f"wrong password, you are blocked until {user_exists.locked_until}", username=username)            
             db.session.commit()
             return render_template("login.html", error_message="wrong password", username=username)
 
     else:
         return render_template("login.html")   
-@app.route("/schicht", methods=["GET", "POST"])
+@app.route("/index", methods=["GET", "POST"])
 def schicht_eintragen():
     if "user_id" not in session:
         return redirect("/login")
@@ -172,6 +172,7 @@ def schicht_eintragen():
             new_date = Date(user_id = user_id, date = datum_formatiert, time_begin = zeit_anfang, time_end = zeit_ende, frei = False)
             db.session.add(new_date)           
             db.session.commit()
+            return render_template("index.html", error_message = "Schicht eingetragen")
     else:
         return render_template("index.html")
         
