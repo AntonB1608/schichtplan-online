@@ -9,34 +9,18 @@ import emoji
 load_dotenv()
 
 
-def hole_datum_heute():
+def get_date():
+    current_user = Register.query.filter_by(useremail = email)
     heute = datetime.today()
     morgen = heute + timedelta(days=1)
     heute_str = heute.strftime("%d.%m.%Y")
     morgen_str = morgen.strftime("%d.%m.%Y")
     return morgen_str, heute_str
 
-def extrahiere_zeit(text):
-    muster = r"(\d{2}\.\d{2}\.\d{4})\s+([\d:freiF][\d:\-free i]+)"
-    finden = list(re.finditer(muster, text))
-    paare = []
-    for m in finden:
-        datum = m.group(1)
-        zeit = m.group(2).strip()
-        paare.append((datum, zeit))
-    return paare
 
-def finde_paar_heute(paare, morgen_str):  
-    try: 
-        for element in paare:
-            if element[0] == morgen_str:
-                datum = element[0]
-                zeit = element[1]
-        return datum, zeit
-    except: 
-        print(f"Es gibt keine Zeiteinträge für den {morgen_str}")
 
-def finde_aufstehzeit_temp(zeit, temp, luftfeuchtigkeit):
+
+def get_shift_for_tomorrow():
     if "frei" in zeit:
         aufstehzeit_str = f"Morgen hast du frei, schlaf aus!"
         arbeit = False

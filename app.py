@@ -7,6 +7,13 @@ import os
 from flask_wtf.csrf import CSRFProtect
 import secrets 
 from flask_mail import Mail, Message
+import re
+import os
+import requests
+import smtplib
+from datetime import datetime, timedelta
+import emoji
+
 
 load_dotenv()
  
@@ -33,15 +40,14 @@ class Register(db.Model):
     user_password_hash = db.Column(db.String)
     user_locked_until = db.Column(db.String(40))
     user_trys = db.Column(db.String(5))
-
-
+    
 class Date(db.Model):
     date_id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey("register.user_id"))
-    date = db.Column(db.String(10))
+    date_date = db.Column(db.String(10))
     time_begin = db.Column(db.String(12))
     time_end = db.Column(db.String(12))
-    frei = db.Column(db.Boolean)
+    free = db.Column(db.Boolean)
 
 
 class Verification(db.Model):
@@ -56,7 +62,7 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         email = request.form["email"]
-        if len(username) > 20:   
+        if len(username) > 20:    
             return render_template("register.html", error_message = "username too long")
 
         user_exists = Register.query.filter_by(user_name=username).first()
@@ -157,7 +163,6 @@ def schicht_eintragen():
         return redirect("/login")
     user_id = session["user_id"]
     if request.method == "POST":
-
         datum = request.form["datum"]
         zeit_anfang = request.form["zeit_anfang"]
         zeit_ende = request.form["zeit_ende"]
@@ -176,6 +181,31 @@ def schicht_eintragen():
     else:
         return render_template("index.html")
         
+def get_date(): 
+    today = datetime.today()
+    tomorrow = today + timedelta(days=1)
+    today_str = today.strftime("%d.%m.%Y")
+    tomorrow_str = tomorrow.strftime("%d.%m.%Y")
+    return tomorrow_str, today_str
+
+def get_shift_for_tomorrow(morgen_str, user_id):
+    shift = Date.query.filter_by(user_id=user_id, date=morgen_str).first()
+    if shift:
+        if shift.free == True:
+            wake_time = f"You are free tomorrow, sleep well."
+            work = False
+        else: 
+            work = True
+            time_begin = shift.time_begin
+            time_end = shift.time_end
+            wake_time = f"Sleep well, you will have to work tomorrow from  {time_begin} to {time_end} aufstehen." 
+    else:
+        wake_time = "No shift found for tomorrow."
+    return wake_time, work 
+
+def send_daily_emails():
+    get_shift_for_tomorrow()
+
 
 
 
