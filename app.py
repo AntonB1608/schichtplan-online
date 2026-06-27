@@ -40,6 +40,7 @@ class Register(db.Model):
     user_password_hash = db.Column(db.String)
     user_locked_until = db.Column(db.String(40))
     user_trys = db.Column(db.String(5))
+    user_city = db.Column(db.String)
     
 class Date(db.Model):
     date_id = db.Column(db.Integer, primary_key = True)

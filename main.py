@@ -1,68 +1,38 @@
-import re
-from dotenv import load_dotenv
-import os
-import requests
-import smtplib
-from email.mime.text import MIMEText
-from datetime import datetime, timedelta
-import emoji
-load_dotenv()
+import weather
 
-
-def get_date():
-    current_user = Register.query.filter_by(useremail = email)
-    heute = datetime.today()
-    morgen = heute + timedelta(days=1)
-    heute_str = heute.strftime("%d.%m.%Y")
-    morgen_str = morgen.strftime("%d.%m.%Y")
-    return morgen_str, heute_str
-
-
-
-
-def get_shift_for_tomorrow():
-    if "frei" in zeit:
-        aufstehzeit_str = f"Morgen hast du frei, schlaf aus!"
-        arbeit = False
+def weather(response):
+    weather_description = response["weather"][0]["main"]
+    if weather_description == "Thunderstorm": 
+        weather_text = emoji.emojize("Es gewittert morgen :thunder_cloud_and_rain:")
+    elif weather_description == "Drizzle":
+        weather_text = emoji.emojize("Es nieselt morgen leicht.:cloud_with_rain:")
+    elif weather_description == "Rain":
+        weather_text = emoji.emojize("Es wird morgen regnen.:umbrella_with_rain_drops:")
+    elif weather_description == "Snow":
+        weather_text = emoji.emojize("Es schneit morgen :snowflake:")
+    elif weather_description == "Atmosphere":
+        weather_text = emoji.emojize("Es wird nebelig morgen. :fog:")
+    elif weather_description == "Clear":
+        weather_text = emoji.emojize("Es wird morgen klar und wolkenlos")
+    elif weather_description == "Clouds":
+        weather_text = "Es wird morgen wolkig."
     else: 
-        arbeit = True
-        erste_zeit = datetime.strptime(zeit.split("-")[0].strip(), "%H:%M")
-        erste_zeit = erste_zeit.hour
-        if erste_zeit <= 12:
-            aufstehzeit = erste_zeit - 1
-        else: 
-            aufstehzeit = 10
-        aufstehzeit_str = f"Schlaf gut, du musst morgen um {aufstehzeit} aufstehen." 
-    temperatur = f"Es hat außerdem morgen voraussichtlich {temp}°C, mit einer Luftfeuchtigkeit von {luftfeuchtigkeit}%. ."
-    return aufstehzeit_str, temperatur, arbeit
+        weather_text = ""
+    return weather_text
 
 
 
 
 
-def lese_datei(pfad):        
-    with open(pfad, "r", encoding="utf-8") as f:
-        return f.read().strip()
 
-def wähle_wetter_beschreibung(response):
-    beschreibung = response["weather"][0]["main"]
-    if beschreibung == "Thunderstorm": 
-        wetter_text = emoji.emojize("Es gewittert morgen :thunder_cloud_and_rain:")
-    elif beschreibung == "Drizzle":
-        wetter_text = emoji.emojize("Es nieselt morgen leicht.:cloud_with_rain:")
-    elif beschreibung == "Rain":
-        wetter_text = emoji.emojize("Es wird morgen regnen.:umbrella_with_rain_drops:")
-    elif beschreibung == "Snow":
-        wetter_text = emoji.emojize("Es schneit morgen :snowflake:")
-    elif beschreibung == "Atmosphere":
-        wetter_text = emoji.emojize("Es wird nebelig morgen. :fog:")
-    elif beschreibung == "Clear":
-        wetter_text = emoji.emojize("Es wird morgen klar und wolkenlos")
-    elif beschreibung == "Clouds":
-        wetter_text = "Es wird morgen wolkig."
-    else: 
-        pass 
-    return wetter_text
+
+
+
+
+
+
+
+
 
 
 
