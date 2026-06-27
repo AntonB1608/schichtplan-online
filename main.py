@@ -1,5 +1,8 @@
 import weather
+from dotenv import load_dotenv
+import os 
 
+load_dotenv()
 def weather(response):
     weather_description = response["weather"][0]["main"]
     if weather_description == "Thunderstorm": 
@@ -20,6 +23,16 @@ def weather(response):
         weather_text = ""
     return weather_text
 
+def find_weather_data(user_id):
+    user = Register.query.filter_by(user_id = user_id).first()
+    key = os.getenv("OPENWEATHER_KEY")
+    url = f"https://api.openweathermap.org/data/2.5/weather?q=Mannheim&appid={key}&units=metric&lang=de"        
+    response = requests.get(url)
+    response = response.json()
+    temp = response["main"]["temp"]
+    description = response["weather"][0]["description"]
+    humidity = response["main"]["humidity"]
+    return temp, description, humidity, response
 
 
 
@@ -79,15 +92,7 @@ def erstelle_zweite_Mailinhalt(arbeit, zeit, name, heute_str):
         """
     return zweitemailinhalt
 
-def finde_wetterdaten(text):
-    key = os.getenv("OPENWEATHER_KEY")
-    url = f"https://api.openweathermap.org/data/2.5/weather?q=Mannheim&appid={key}&units=metric&lang=de"        
-    response = requests.get(url)
-    response = response.json()
-    temp = response["main"]["temp"]
-    beschreibung = response["weather"][0]["description"]
-    luftfeuchtigkeit = response["main"]["humidity"]
-    return temp, beschreibung, luftfeuchtigkeit, response
+
 
 
 def bereite_Mail():

@@ -130,6 +130,7 @@ def registeruser():
             return render_template("registeruser.html", error_message = "passwords dont match", password=password)
     else:
         return render_template("registeruser.html")
+    
 @app.route("/login", methods = ["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -157,7 +158,8 @@ def login():
             return render_template("login.html", error_message="wrong password", username=username)
 
     else:
-        return render_template("login.html")   
+        return render_template("login.html") 
+      
 @app.route("/index", methods=["GET", "POST"])
 def schicht_eintragen():
     if "user_id" not in session:
@@ -204,7 +206,21 @@ def get_shift_for_tomorrow(morgen_str, user_id):
         wake_time = "No shift found for tomorrow."
     return wake_time, work 
 
-def send_daily_emails():
+def find_weather_data(user_id):
+    user = Register.query.filter_by(user_id = user_id).first()
+    key = os.getenv("OPENWEATHER_KEY")
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={user.user_city}&appid={key}&units=metric&lang=de"        
+    response = requests.get(url)
+    response = response.json()
+    temp = response["main"]["temp"]
+    description = response["weather"][0]["description"]
+    humidity = response["main"]["humidity"]
+    return temp, description, humidity, response
+
+
+
+
+#def send_daily_emails():
     get_shift_for_tomorrow()
 
 
