@@ -1,47 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Add Shift – Shift Planner{% endblock %}
+{% block content %}
 <div class="container">
-    <b><h1>Schichtplantool</h1></b>
+    <h1>Shift Planner</h1>
     <form method="POST" action="/index">
-        <div class = "Felder">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="Felder">
             <div class="Eintrag">
-                <label>
-                    Datum:
-                </label>
+                <label>Date</label>
                 <input type="date" name="datum">
             </div>
             <div class="Eintrag">
-                <label>
-                    Schicht Anfang
-                </label>
+                <label>Shift Start</label>
                 <input type="time" name="zeit_anfang">
             </div>
-            <div class = "Eintrag">
-                <label> 
-                    Schicht Ende
-                </label>
+            <div class="Eintrag">
+                <label>Shift End</label>
                 <input type="time" name="zeit_ende">
             </div>
-            <div class = "Eintrag">
-                <label> 
-                    Freier Tag
-                </label>
-                <input type="checkbox" name="frei"> 
-            </div>
             <div class="Eintrag">
-                <label></label>
-                <button type="submit" class="button">Eintragen</button>
+                <label>Day Off</label>
+                <input type="checkbox" name="frei">
             </div>
+            <div class="Eintragen">
+                <button type="submit" class="button">Save Shift</button>
+            </div>
+        </div>
+        {% if error_message %}
+        <p class="error">{{ error_message|e }}</p>
+        {% endif %}
     </form>
+    <p><a href="/logout">Logout</a></p>
 </div>
-</body>
-
-</html>
+{% endblock %}

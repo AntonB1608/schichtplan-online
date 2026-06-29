@@ -1,119 +1,190 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    background-color: #001233;
+    background-color: #000000;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center; 
+    justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    color: #f5f5f7;
+    -webkit-font-smoothing: antialiased;
+}
 
-  
-}
-u {
-    color: white;
-}
-h1 {
-    font-size: 5rem;
-    font-family: Gill Sans;
-    font-weight: bolder;
-    color: #ffffff;
-    text-align: center;
-    width: 100%;
-    margin-bottom: 2rem;
-    max-width: 700px;
-}
 .container {
-    width: fit-content;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem 1.5rem 6rem;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    margin: 0 auto;
+    gap: 1.2rem;
 }
+
+h1 {
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: #f5f5f7;
+    text-align: center;
+    letter-spacing: -0.3px;
+}
+
 .Felder {
-    background: #065A82;
-    border-radius: 12px;
-    padding: 4rem;
+    width: 100%;
+    background: #1c1c1e;
+    border: 1px solid #3a3a3c;
+    border-radius: 18px;
+    padding: 1.8rem 1.5rem;
     display: flex;
-    color: #ffffff;
-    font-family: 'Space grotesk';
-    font-weight: bold;
-    align-items: flex-end;
-    box-sizing: border-box;
-    max-width: fit-content;
-    margin-top: 4rem;
+    flex-direction: column;
+    gap: 1rem;
 }
-.checkbox, .S_anfang, .S_ende {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    align-items: center;
-    font-family: Tahoma;
-    padding: 0.5px;
-    border-radius: 80px;
-    font-family: 'Space Grotesk';
-    font-size: 13px;
-    text-align: center;
+
+.Eintrag {
     display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: none;
+    text-align: left;
 }
 
-.datum-feld, .zeit, .checkbox, .eintragen {
-    padding: 5px;
-    margin: 5rem;
-    
-}
-.label {
-    display: flex;
-    border-radius: 80px;
-    margin-top: 8rem;
-    margin-bottom: 8rem;
-
-}
-.checkbox {
-    padding: 5px;
-    margin: 5px;
-    font-size: 13px;
-    text-align: center;
-    
+.Eintrag label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #98989d;
+    letter-spacing: 0.3px;
 }
 
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="date"],
+input[type="time"] {
+    width: 100%;
+    height: 44px;
+    background-color: #2c2c2e;
+    border: 1px solid #3a3a3c;
+    border-radius: 10px;
+    color: #f5f5f7;
+    font-size: 0.95rem;
+    font-family: inherit;
+    padding: 0 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: left;
+}
 
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus {
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.25);
+}
+
+input[type="text"]::placeholder,
+input[type="password"]::placeholder,
+input[type="email"]::placeholder {
+    color: #636366;
+}
+
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #0071e3;
+    cursor: pointer;
+}
+
+.Eintragen {
+    margin-top: 0.4rem;
+}
 
 .button {
-    background-image: none;
+    width: 100%;
+    height: 44px;
+    background-color: #0071e3;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: inherit;
     cursor: pointer;
-    font-size: 100%;
-    line-height: 1.5;
-    outline: #000000;
-    border-radius: 99px;
-    padding: 1.2rem 3rem;
-    background-color: #E9C46A;
-    border-color: #33415C;
-    font-size: 12.5px;
-    color: #000000;
-    border-radius: 25px;
-    padding: 9px;
-    text-align: center;
-    cursor: pointer;
-    width: 100px;
-    height: 30px;
-    font-family: 'Space grotesk';
-    font-weight: bold;
+    transition: background-color 0.2s;
+}
 
+.button:hover {
+    background-color: #0077ed;
 }
-.Eintrag {
-    color: #ffffff;
-    border: var(--border);
-    padding: 5px;
-    margin: 5px;
-    width: 100%;   
-    flex-direction: column;
+
+.button:active {
+    background-color: #006edb;
+}
+
+.error {
+    width: 100%;
+    font-size: 0.82rem;
+    color: #ff453a;
+    background: rgba(255, 69, 58, 0.1);
+    border: 1px solid rgba(255, 69, 58, 0.25);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    text-align: center;
+}
+
+.container > p {
+    font-size: 0.82rem;
+    color: #98989d;
+    text-align: center;
+}
+
+.container > p a {
+    color: #0071e3;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.container > p a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #000000;
+    border-top: 1px solid #1c1c1e;
+    padding: 0.85rem 2rem;
     display: flex;
-    text-align: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem 1rem;
 }
-input {
-    background-color: #1B3B6F;
-    border: black;
-    border-width: 1px solid;
-    color: #ffffff;
-    border-radius: 25px;
-    width: 120px;
-    height: 45px;
-    text-align: center;
-    padding: 5px;
+
+footer p,
+footer a {
+    font-size: 0.72rem;
+    color: #636366;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+footer a:hover {
+    color: #98989d;
+}
+
+footer .sep {
+    color: #3a3a3c;
+    font-size: 0.72rem;
 }

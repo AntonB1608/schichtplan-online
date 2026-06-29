@@ -1,39 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Login – Shift Planner{% endblock %}
+{% block content %}
 <div class="container">
-    <b><h1>Schichtplantool</h1></b>
+    <h1>Shift Planner</h1>
     <form method="POST" action="/login">
-        <div class = "Felder">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="Felder">
             <div class="Eintrag">
-                <label>
-                    Username
-                </label>
-                <input type="text" name="username" placeholder: enter your username>
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter your username" value="{{ username|default('')|e }}">
             </div>
             <div class="Eintrag">
-                <label>
-                    Password
-                </label>
-                <input type="password" name="password" placeholder: Enter your password>
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter your password">
             </div>
             <div class="Eintragen">
-                <label></label>
-                <button type="submit" class="button">Eintragen</button>
+                <button type="submit" class="button">Login</button>
             </div>
-            {{error_message}}
+        </div>
+        {% if error_message %}
+        <p class="error">{{ error_message|e }}</p>
+        {% endif %}
     </form>
+    <p><a href="/register">No account yet? Register</a></p>
 </div>
-</body>
-
-</html>
-
- 
-    
+{% endblock %}
