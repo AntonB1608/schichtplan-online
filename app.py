@@ -15,6 +15,7 @@ from urllib.parse import quote
 
 load_dotenv()
 
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///schichtplan.db"
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -248,7 +249,7 @@ def find_weather_data(user_id):
     user = Register.query.filter_by(user_id=user_id).first()
     key = os.getenv("OPENWEATHER_KEY")
     url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
-    response = requests.get(url).json()
+    response = requests.get(url, timeout=10).json()
     return response["main"]["temp"], response["weather"][0]["description"], response["main"]["humidity"], response
 
 
