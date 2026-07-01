@@ -293,6 +293,16 @@ def send_daily_emails():
         msg.html = mail_text
         mail.send(msg)
 
+@app.route("/shifts", methods=["GET", "POST"])
+def show_shift():
+    if "user_id" not in session:
+        return redirect("/login")
+    else:
+        user_id = session["user_id"]
+        shifts = Date.query.filter_by(user_id=user_id).all()
+        return render_template("shifts.html", shifts=shifts)
+
+
 
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
