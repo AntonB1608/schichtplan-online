@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Show shifts – Shift Planner{% endblock %}
+{% block content %}
+
+{% for shift in shifts %}
+    {{ shift.date }} {{ shift.time_begin }} - {{ shift.time_end }}
+
+{% endfor %}
+{% endblock %}
