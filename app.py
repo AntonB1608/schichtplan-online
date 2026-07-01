@@ -293,6 +293,7 @@ def send_daily_emails():
         msg.html = mail_text
         mail.send(msg)
 
+
 @app.route("/shifts", methods=["GET", "POST"])
 def show_shift():
     if "user_id" not in session:
@@ -301,6 +302,16 @@ def show_shift():
         user_id = session["user_id"]
         shifts = Date.query.filter_by(user_id=user_id).all()
         return render_template("shifts.html", shifts=shifts)
+        
+
+
+@app.route("/delete/<int:date_id>", methods=["POST"])
+def delete_shift(date_id):
+    shift = Date.query.filter_by(date_id=date_id, user_id=session["user_id"]).first()
+    if shift:
+        db.session.delete(shift)
+        db.session.commit()
+    return redirect("/shifts")
 
 
 
