@@ -208,12 +208,16 @@ def show_profile():
     if "user_id" not in session:
         return redirect("/login")
     user_id = session["user_id"]
-    email_time = request.form["email_time"]
-    city = request.form["city"]
+
+    if request.method == "GET":
+        return render_template("profile.html")
+
+    email_time = request.form.get("email_time")
+    city = request.form.get("city")
     if email_time and city:
         key = os.getenv("openweather_key")
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}"
-        response = requests.get(url).json()
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(city)}&appid={key}"
+        response = requests.get(url, timeout=10).json()
         if response.get("cod") == "404":
             return render_template("settings.html", error_message="City not found")
         user = Register.query.filter_by(user_id=user_id).first()
@@ -275,7 +279,7 @@ def get_shift_for_tomorrow(morgen_str, user_id):
 
 def find_weather_data(user_id):
     user = Register.query.filter_by(user_id=user_id).first()
-    key = os.getenv("OPENWEATHER_KEY")
+    key = os.getenv("openweather_key")
     url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
     response = requests.get(url, timeout=10).json()
     return response["main"]["temp"], response["weather"][0]["description"], response["main"]["humidity"], response
