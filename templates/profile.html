@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Profile – Shift Planner{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Shift Planner</h1>
+    <form method="POST" action="/profile">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="Felder">
+            <div class="Eintrag">
+                <label>City</label>
+                <input type="text" name="city" placeholder="Enter your city">
+            </div>
+            <div class="Eintrag">
+                <label>Time for daily email</label>
+                <input type="time" name="email_time" >
+            </div>
+            <div class="Eintragen">
+                <button type="submit" class="button">Save</button>
+            </div>
+        </div>
+        {% if error_message %}
+        <p class="error">{{ error_message|e }}</p>
+        {% endif %}
+    </form>
+    <p><a href="/index">Ready? Add a shift here</a></p>
+</div>
+{% endblock %}
