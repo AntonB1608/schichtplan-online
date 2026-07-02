@@ -181,7 +181,11 @@ def login():
             user.user_locked_until = None
             session["user_id"] = user.user_id
             db.session.commit()
-            return redirect("/index")
+            if not user.user_city or not user.email_time:
+                return redirect("/profile")
+            else:
+                return redirect("/index")
+        
 
         user.user_trys = (user.user_trys or 0) + 1
         if user.user_trys >= 5:
@@ -199,7 +203,31 @@ def login():
 def logout():
     session.clear()
     return redirect("/login")
-
+@app.route("/profile", methods=["POST", "GET"])
+def show_profile():
+    if "user_id" not in session:
+        return redirect("/login")
+    user_id = session["user_id"]
+    email_time = request.form["email_time"]
+    city = request.form["city"]
+    if email_time and city:
+        key = os.getenv("openweather_key")
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}"
+        response = requests.get(url).json()
+        if response.get("cod") == "404":
+            return render_template("settings.html", error_message="City not found")
+        user = Register.query.filter_by(user_id=user_id).first()
+        user.user_city = city
+        user.email_time = email_time
+        db.session.commit()
+        return render_template("index.html", error_message = "Shift saved") 
+    if not email_time and not city:
+        return render_template("profile.html", error_message = "Enter email_time and your city please.")
+    elif not email_time and city:
+        return render_template("profile.html", error_message =  "Enter email_time please.")
+    elif email_time and not city:
+        return render_template("profile.html", error_message = "Enter your city please")
+    
 
 @app.route("/index", methods=["GET", "POST"])
 def schicht_eintragen():
