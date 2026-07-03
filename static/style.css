@@ -140,7 +140,17 @@ input[type="checkbox"] {
     padding: 0.6rem 0.9rem;
     text-align: center;
 }
+.good {
+    width: 100%;
+    font-size: 0.82rem;
+    color: #13e508;
+    background: rgba(255, 69, 58, 0.1);
+    border: 1px solid rgba(255, 69, 58, 0.25);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    text-align: center;
 
+}
 .container > p {
     font-size: 0.82rem;
     color: #98989d;
