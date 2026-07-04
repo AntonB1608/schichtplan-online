@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, session, redirect
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 import bcrypt
 import datetime as dt
 from dotenv import load_dotenv
@@ -12,7 +13,7 @@ import requests
 from datetime import datetime, timedelta
 import emoji
 from urllib.parse import quote
-
+from apscheduler.schedulers.background import BackgroundScheduler
 load_dotenv()
 
 
@@ -79,19 +80,29 @@ def register():
         if not EMAIL_REGEX.match(email):
             return render_template("register.html", error_message="Invalid email address")
 
-        if Register.query.filter_by(user_name=username).first():
+        existing_name = Register.query.filter_by(user_name=username).first()
+        if existing_name and existing_name.user_registered:
             return render_template("register.html", error_message="Username already exists")
 
-        if Register.query.filter_by(user_mail=email).first():
+        existing_mail = Register.query.filter_by(user_mail=email).first()
+        if existing_mail and existing_mail.user_registered:
             return render_template("register.html", error_message="Email already exists", user_name=username)
 
-        token = secrets.token_urlsafe(64)
-        new_user = Register(user_name=username, user_mail=email)
-        db.session.add(new_user)
+        for stale in {existing_name, existing_mail}:
+            if stale is not None:
+                Verification.query.filter_by(user_id=stale.user_id).delete()
+                db.session.delete(stale)
         db.session.commit()
 
-        db.session.add(Verification(user_token=token, user_id=new_user.user_id))
-        db.session.commit()
+        token = secrets.token_urlsafe(64)
+
+        new_user = Register(user_name=username, user_mail=email)
+        db.session.add(new_user)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return render_template("verifyregister.html")
 
         msg = Message(
             subject="Verify your email",
@@ -100,6 +111,9 @@ def register():
         )
         msg.body = f"Dear {username}, click this link to verify your email: http://localhost:5555/verify/{token}"
         mail.send(msg)
+
+        db.session.add(Verification(user_token=token, user_id=new_user.user_id))
+        db.session.commit()
         return render_template("verifyregister.html")
 
     return render_template("register.html")
@@ -208,27 +222,29 @@ def logout():
 def show_profile():
     if "user_id" not in session:
         return redirect("/login")
-    user_id = session["user_id"]
-    email_time = request.form["email_time"]
-    city = request.form["city"]
-    if email_time and city:
-        key = os.getenv("openweather_key")
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}"
-        response = requests.get(url).json()
-        if response.get("cod") == "404":
-            return render_template("settings.html", error_message="City not found")
-        user = Register.query.filter_by(user_id=user_id).first()
-        user.user_city = city
-        user.email_time = email_time
-        db.session.commit()
-        return render_template("index.html", error_message = "Shift saved") 
-    if not email_time and not city:
-        return render_template("profile.html", error_message = "Enter email_time and your city please.")
-    elif not email_time and city:
-        return render_template("profile.html", error_message =  "Enter email_time please.")
-    elif email_time and not city:
-        return render_template("profile.html", error_message = "Enter your city please")
-    
+    if request.method == "POST":
+        user_id = session["user_id"]
+        email_time = request.form["email_time"]
+        city = request.form["city"]
+        if email_time and city:
+            key = os.getenv("openweather_key")
+            url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}"
+            response = requests.get(url).json()
+            if response.get("cod") == "404":
+                return render_template("settings.html", error_message="City not found")
+            user = Register.query.filter_by(user_id=user_id).first()
+            user.user_city = city
+            user.email_time = email_time
+            db.session.commit()
+            return render_template("index.html", good_message = "Shift saved") 
+        if not email_time and not city:
+            return render_template("profile.html", error_message = "Enter email_time and your city please.")
+        elif not email_time and city:
+            return render_template("profile.html", error_message =  "Enter email_time please.")
+        elif email_time and not city:
+            return render_template("profile.html", error_message = "Enter your city please")
+    else:
+        return render_template("profile.html")
 
 @app.route("/index", methods=["GET", "POST"])
 def schicht_eintragen():
@@ -249,16 +265,25 @@ def schicht_eintragen():
             db.session.add(Date(user_id=user_id, date=datum_formatiert, time_begin=zeit_anfang, time_end=zeit_ende, free=False))
 
         db.session.commit()
-        return render_template("index.html", error_message="Shift saved successfully")
+        return render_template("index.html",good_message="Shift saved successfully")
+    else:
+        return render_template("index.html")
 
-    return render_template("index.html")
+@app.route("/testmail")
+def testmail():
+    now = datetime.now().strftime("%H:%M")
+    users = Register.query.all()
+    lines = [f"jetzt ist {now}"]
+    for u in users:
+        lines.append(f"{u.user_name}: time={u.email_time}, registered={u.user_registered}, city={u.user_city}")
+    send_daily_emails()
+    return "<br>".join(lines)
 
 
 def get_date():
     today = datetime.today()
     tomorrow = today + timedelta(days=1)
     return tomorrow.strftime("%d.%m.%Y"), today.strftime("%d.%m.%Y")
-
 
 def get_shift_for_tomorrow(morgen_str, user_id):
     shift = Date.query.filter_by(user_id=user_id, date=morgen_str).first()
@@ -310,18 +335,23 @@ def build_mail(work, temp, user_name, tomorrow_str, weather_text, wake_time):
 
 
 def send_daily_emails():
-    tomorrow_str, _ = get_date()
+    now = datetime.now().strftime("%H:%M")
     for user in Register.query.all():
-        if not user.user_registered:
-            continue
-        wake_time, work = get_shift_for_tomorrow(tomorrow_str, user.user_id)
-        temp, _, _, response = find_weather_data(user.user_id)
-        weather_text = weather(response)
-        mail_text = build_mail(work, temp, user.user_name, tomorrow_str, weather_text, wake_time)
-        msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
-        msg.html = mail_text
-        mail.send(msg)
-
+        try: 
+            if not user.user_registered:
+                continue
+            if now != user.email_time:
+                continue
+            tomorrow_str, _ = get_date()
+            wake_time, work = get_shift_for_tomorrow(tomorrow_str, user.user_id)
+            temp, _, _, response = find_weather_data(user.user_id)
+            weather_text = weather(response)
+            mail_text = build_mail(work, temp, user.user_name, tomorrow_str, weather_text, wake_time)
+            msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
+            msg.html = mail_text
+            mail.send(msg)
+        except Exception as e: 
+            print(f"Mail failed for {user.user_name}: {e}"); continue
 
 @app.route("/shifts", methods=["GET", "POST"])
 def show_shift():
@@ -344,6 +374,10 @@ def delete_shift(date_id):
 
 
 
+def scheduled_job():
+    with app.app_context():
+        send_daily_emails()
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     app.run(host='0.0.0.0', port=5555, debug=debug_mode)
+

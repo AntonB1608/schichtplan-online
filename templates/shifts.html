@@ -9,5 +9,10 @@
     <button type="submit" class="button">Delete</button>
     </form>
 <p><a href="/index">Add more shifts here</a></p>
+{% if error_message %}
+<p class="error">{{ error_message|e }}</p>
+{% elif good_message %}
+<p class="good">{{good_message|e }}</p>
+{% endif %}
 {% endfor %}
 {% endblock %}

@@ -28,6 +28,8 @@
         </div>
         {% if error_message %}
         <p class="error">{{ error_message|e }}</p>
+        {% elif good_message %}
+        <p class="good">{{good_message|e }}</p>
         {% endif %}
     </form>
     <p><a href="/logout">Logout</a></p>

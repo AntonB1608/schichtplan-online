@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Register – Shift Planner{% endblock %}
 {% block content %}
+
 <div class="container">
     <h1>Shift Planner</h1>
     <form method="POST" action="/register">
@@ -20,8 +21,15 @@
         </div>
         {% if error_message %}
         <p class="error">{{ error_message|e }}</p>
+        {% elif good_message %}
+        <p class="good">{{good_message|e }}</p>
         {% endif %}
     </form>
     <p><a href="/login">Already have an account? Login</a></p>
 </div>
+<script>
+document.querySelector("form").addEventListener("submit", function() {
+    document.querySelector("button[type='submit']").disabled = true;
+});
+</script>
 {% endblock %}
