@@ -301,7 +301,7 @@ def get_shift_for_tomorrow(morgen_str, user_id):
 
 def find_weather_data(user_id):
     user = Register.query.filter_by(user_id=user_id).first()
-    key = os.getenv("OPENWEATHER_KEY")
+    key = os.getenv("openweather_key")
     url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
     response = requests.get(url, timeout=10).json()
     return response["main"]["temp"], response["weather"][0]["description"], response["main"]["humidity"], response
@@ -377,7 +377,12 @@ def delete_shift(date_id):
 def scheduled_job():
     with app.app_context():
         send_daily_emails()
+        
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    if not debug_mode or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(scheduled_job, "interval", minutes=1)
+        scheduler.start()
     app.run(host='0.0.0.0', port=5555, debug=debug_mode)
 
