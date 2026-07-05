@@ -269,16 +269,6 @@ def schicht_eintragen():
     else:
         return render_template("index.html")
 
-@app.route("/testmail")
-def testmail():
-    now = datetime.now().strftime("%H:%M")
-    users = Register.query.all()
-    lines = [f"jetzt ist {now}"]
-    for u in users:
-        lines.append(f"{u.user_name}: time={u.email_time}, registered={u.user_registered}, city={u.user_city}")
-    send_daily_emails()
-    return "<br>".join(lines)
-
 
 def get_date():
     today = datetime.today()
@@ -320,7 +310,7 @@ def weather(response):
     return mapping.get(response["weather"][0]["main"], "")
 
 
-def build_mail(work, temp, user_name, tomorrow_str, weather_text, wake_time):
+def build_mail(temp, user_name, tomorrow_str, weather_text, wake_time):
     return f"""
     <html>
     <body style="font-family: -apple-system, Helvetica Neue, Arial, sans-serif;">
