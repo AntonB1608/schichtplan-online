@@ -4,5 +4,11 @@ __pycache__/
 *.pyc
 instance/
 *.db
+pyvenv.cfg
+settings.json
+schichten.txt
+.vscode/
+venv/
+.venv/
 
 
