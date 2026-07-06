@@ -229,9 +229,9 @@ def show_profile():
         if email_time and city:
             key = os.getenv("openweather_key")
             url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}"
-            response = requests.get(url).json()
-            if response.get("cod") == "404":
-                return render_template("settings.html", error_message="City not found")
+            response = requests.get(url, timeout=10).json()
+            if str(response.get("cod")) == "404":
+                return render_template("profile.html", error_message="City not found")
             user = Register.query.filter_by(user_id=user_id).first()
             user.user_city = city
             user.email_time = email_time
@@ -333,10 +333,10 @@ def send_daily_emails():
             if now != user.email_time:
                 continue
             tomorrow_str, _ = get_date()
-            wake_time, work = get_shift_for_tomorrow(tomorrow_str, user.user_id)
+            wake_time, _ = get_shift_for_tomorrow(tomorrow_str, user.user_id)
             temp, _, _, response = find_weather_data(user.user_id)
             weather_text = weather(response)
-            mail_text = build_mail(work, temp, user.user_name, tomorrow_str, weather_text, wake_time)
+            mail_text = build_mail(temp, user.user_name, tomorrow_str, weather_text, wake_time)
             msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
             msg.html = mail_text
             mail.send(msg)
