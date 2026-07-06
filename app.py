@@ -27,6 +27,9 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 app.config['SECRET_KEY'] = os.getenv("secret_key")
 app.config['WTF_CSRF_ENABLED'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
 
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
@@ -108,7 +111,8 @@ def register():
             sender=os.getenv("gmail_email"),
             recipients=[email]
         )
-        msg.body = f"Dear {username}, click this link to verify your email: http://localhost:5555/verify/{token}"
+        verify_link = f"{request.url_root}verify/{token}"
+        msg.body = f"Dear {username}, click this link to verify your email: {verify_link}"
         mail.send(msg)
 
         db.session.add(Verification(user_token=token, user_id=new_user.user_id))
