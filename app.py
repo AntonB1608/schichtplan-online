@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, session, redirect
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 import bcrypt
-import datetime as dt
 from dotenv import load_dotenv
 import os
 from flask_wtf.csrf import CSRFProtect
@@ -171,7 +170,7 @@ def registeruser():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        now = dt.datetime.today()
+        now = datetime.today()
         username = request.form["username"]
         password = request.form["password"]
 
@@ -203,7 +202,7 @@ def login():
 
         user.user_trys = (user.user_trys or 0) + 1
         if user.user_trys >= 5:
-            user.user_locked_until = dt.datetime.today() + dt.timedelta(minutes=15)
+            user.user_locked_until = datetime.today() + timedelta(minutes=15)
             db.session.commit()
             return render_template("login.html", error_message="Too many failed attempts. Account locked for 15 minutes.")
 
@@ -236,7 +235,7 @@ def show_profile():
             user.user_city = city
             user.email_time = email_time
             db.session.commit()
-            return render_template("index.html", good_message = "Shift saved") 
+            return redirect("/index")
         if not email_time and not city:
             return render_template("profile.html", error_message = "Enter email_time and your city please.")
         elif not email_time and city:
@@ -256,7 +255,7 @@ def schicht_eintragen():
         datum = request.form["datum"]
         zeit_anfang = request.form["zeit_anfang"]
         zeit_ende = request.form["zeit_ende"]
-        datum_formatiert = dt.datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
+        datum_formatiert = datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
         free = request.form.get("frei")
 
         if free:
