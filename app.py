@@ -12,12 +12,17 @@ import requests
 from datetime import datetime, timedelta
 import emoji
 from urllib.parse import quote
-from apscheduler.schedulers.background import BackgroundScheduler
 load_dotenv()
 
 
+
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///schichtplan.db"
+database_url = os.getenv("DATABASE_URL")
+if database_url:
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///schichtplan.db"
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv("gmail_email")
@@ -30,7 +35,6 @@ app.config['WTF_CSRF_ENABLED'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
-
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
 mail = Mail(app)
@@ -372,10 +376,6 @@ def scheduled_job():
         send_daily_emails()
         
 if __name__ == "__main__":
-    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    if not debug_mode or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-        scheduler = BackgroundScheduler()
-        scheduler.add_job(scheduled_job, "interval", minutes=1)
-        scheduler.start()
-    app.run(host='0.0.0.0', port=5555, debug=debug_mode)
+    app.run(host='0.0.0.0', port=5555, debug=True)
+
 
