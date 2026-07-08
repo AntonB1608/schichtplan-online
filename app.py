@@ -297,25 +297,33 @@ def get_shift_for_tomorrow(morgen_str, user_id):
 
 
 def find_weather_data(user_id):
-    user = Register.query.filter_by(user_id=user_id).first()
-    key = os.getenv("openweather_key")
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
-    response = requests.get(url, timeout=10).json()
-    return response["main"]["temp"], response["weather"][0]["description"], response["main"]["humidity"], response
+    try: 
+        user = Register.query.filter_by(user_id=user_id).first()
+        key = os.getenv("openweather_key")
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
+        response = requests.get(url, timeout=10).json()
+        available = True
+        return available, response["main"]["temp"], response["weather"][0]["description"], response
+    except Exception as e:
+        print(f"{e}")   
+        response = "" 
+        temp = ""
+        available = False
+        return response, temp, available
 
 
 def weather(response):
     mapping = {
-        "Thunderstorm": emoji.emojize("There will be thunderstorms tomorrow :thunder_cloud_and_rain:"),
-        "Drizzle": emoji.emojize("Light drizzle expected tomorrow. :cloud_with_rain:"),
-        "Rain": emoji.emojize("It will rain tomorrow. :umbrella_with_rain_drops:"),
-        "Snow": emoji.emojize("It will snow tomorrow :snowflake:"),
-        "Atmosphere": emoji.emojize("It will be foggy tomorrow. :fog:"),
-        "Clear": "Clear skies tomorrow.",
-        "Clouds": "It will be cloudy tomorrow.",
-    }
-    return mapping.get(response["weather"][0]["main"], "")
-
+                    "Thunderstorm": emoji.emojize("There will be thunderstorms tomorrow :thunder_cloud_and_rain:"),
+                    "Drizzle": emoji.emojize("Light drizzle expected tomorrow. :cloud_with_rain:"),
+                    "Rain": emoji.emojize("It will rain tomorrow. :umbrella_with_rain_drops:"),
+                    "Snow": emoji.emojize("It will snow tomorrow :snowflake:"),
+                    "Atmosphere": emoji.emojize("It will be foggy tomorrow. :fog:"),
+                    "Clear": "Clear skies tomorrow.",
+                    "Clouds": "It will be cloudy tomorrow.",
+                }
+    weather_text = mapping.get(response["weather"][0]["main"], "")
+    return weather_text
 
 def build_mail(temp, user_name, tomorrow_str, weather_text, wake_time):
     return f"""
@@ -325,13 +333,15 @@ def build_mail(temp, user_name, tomorrow_str, weather_text, wake_time):
     <p>Good evening {user_name},</p>
     <p>{wake_time}</p>
     <p>{weather_text}</p>
-    <p>{temp}°C</p>
+    {{if temp != "":}}
+        <p>{temp}°C</p>
+    
     </body>
     </html>
     """
 
 
-def send_daily_emails():
+def send_daily_emails(available):
     now = datetime.now().strftime("%H:%M")
     for user in Register.query.all():
         try: 
@@ -342,7 +352,8 @@ def send_daily_emails():
             tomorrow_str, _ = get_date()
             wake_time, _ = get_shift_for_tomorrow(tomorrow_str, user.user_id)
             temp, _, _, response = find_weather_data(user.user_id)
-            weather_text = weather(response)
+            if available == True:
+                weather_text = weather(response)
             mail_text = build_mail(temp, user.user_name, tomorrow_str, weather_text, wake_time)
             msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
             msg.html = mail_text
