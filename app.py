@@ -300,20 +300,9 @@ def find_weather_data(user_id):
     try: 
         user = Register.query.filter_by(user_id=user_id).first()
         key = os.getenv("openweather_key")
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
+        url = f"https://api.openweatherxxxmap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
         response = requests.get(url, timeout=10).json()
-        available = True
-        return available, response["main"]["temp"], response["weather"][0]["description"], response
-    except Exception as e:
-        print(f"{e}")   
-        response = "" 
-        temp = ""
-        available = False
-        return response, temp, available
-
-
-def weather(response):
-    mapping = {
+        mapping = {
                     "Thunderstorm": emoji.emojize("There will be thunderstorms tomorrow :thunder_cloud_and_rain:"),
                     "Drizzle": emoji.emojize("Light drizzle expected tomorrow. :cloud_with_rain:"),
                     "Rain": emoji.emojize("It will rain tomorrow. :umbrella_with_rain_drops:"),
@@ -322,26 +311,39 @@ def weather(response):
                     "Clear": "Clear skies tomorrow.",
                     "Clouds": "It will be cloudy tomorrow.",
                 }
-    weather_text = mapping.get(response["weather"][0]["main"], "")
-    return weather_text
+        weather_text = mapping.get(response["weather"][0]["main"], "")
+        temp = f"{response['main'] ['temp']}°C"
+        return weather_text, temp
+    except Exception as e:
+        print(f"{e}")   
+        weather_text = ""
+        temp = ""
+        return weather_text, temp
+
+
+
 
 def build_mail(temp, user_name, tomorrow_str, weather_text, wake_time):
+    head_line = "<html><body style='font-family: -apple-system, Helvetica Neue, Arial, sans-serif;'>"
+    main_line = f"<h1>Reminder for tomorrow ({tomorrow_str})</h1> <p>Good evening {user_name},</p>"
+    end_line = "</body></html>"
+    if weather_text == "":
+        weather_line = ""
+        temp_line = ""
+    if weather_text != "":
+        weather_line = f"<p>{weather_text}</p>"
+        temp_line = f"<p>The temperature will be {temp}."
     return f"""
-    <html>
-    <body style="font-family: -apple-system, Helvetica Neue, Arial, sans-serif;">
-    <h1>Reminder for tomorrow ({tomorrow_str})</h1>
-    <p>Good evening {user_name},</p>
-    <p>{wake_time}</p>
-    <p>{weather_text}</p>
-    {{if temp != "":}}
-        <p>{temp}°C</p>
-    
-    </body>
-    </html>
-    """
+        {head_line}
+        {main_line}
+        {wake_time}
+        {weather_line}
+        {temp_line}
+        {end_line}
+        """
 
 
-def send_daily_emails(available):
+def send_daily_emails():
     now = datetime.now().strftime("%H:%M")
     for user in Register.query.all():
         try: 
@@ -351,9 +353,7 @@ def send_daily_emails(available):
                 continue
             tomorrow_str, _ = get_date()
             wake_time, _ = get_shift_for_tomorrow(tomorrow_str, user.user_id)
-            temp, _, _, response = find_weather_data(user.user_id)
-            if available == True:
-                weather_text = weather(response)
+            weather_text, temp = find_weather_data(user.user_id)
             mail_text = build_mail(temp, user.user_name, tomorrow_str, weather_text, wake_time)
             msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
             msg.html = mail_text
