@@ -284,30 +284,28 @@ def get_date():
 
 def get_shift_for_tomorrow(morgen_str, user_id):
     shift = Date.query.filter_by(user_id=user_id, date=morgen_str).first()
-    work = False
     if shift:
         if shift.free:
-            wake_time = "You are free tomorrow, sleep well."
+            wake_time = "You are free tomorrow."
         else:
-            work = True
             wake_time = f"Sleep well, you will have to work tomorrow from {shift.time_begin} to {shift.time_end}."
     else:
         wake_time = "No shift found for tomorrow."
-    return wake_time, work
+    return wake_time
 
 
 def find_weather_data(user_id):
     try: 
         user = Register.query.filter_by(user_id=user_id).first()
         key = os.getenv("openweather_key")
-        url = f"https://api.openweatherxxxmap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
         response = requests.get(url, timeout=10).json()
         mapping = {
                     "Thunderstorm": emoji.emojize("There will be thunderstorms tomorrow :thunder_cloud_and_rain:"),
                     "Drizzle": emoji.emojize("Light drizzle expected tomorrow. :cloud_with_rain:"),
                     "Rain": emoji.emojize("It will rain tomorrow. :umbrella_with_rain_drops:"),
                     "Snow": emoji.emojize("It will snow tomorrow :snowflake:"),
-                    "Atmosphere": emoji.emojize("It will be foggy tomorrow. :fog:"),
+                    "Atmosphere": emoji.emojize("It will be foggy date. :fog:"),
                     "Clear": "Clear skies tomorrow.",
                     "Clouds": "It will be cloudy tomorrow.",
                 }
@@ -321,11 +319,10 @@ def find_weather_data(user_id):
         return weather_text, temp
 
 
-
-
-def build_mail(temp, user_name, tomorrow_str, weather_text, wake_time):
+def mail_line(temp, user_name, tomorrow_str, weather_text, wake_time):
     head_line = "<html><body style='font-family: -apple-system, Helvetica Neue, Arial, sans-serif;'>"
     main_line = f"<h1>Reminder for tomorrow ({tomorrow_str})</h1> <p>Good evening {user_name},</p>"
+    work_line = f"<p>{wake_time}</p>"
     end_line = "</body></html>"
     if weather_text == "":
         weather_line = ""
@@ -333,15 +330,29 @@ def build_mail(temp, user_name, tomorrow_str, weather_text, wake_time):
     if weather_text != "":
         weather_line = f"<p>{weather_text}</p>"
         temp_line = f"<p>The temperature will be {temp}."
+    return head_line, main_line, end_line, weather_line, temp_line, work_line
+
+def build_first_mail(head_line, main_line, end_line, weather_line, temp_line, work_line): 
     return f"""
         {head_line}
         {main_line}
-        {wake_time}
+        {work_line}
         {weather_line}
         {temp_line}
         {end_line}
         """
 
+def build_second_mail(head_line, main_line, end_line, weather_line, temp_line, work_line):
+    weather_line =  weather_line.replace("tomorrow", "today")
+    main_line = main_line.replace("tomorrow", "today" "evening", "morning")
+    work_line = work_line.replace("tomorrow", "today")
+    return f"""
+        {head_line}
+        {main_line}
+        {work_line}
+        {temp_line}
+        {end_line}
+        """
 
 def send_daily_emails():
     now = datetime.now().strftime("%H:%M")
@@ -351,12 +362,18 @@ def send_daily_emails():
                 continue
             if now != user.email_time:
                 continue
+            user_name = Register.query.filter_by(user_id=user_id).first()
             tomorrow_str, _ = get_date()
             wake_time, _ = get_shift_for_tomorrow(tomorrow_str, user.user_id)
             weather_text, temp = find_weather_data(user.user_id)
-            mail_text = build_mail(temp, user.user_name, tomorrow_str, weather_text, wake_time)
+            head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user_name, tomorrow_str, weather_text, wake_time)
+            mail_first_text = build_first_mail(work_line, head_line, main_line, end_line, weather_line, temp_line)
+            mail_second_text = build_second_mail(work_line, head_line, main_line, end_line, weather_line, temp_line)
             msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
-            msg.html = mail_text
+            msg.html = mail_first_text
+            mail.send(msg)
+            msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
+            msg.html = mail_second_text
             mail.send(msg)
         except Exception as e: 
             print(f"Mail failed for {user.user_name}: {e}"); continue
