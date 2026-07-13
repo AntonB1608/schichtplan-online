@@ -362,11 +362,11 @@ def send_daily_emails():
                 continue
             if now != user.email_time:
                 continue
-            user_name = Register.query.filter_by(user_id=user_id).first()
+            user.user_name = Register.query.filter_by(user_id=user.user_id).first()
             tomorrow_str, _ = get_date()
             wake_time, _ = get_shift_for_tomorrow(tomorrow_str, user.user_id)
             weather_text, temp = find_weather_data(user.user_id)
-            head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user_name, tomorrow_str, weather_text, wake_time)
+            head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
             mail_first_text = build_first_mail(work_line, head_line, main_line, end_line, weather_line, temp_line)
             mail_second_text = build_second_mail(work_line, head_line, main_line, end_line, weather_line, temp_line)
             msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
