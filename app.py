@@ -344,7 +344,7 @@ def build_first_mail(head_line, main_line, end_line, weather_line, temp_line, wo
 
 def build_second_mail(head_line, main_line, end_line, weather_line, temp_line, work_line):
     weather_line =  weather_line.replace("tomorrow", "today")
-    main_line = main_line.replace("tomorrow", "today" "evening", "morning")
+    main_line = main_line.replace("tomorrow", "today").replace("evening", "morning")
     work_line = work_line.replace("tomorrow", "today")
     return f"""
         {head_line}
@@ -357,26 +357,22 @@ def build_second_mail(head_line, main_line, end_line, weather_line, temp_line, w
 def send_daily_emails():
     now = datetime.now().strftime("%H:%M")
     for user in Register.query.all():
-        try: 
-            if not user.user_registered:
-                continue
-            if now != user.email_time:
-                continue
-            user.user_name = Register.query.filter_by(user_id=user.user_id).first()
-            tomorrow_str, _ = get_date()
-            wake_time, _ = get_shift_for_tomorrow(tomorrow_str, user.user_id)
-            weather_text, temp = find_weather_data(user.user_id)
-            head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
-            mail_first_text = build_first_mail(work_line, head_line, main_line, end_line, weather_line, temp_line)
-            mail_second_text = build_second_mail(work_line, head_line, main_line, end_line, weather_line, temp_line)
-            msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
-            msg.html = mail_first_text
-            mail.send(msg)
-            msg = Message(subject="Reminder for today", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
-            msg.html = mail_second_text
-            mail.send(msg)
-        except Exception as e: 
-            print(f"Mail failed for {user.user_name}: {e}"); continue
+        if not user.user_registered:
+            continue
+        if now != user.email_time:
+            continue
+        tomorrow_str, _ = get_date()
+        wake_time = get_shift_for_tomorrow(tomorrow_str, user.user_id)
+        weather_text, temp = find_weather_data(user.user_id)
+        head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
+        mail_first_text = build_first_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
+        mail_second_text = build_second_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
+        msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
+        msg.html = mail_first_text
+        mail.send(msg)
+        msg = Message(subject="Reminder for today", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
+        msg.html = mail_second_text
+        mail.send(msg)
 
 @app.route("/shifts", methods=["GET", "POST"])
 def show_shift():
