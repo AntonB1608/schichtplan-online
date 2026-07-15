@@ -8,11 +8,13 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button type="submit" class="button">Delete</button>
     </form>
-<p><a href="/index">Add more shifts here</a></p>
+{% endfor %}
+
 {% if error_message %}
 <p class="error">{{ error_message|e }}</p>
 {% elif good_message %}
 <p class="good">{{good_message|e }}</p>
 {% endif %}
-{% endfor %}
+<p><a href="/index">Add more shifts here</a></p>
+<p><a href="/profile">Change your settings here</a></p>
 {% endblock %}
