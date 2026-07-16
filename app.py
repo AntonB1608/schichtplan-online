@@ -52,6 +52,8 @@ class Register(db.Model):
     user_city = db.Column(db.String)
     email_time = db.Column(db.String)
     user_registered = db.Column(db.Boolean, default=False)
+    first_mail_send = db.Column(db.String)
+    second_mail_send = db.Column(db.String)
 
 
 class Date(db.Model):
@@ -67,6 +69,8 @@ class Verification(db.Model):
     user_verification_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("register.user_id"))
     user_token = db.Column(db.String)
+
+    
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
 
@@ -357,6 +361,8 @@ def build_second_mail(head_line, main_line, end_line, weather_line, temp_line, w
 def send_daily_emails():
     now = datetime.now().strftime("%H:%M")
     for user in Register.query.all():
+        print(f"checke user {user.user_name}: registered={user.user_registered}, email_time={user.email_time}, now={now}")
+        tomorrow_str, today_str = get_date()
         if not user.user_registered:
             continue
         if now != user.email_time:
@@ -365,14 +371,20 @@ def send_daily_emails():
         wake_time = get_shift_for_tomorrow(tomorrow_str, user.user_id)
         weather_text, temp = find_weather_data(user.user_id)
         head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
-        mail_first_text = build_first_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
-        mail_second_text = build_second_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
-        msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
-        msg.html = mail_first_text
-        mail.send(msg)
-        msg = Message(subject="Reminder for today", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
-        msg.html = mail_second_text
-        mail.send(msg)
+        if not user.first_mail_send or user.first_mail_send != today_str:
+            mail_first_text = build_first_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
+            msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
+            msg.html = mail_first_text
+            mail.send(msg)
+            user.first_mail_send = today_str
+            db.session.commit()
+        if user.second_mail_send != today_str:
+            mail_second_text = build_second_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
+            msg = Message(subject="Reminder for today", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
+            msg.html = mail_second_text
+            mail.send(msg)
+            user.second_mail_send = today_str
+            db.session.commit()
 
 @app.route("/shifts", methods=["GET", "POST"])
 def show_shift():
