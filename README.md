@@ -32,25 +32,19 @@ Login is rate limited: after five wrong passwords the account is locked for
 
 Create a virtual environment and install the dependencies:
 
-```
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-```
 
 Copy `example.env` to `.env` and fill in your own values (see below), then
 start the app:
 
-```
 python app.py
-```
 
-It serves on http://localhost:5555. To actually send the reminder emails,
+It serves on <http://localhost:5555>. To actually send the reminder emails,
 run the worker in a second terminal:
 
-```
 python worker.py
-```
 
 ## Environment variables
 
@@ -74,3 +68,5 @@ Postgres database.
 
 The `screenshots/` folder has two example reminder emails, one sent the
 evening before a shift and one on the morning of it.
+
+Built as a personal side project while working full-time before starting my Computer Science degree.
