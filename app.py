@@ -239,7 +239,7 @@ def show_profile():
         city = request.form["city"]
         if email_time and city:
             key = os.getenv("openweather_key")
-            url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}"
+            url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
             response = requests.get(url, timeout=10).json()
             if str(response.get("cod")) == "404":
                 return render_template("profile.html", error_message="City not found")
@@ -367,7 +367,7 @@ def send_daily_emails():
             continue
         if now != user.email_time:
             continue
-        tomorrow_str, _ = get_date()
+        tomorrow_str, _ = get_date()     
         wake_time = get_shift_for_tomorrow(tomorrow_str, user.user_id)
         weather_text, temp = find_weather_data(user.user_id)
         head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
