@@ -153,76 +153,74 @@ def registeruser():
     if "user_id" not in session:
         return redirect("/login")
 
-    if request.method == "POST":
-        sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
-        password = request.form["password"]
-        password_again = request.form["password_again"]
+    if not request.method == "POST":
+        return render_template("registeruser.html")
+    
+    sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
+    password = request.form["password"]
+    password_again = request.form["password_again"]
+    if len(password) < 15:
+        return render_template("registeruser.html", error_message="Password too short (min. 15 characters)")
+    if not any(z in password for z in sonderzeichen):
+        return render_template("registeruser.html", error_message="Password must contain a special character")
+    if password != password_again:
+        return render_template("registeruser.html", error_message="Passwords don't match")
+    user = Register.query.filter_by(user_id=session["user_id"]).first()
+    if not user:
+        return redirect("/register")
+    user.user_password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    user.user_registered = True
+    db.session.commit()
+    return redirect("/login")
 
-        if len(password) < 15:
-            return render_template("registeruser.html", error_message="Password too short (min. 15 characters)")
-
-        if not any(z in password for z in sonderzeichen):
-            return render_template("registeruser.html", error_message="Password must contain a special character")
-
-        if password != password_again:
-            return render_template("registeruser.html", error_message="Passwords don't match")
-
-        user = Register.query.filter_by(user_id=session["user_id"]).first()
-        if not user:
-            return redirect("/register")
-
-        user.user_password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        user.user_registered = True
-        db.session.commit()
-        return redirect("/login")
-
-    return render_template("registeruser.html")
+    
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
-        now = datetime.today()
-        username = request.form["username"]
-        password = request.form["password"]
+    if not request.method == "POST":
+        return render_template("login.html")
 
-        user = Register.query.filter_by(user_name=username).first()
-        if not user:
-            return render_template("login.html", error_message="Wrong username or password")
+    now = datetime.today()
+    username = request.form["username"]
+    password = request.form["password"]
 
-        if user.user_locked_until and now < user.user_locked_until:
-            return render_template("login.html", error_message=f"Account locked until {user.user_locked_until.strftime('%H:%M:%S')}")
+    user = Register.query.filter_by(user_name=username).first()
+    if not user:
+        return render_template("login.html", error_message="Wrong username or password")
 
-        if user.user_locked_until and now >= user.user_locked_until:
-            user.user_trys = 0
-            user.user_locked_until = None
-            db.session.commit()
+    if user.user_locked_until and now < user.user_locked_until:
+        return render_template("login.html", error_message=f"Account locked until {user.user_locked_until.strftime('%H:%M:%S')}")
 
-        if not user.user_password_hash:
-            return render_template("login.html", error_message="Wrong username or password")
-
-        if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash):
-            user.user_trys = 0
-            user.user_locked_until = None
-            session["user_id"] = user.user_id
-            db.session.commit()
-            if not user.user_city or not user.email_time:
-                return redirect("/profile")
-            else:
-                return redirect("/index")
-        
-
-        user.user_trys = (user.user_trys or 0) + 1
-        if user.user_trys >= 5:
-            user.user_locked_until = datetime.today() + timedelta(minutes=15)
-            db.session.commit()
-            return render_template("login.html", error_message="Too many failed attempts. Account locked for 15 minutes.")
-
+    if user.user_locked_until and now >= user.user_locked_until:
+        user.user_trys = 0
+        user.user_locked_until = None
         db.session.commit()
-        return render_template("login.html", error_message="Wrong username or password", username=username)
 
-    return render_template("login.html")
+    if not user.user_password_hash:
+        return render_template("login.html", error_message="Wrong username or password")
 
+    if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash):
+        user.user_trys = 0
+        user.user_locked_until = None
+        session["user_id"] = user.user_id
+        db.session.commit()
+        if not user.user_city or not user.email_time:
+            return redirect("/profile")
+        else:
+            return redirect("/index")
+    
+
+    user.user_trys = (user.user_trys or 0) + 1
+    if user.user_trys >= 5:
+        user.user_locked_until = datetime.today() + timedelta(minutes=15)
+        db.session.commit()
+        return render_template("login.html", error_message="Too many failed attempts. Account locked for 15 minutes.")
+
+    db.session.commit()
+    return render_template("login.html", error_message="Wrong username or password", username=username)
+
+   
 
 @app.route("/logout")
 def logout():
@@ -233,29 +231,29 @@ def logout():
 def show_profile():
     if "user_id" not in session:
         return redirect("/login")
-    if request.method == "POST":
-        user_id = session["user_id"]
-        email_time = request.form["email_time"]
-        city = request.form["city"]
-        if email_time and city:
-            key = os.getenv("openweather_key")
-            url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
-            response = requests.get(url, timeout=10).json()
-            if str(response.get("cod")) == "404":
-                return render_template("profile.html", error_message="City not found")
-            user = Register.query.filter_by(user_id=user_id).first()
-            user.user_city = city
-            user.email_time = email_time
-            db.session.commit()
-            return redirect("/index")
-        if not email_time and not city:
-            return render_template("profile.html", error_message = "Enter email_time and your city please.")
-        elif not email_time and city:
-            return render_template("profile.html", error_message =  "Enter email_time please.")
-        elif email_time and not city:
-            return render_template("profile.html", error_message = "Enter your city please")
-    else:
+    if not request.method == "POST":
         return render_template("profile.html")
+    user_id = session["user_id"]
+    email_time = request.form["email_time"]
+    city = request.form["city"]
+    if email_time and city:
+        key = os.getenv("openweather_key")
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(city)}&appid={key}&units=metric&lang=de"
+        response = requests.get(url, timeout=10).json()
+        if str(response.get("cod")) == "404":
+            return render_template("profile.html", error_message="City not found")
+        user = Register.query.filter_by(user_id=user_id).first()
+        user.user_city = city
+        user.email_time = email_time
+        db.session.commit()
+        return redirect("/index")
+    if not email_time and not city:
+        return render_template("profile.html", error_message = "Enter email_time and your city please.")
+    elif not email_time and city:
+        return render_template("profile.html", error_message =  "Enter email_time please.")
+    elif email_time and not city:
+        return render_template("profile.html", error_message = "Enter your city please")
+    
 
 @app.route("/index", methods=["GET", "POST"])
 def schicht_eintragen():
@@ -368,7 +366,7 @@ def send_daily_emails():
         if now != user.email_time:
             continue
         tomorrow_str, _ = get_date()     
-        wake_time = get_shift_for_tomorrow(tomorrow_str, user.user_id)
+        wake_time, _ = get_shift_for_tomorrow(tomorrow_str, user.user_id)
         weather_text, temp = find_weather_data(user.user_id)
         head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
         if not user.first_mail_send or user.first_mail_send != today_str:
