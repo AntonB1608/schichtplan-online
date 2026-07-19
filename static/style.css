@@ -120,16 +120,19 @@ input[type="checkbox"] {
     font-family: inherit;
     cursor: pointer;
     transition: background-color 0.2s;
-    .error {
-        background-color: #e32a00;
-
-    }
+}
+.button-delete {
+    background-color: #c0392b;
+    width: auto;
+    margin: 10px;
 }
 
 .button:hover {
     background-color: #0077ed;
 }
-
+.button-delete:hover { 
+      background-color: #e43521;
+}
 .button:active {
     background-color: #006edb;
 }
@@ -201,4 +204,14 @@ footer a:hover {
 footer .sep {
     color: #3a3a3c;
     font-size: 0.72rem;
+}
+.shift {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background: #1c1c1e;
+    border: 1px solid #3a3a3c;
+    border-radius: 12px;
+    padding: 1rem;
 }

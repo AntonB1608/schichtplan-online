@@ -3,30 +3,22 @@
 {% block content %}
 <div class="container">
     <h1>Your shifts</h1>
-    <form method="POST" action="/profile">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="Felder">
-            {% for shift in shifts %}
-                <div class="shift">
-                    <label></label>
-                    {{ shift.date }} {{ shift.time_begin }} - {{ shift.time_end }}
-                </div>
-                <p class="error">
-                    <form method="POST" action="/delete/{{ shift.date_id }}">
+    <div class="Felder">
+        {% for shift in shifts %}
+            <div class="shift">
+                {{ shift.date }} {{ shift.time_begin }} - {{ shift.time_end }}
+                <form method="POST" action="/delete/{{ shift.date_id }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="button.error">Delete</button>
-                    </form>
-                </p>
-            {% endfor %}
-                
+                <button type="submit" class="button button-delete">Delete</button>
+                </form>
+            </div>
+        {% endfor %}
+     </div>  
+</div>        
 {% if error_message %}
-        </div>
-    
-
-
-<p class="error">{{ error_message|e }}</p>
+    <p class="error">{{ error_message|e }}</p>
 {% elif good_message %}
-<p class="good">{{good_message|e }}</p>
+    <p class="good">{{good_message|e }}</p>
 {% endif %}
 <p><a href="/index">Add more shifts here</a></p>
 <p><a href="/profile">Change your settings here</a></p>
