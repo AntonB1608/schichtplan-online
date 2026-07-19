@@ -120,6 +120,10 @@ input[type="checkbox"] {
     font-family: inherit;
     cursor: pointer;
     transition: background-color 0.2s;
+    .error {
+        background-color: #e32a00;
+
+    }
 }
 
 .button:hover {

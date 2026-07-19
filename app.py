@@ -288,9 +288,9 @@ def get_shift_for_tomorrow(morgen_str, user_id):
     shift = Date.query.filter_by(user_id=user_id, date=morgen_str).first()
     if shift:
         if shift.free:
-            wake_time = "You are free tomorrow."
+            wake_time = "Hello, You are free tomorrow."
         else:
-            wake_time = f"Sleep well, you will have to work tomorrow from {shift.time_begin} to {shift.time_end}."
+            wake_time = f"Hi, you will have to work tomorrow from {shift.time_begin} to {shift.time_end}."
     else:
         wake_time = "No shift found for tomorrow."
     return wake_time
