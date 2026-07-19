@@ -357,19 +357,22 @@ def build_second_mail(head_line, main_line, end_line, weather_line, temp_line, w
         """
 
 def send_daily_emails():
-    now = datetime.now().strftime("%H:%M")
+    now = datetime.now().time()
     for user in Register.query.all():
         print(f"checke user {user.user_name}: registered={user.user_registered}, email_time={user.email_time}, now={now}")
-        tomorrow_str, today_str = get_date()
+        tomorrow_str, today_str = get_date()   
         if not user.user_registered:
             continue
-        if now != user.email_time:
+        if not user.email_time:
+            continue
+        email_time = datetime.strptime(user.email_time, "%H:%M").time()
+        if now < email_time: 
             continue
         tomorrow_str, _ = get_date()     
-        wake_time, _ = get_shift_for_tomorrow(tomorrow_str, user.user_id)
+        wake_time = get_shift_for_tomorrow(tomorrow_str, user.user_id)
         weather_text, temp = find_weather_data(user.user_id)
         head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
-        if not user.first_mail_send or user.first_mail_send != today_str:
+        if user.first_mail_send != today_str:
             mail_first_text = build_first_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
             msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
             msg.html = mail_first_text
