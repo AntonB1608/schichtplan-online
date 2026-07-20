@@ -9,10 +9,18 @@
 </head>
 <body>
     <nav class= "navbar">
-        <a href="/profile">profile</a>
-        <a href="/shifts">shifts</a>
-        <a href="#" class="li"></a>
+        Shift Planner
+        {% if session.user_id %}
+            <span class="sep">|</span>
+            <a href="/profile">Profile</a>
+            <span class="sep">|</span>
+            <a href="/shifts">Shifts</a>
+        {% else %}
+            <a href="/register">Register</a>
+            <span class="sep">|</span>
+            <a href="/login">Login</a>
     </nav>
+    {% endif %}
     {% block content %}{% endblock %}
     <footer>
         <p>Copyright &copy; 2026 Shift Planner</p>
