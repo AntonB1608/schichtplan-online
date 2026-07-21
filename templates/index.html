@@ -2,7 +2,7 @@
 {% block title %}Add Shift – Shift Planner{% endblock %}
 {% block content %}
 <div class="container">
-    <h1>Shift Planner</h1>
+    <h1>Add Shift</h1>
     <form method="POST" action="/index">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="Felder">
@@ -32,8 +32,6 @@
         <p class="good">{{good_message|e }}</p>
         {% endif %}
     </form>
-    <p><a href="/logout">Logout</a></p>
     <p><a href="/shifts">View your shifts here</a></p>
-    <p><a href="/profile">Change your settings here</a></p>
 </div>
 {% endblock %}
