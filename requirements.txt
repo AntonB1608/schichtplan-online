@@ -9,3 +9,4 @@ gunicorn==26.0.0
 python-dotenv==1.2.2
 requests==2.34.0
 SQLAlchemy==2.0.50
+psycopg2-binary==2.9.12

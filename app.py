@@ -31,12 +31,12 @@ else:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///schichtplan.db"
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
+app.config['MAIL_PORT'] = 465
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv("gmail_email")
 app.config['MAIL_USERNAME'] = os.getenv("gmail_email")
 app.config['MAIL_PASSWORD'] = os.getenv("gmail_password")
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 app.config['SECRET_KEY'] = os.getenv("secret_key")
 app.config['WTF_CSRF_ENABLED'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
