@@ -134,16 +134,12 @@ def register():
             db.session.rollback()
             return render_template("verifyregister.html")
 
-        msg = Message (
-
-            subject="Verify your email",
-            sender=os.getenv("gmail_email"),
-            recipients=[email]
-            
-        )
+       
         verify_link = f"{request.url_root}verify/{token}"
-        msg.body = f"Dear {username}, click this link to verify your email: {verify_link}"
-        mail.send(msg)
+        html = f"<p>Dear {username}, <a href='{verify_link}'>click here to verify your email</a></p>"
+        to = email
+        subject="Verify your email"
+        send_email(to, subject, html)
 
         db.session.add(Verification(user_token=token, user_id=new_user.user_id))
         db.session.commit()
@@ -433,20 +429,18 @@ def send_daily_emails():
         weather_text, temp, time_zone = find_weather_data(user.user_id)
         head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
         if user.first_mail_send != today_str:
-
-            mail_first_text = build_first_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
-            msg = Message(subject="Reminder for tomorrow", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
-            msg.html = mail_first_text
-            mail.send(msg)
+            html = build_first_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
+            subject = "Reminder for tomorrow"
+            to = user.user_mail
+            send_email(to, subject, html)
             user.first_mail_send = today_str
             db.session.commit()
 
         if user.second_mail_send != today_str:
-
-            mail_second_text = build_second_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
-            msg = Message(subject="Reminder for today", sender=os.getenv("gmail_email"), recipients=[user.user_mail])
-            msg.html = mail_second_text
-            mail.send(msg)
+            html = build_second_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
+            subject = "Reminder for today"
+            to = user.user_mail
+            send_email(to, subject, html)
             user.second_mail_send = today_str
             db.session.commit()
 
@@ -480,7 +474,18 @@ def scheduled_job():
     with app.app_context():
 
         send_daily_emails()
-      
+def send_email(to, subject, html):
+    resp = requests.post(
+        "https://api.resend.com/emails",
+        headers= {"Authorization": f"Bearer {os.getenv('resend_api_key')}"},
+        json={
+            "from": "Anton <onboarding@resend.dev>",
+            "to": [to],
+            "subject": subject,
+            "html": html,
+        },
+    )
+    print(resp.status_code, resp.json())   
 if __name__ == "__main__":
 
     app.run(host='0.0.0.0', port=5555, debug=debug_mode)
