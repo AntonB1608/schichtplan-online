@@ -36,7 +36,6 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
-mail = Mail(app)
 
 
 class Register(db.Model):
