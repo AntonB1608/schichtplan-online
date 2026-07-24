@@ -396,9 +396,7 @@ def build_second_mail(head_line, main_line, end_line, weather_line, temp_line, w
 def send_daily_emails():
     now = datetime.now(timezone.utc)
     for user in Register.query.all():
-        
-        print(f"checke user {user.user_name}: registered={user.user_registered}, email_time={user.email_time}, now={now}")
-        
+            
         if not user.user_registered:
 
             continue
