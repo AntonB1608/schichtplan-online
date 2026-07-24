@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 import emoji
 from urllib.parse import quote
 import re
+from flask_migrate import Migrate
 
 load_dotenv()
 
@@ -36,7 +37,7 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
-
+migrate = Migrate(app, db)
 
 class Register(db.Model):
 
@@ -74,9 +75,7 @@ class Verification(db.Model):
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
 
-with app.app_context():
 
-    db.create_all()
 
 
 @app.route("/", methods=["POST", "GET"])
@@ -176,7 +175,7 @@ def registeruser():
         return render_template("registeruser.html", error_message="Passwords don't match")
     user = Register.query.filter_by(user_id=session["user_id"]).first()
     if not user:
-        return redirect("/register")
+        return redirect("/")
     user.user_password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     user.user_password_hash = user.user_password_hash.decode("utf-8")
     user.user_registered = True
@@ -210,7 +209,7 @@ def login():
     if not user.user_password_hash:
         return render_template("login.html", error_message="Wrong username or password")
 
-    if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash.encode("utf-8")):
+    if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash).encode("utf-8"):
         user.user_trys = 0
         user.user_locked_until = None
         session["user_id"] = user.user_id
