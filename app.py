@@ -79,7 +79,7 @@ with app.app_context():
     db.create_all()
 
 
-@app.route("/register", methods=["POST", "GET"])
+@app.route("/", methods=["POST", "GET"])
 def register():
 
     if request.method == "POST":
@@ -178,6 +178,7 @@ def registeruser():
     if not user:
         return redirect("/register")
     user.user_password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    user.user_password_hash = user.user_password_hash.decode("utf-8")
     user.user_registered = True
     db.session.commit()
     return redirect("/login")
@@ -209,7 +210,7 @@ def login():
     if not user.user_password_hash:
         return render_template("login.html", error_message="Wrong username or password")
 
-    if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash):
+    if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash.encode("utf-8")):
         user.user_trys = 0
         user.user_locked_until = None
         session["user_id"] = user.user_id
