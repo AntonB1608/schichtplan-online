@@ -2,7 +2,7 @@
 {% block title %}Reset your password{% endblock %}
 {% block content %}
 <div class="container">
-    <form method="POST" action="/index">
+    <form method="POST" action="/reset">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="Felder">
             <div class="Eintrag">
