@@ -278,20 +278,22 @@ def show_profile():
     
 @app.route("/reset", methods = ["GET", "POST"])
 def reset_password():
-    mail = request.form["mail"]
-    user = Register.query.filter_by(user_mail = mail).first()
-    if not user:
-        return render_template("registeruser") 
-    token = secrets.token_urlsafe(64)
-    verify_link = f"{request.url_root}verify/{token}"
-    html = f"<p>Dear {user.user_name}, <a href='{verify_link}'>click here to reset your password</a></p>"
-    to = user.user_mail
-    subject="Reset your password"
-    send_email(to, subject, html)
-    db.session.add(Verification(user_token=token, user_id=user.user_id))
-    db.session.commit()
-    return render_template("registeruser")
-    
+    if request.method == "POST":
+        mail = request.form["mail"]
+        user = Register.query.filter_by(user_mail = mail).first()
+        if not user:
+            return render_template("passwordreset.html")
+        token = secrets.token_urlsafe(64)
+        verify_link = f"{request.url_root}verify/{token}"
+        html = f"<p>Dear {user.user_name}, <a href='{verify_link}'>click here to reset your password</a></p>"
+        to = user.user_mail
+        subject="Reset your password"
+        send_email(to, subject, html)
+        db.session.add(Verification(user_token=token, user_id=user.user_id))
+        db.session.commit()
+        return render_template("passwordreset.html")
+    else:
+        return render_template("reset.html")    
     
     
 
