@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Show shifts – Shift Planner{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Your shifts</h1>
+    <div class="Felder">
+        {% for shift in shifts %}
+            <div class="shift">
+                {{ shift.date }} {{ shift.time_begin }} - {{ shift.time_end }}
+                <form method="POST" action="/delete/{{ shift.date_id }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="button button-delete">Delete</button>
+                </form>
+            </div>
+        {% endfor %}
+     </div>  
+</div>        
+{% if error_message %}
+    <p class="error">{{ error_message|e }}</p>
+{% elif good_message %}
+    <p class="good">{{good_message|e }}</p>
+{% endif %}
+
+{% endblock %}
