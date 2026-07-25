@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Reset your password{% endblock %}
+{% block content %}
+<div class="container">
+    <form method="POST" action="/index">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="Felder">
+            <div class="Eintrag">
+                <label>Email</label>
+                <input type="email" name="mail">
+            </div>
+            <div class="Eintragen">
+                <button type="submit" class="button">Send email</button>
+            </div>
+        </div>
+        {% if error_message %}
+        <p class="error">{{ error_message|e }}</p>
+        {% elif good_message %}
+        <p class="good">{{good_message|e }}</p>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

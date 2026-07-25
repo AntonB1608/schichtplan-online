@@ -276,6 +276,24 @@ def show_profile():
     
         return render_template("profile.html", error_message = "Enter your city please")
     
+@app.route("/reset", methods = ["GET", "POST"])
+def reset_password():
+    mail = request.form["mail"]
+    user = Register.query.filter_by(user_mail = mail).first()
+    if not user:
+        return render_template("registeruser") 
+    token = secrets.token_urlsafe(64)
+    verify_link = f"{request.url_root}verify/{token}"
+    html = f"<p>Dear {user.user_name}, <a href='{verify_link}'>click here to reset your password</a></p>"
+    to = user.user_mail
+    subject="Reset your password"
+    send_email(to, subject, html)
+    db.session.add(Verification(user_token=token, user_id=user.user_id))
+    db.session.commit()
+    return render_template("registeruser")
+    
+    
+    
 
 @app.route("/index", methods=["GET", "POST"])
 def schicht_eintragen():
@@ -396,7 +414,7 @@ def build_second_mail(head_line, main_line, end_line, weather_line, temp_line, w
 def send_daily_emails():
     now = datetime.now(timezone.utc)
     for user in Register.query.all():
-            
+                
         if not user.user_registered:
 
             continue
