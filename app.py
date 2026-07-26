@@ -70,6 +70,7 @@ class Verification(db.Model):
     user_verification_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("register.user_id"))
     user_token = db.Column(db.String)
+    user_token_date = db.Column(db.DateTime)
 
     
 
@@ -163,7 +164,6 @@ def registeruser():
 
     if not request.method == "POST":
         return render_template("registeruser.html")
-    
     sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
     password = request.form["password"]
     password_again = request.form["password_again"]
@@ -284,18 +284,59 @@ def reset_password():
         if not user:
             return render_template("passwordreset.html")
         token = secrets.token_urlsafe(64)
-        verify_link = f"{request.url_root}verify/{token}"
+        token_date = datetime.now(timezone.utc)
+        verify_link = f"{request.url_root}reset/{token}"
         html = f"<p>Dear {user.user_name}, <a href='{verify_link}'>click here to reset your password</a></p>"
         to = user.user_mail
         subject="Reset your password"
         send_email(to, subject, html)
-        db.session.add(Verification(user_token=token, user_id=user.user_id))
+        db.session.add(Verification(user_token=token, user_id=user.user_id, user_token_date=token_date))
         db.session.commit()
         return render_template("passwordreset.html")
     else:
         return render_template("reset.html")    
     
-    
+@app.route('/reset/<token>', methods = ["GET", "POST"])
+def reset_token(token):
+    if request.method == "GET":
+        verification = Verification.query.filter_by(user_token=token).first()
+        if not verification:
+            return render_template("register.html", error_message="Invalid token")
+
+        real_user = Register.query.filter_by(user_id=verification.user_id).first()
+        if not real_user:
+            return render_template("register.html", error_message="User not found")
+        token_time = verification.user_token_date.replace(tzinfo=timezone.utc)
+        date_expired = token_time + timedelta(hours=1)
+        if datetime.now(timezone.utc) > date_expired:
+            return render_template("register.html", error_message="Expired token")
+        
+        return render_template("registeruser.html", token=token)
+    else:
+        verification = Verification.query.filter_by(user_token=token).first()
+        if not verification: 
+            return render_template("register.html")
+        
+        sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
+        password = request.form["password"]
+        password_again = request.form["password_again"]
+        if len(password) < 15:
+            return render_template("newpassword.html", error_message="Password too short (min. 15 characters)")
+        if not any(z in password for z in sonderzeichen):
+            return render_template("newpassword.html", error_message="Password must contain a special character")
+        if password != password_again:
+            return render_template("newpassword.html", error_message="Passwords don't match")
+        user = Register.query.filter_by(user_id=verification.user_id).first()
+        if not user:
+            return redirect("/register")
+        user.user_password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        user.user_password_hash = user.user_password_hash.decode("utf-8")
+        db.session.delete(verification)
+        db.session.commit()
+        return redirect("/login")
+        
+        
+
 
 @app.route("/index", methods=["GET", "POST"])
 def schicht_eintragen():
@@ -488,7 +529,7 @@ def send_email(to, subject, html):
         "https://api.resend.com/emails",
         headers= {"Authorization": f"Bearer {os.getenv('resend_api_key')}"},
         json={
-            "from": "Anton <onboarding@resend.dev>",
+            "from": "Shiftmates <noreply@send.shiftmates.org>",
             "to": [to],
             "subject": subject,
             "html": html,
