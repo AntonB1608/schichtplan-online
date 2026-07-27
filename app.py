@@ -38,7 +38,7 @@ app.config['SESSION_COOKIE_SECURE'] = os.getenv("SESSION_COOKIE_SECURE", "false"
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
 migrate = Migrate(app, db)
-
+ 
 class Register(db.Model):
 
     user_id = db.Column(db.Integer, primary_key=True)
@@ -308,6 +308,7 @@ def reset_token(token):
             return render_template("register.html", error_message="User not found")
         token_time = verification.user_token_date.replace(tzinfo=timezone.utc)
         date_expired = token_time + timedelta(hours=1)
+        
         if datetime.now(timezone.utc) > date_expired:
             return render_template("register.html", error_message="Expired token")
         
@@ -361,8 +362,48 @@ def schicht_eintragen():
     else:
         return render_template("index.html")
 
-
+@app.route("/unsubscribe", methods=["GET", "POST"])
+def unsubscribe():
+    if request.method == "POST":
+        now = datetime.today()
+        username = request.form["username"]
+        password = request.form["password"]
+    
+        user = Register.query.filter_by(user_name=username).first()
+        if not user:
+            return render_template("unsubscribe.html", error_message="Wrong username or password")
+    
+        if user.user_locked_until and now < user.user_locked_until:
+            return render_template("unsubscribe.html", error_message=f"Account locked until {user.user_locked_until.strftime('%H:%M:%S')}")
+    
+        if user.user_locked_until and now >= user.user_locked_until:
+            user.user_trys = 0
+            user.user_locked_until = None
+            db.session.commit()
+    
+        if not user.user_password_hash:
+            return render_template("unsubscribe.html", error_message="Wrong username or password")
+    
+        if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash.encode("utf-8")):
+            user.user_trys = 0
+            user.user_locked_until = None
+            user.email_time.delete()
+            session["user_id"] = user.user_id
+            db.session.commit()
+            return render_template("base.html", error_message="Unsubscribed.")  
+    
+        user.user_trys = (user.user_trys or 0) + 1
+        if user.user_trys >= 5:
+            user.user_locked_until = datetime.today() + timedelta(minutes=15)
+            db.session.commit()
+            return render_template("unsubscribe.html", error_message="Too many failed attempts. Account locked for 15 minutes.")
+    
+        db.session.commit()
+        return render_template("unsubscribe.html", error_message="Wrong username or password", username=username)
+  
+       
 def get_date():
+    user_name = request.form["name"]
     today = datetime.today()
     tomorrow = today + timedelta(days=1)
     return tomorrow.strftime("%d.%m.%Y"), today.strftime("%d.%m.%Y")
