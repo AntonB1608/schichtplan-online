@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Register – Shift Planner{% endblock %}
+{% block content %}
+
+<div class="container">
+    <form method="POST" action="/">
+        <h1>Shiftmate</h1>
+        <h2>Wisse morgens, wann du morgen arbeitest.<br>Kostenlos. Kein Abo. Jederzeit abbestellbar.</h2>
+        <div class="Felder">
+            <div class="Eintrag"></div>
+                <a href="/register" class="button"> Create a free account: Register</a>
+            </div>
+            <div class="Eintragen">
+                <a href="/login" class="button"> Already have an account? Login</a>
+        </div>
+        <p> 
+Shiftmates schickt dir jeden Abend eine Mail mit deiner Schicht für den nächsten Tag — plus dem Wetter. Du trägst deine Schichten einmal ein, den Rest macht das Tool.
+
+So funktioniert's
+Registrieren und Mail-Adresse bestätigen. Schichten eintragen. Jeden Abend die Erinnerung bekommen.
+
+</p>
+    </form>
+    <p></p>
+</div>
+{% endblock %}
