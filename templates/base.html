@@ -3,40 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Shift Planner{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
+    <title>{% block title %}Shiftmates{% endblock %}</title>
+    <meta name="description" content="{% block description %}Email reminders for your work shifts, with the weather for your city.{% endblock %}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head %}{% endblock %}
 </head>
 <body>
-    <nav class= "navbar">
-        <div class = "navbar-logo">
-        
-            <a href="/">Shift Planner</a>
-        </div>
-    
-        <div class = "navbar-links">
-    
-            <a href="/login">Login</a>
-
-            {% if session.user_id %}
-            
-                <a href="/profile">Profile</a>
-            
-                <a href="/shifts">Shifts</a>
-                <a href="/logout">Logout</a>
-        </div>
-   
-    {% endif %}
-    </nav>
-    {% block content %}{% endblock %}
-    <footer>
-        <p>Copyright &copy; 2026 Shift Planner</p>
-        <span class="sep">|</span>
-        <a href="#">Privacy Policy</a>
-        <span class="sep">|</span>
-        <a href="#">Terms of Service</a>
-        <span class="sep">|</span>
-        <a href="#">Contact</a>
-    </footer>
-</body>
-</html>
+ 
+    <div class="navbar-wrap">
+        <nav class="navbar">
+            <div class="navbar-logo">
+                <a href="/">Shiftmates</a>
+            </div>
+ 
+            <div class="navbar-links">
+                {% if session.user_id %}
+                    <a href="/index">Add shift</a>
+                    <a href="/shifts">Shifts</a>
+                    <a href="/profile">Profile</a>
+                    <a href="/logout">Log out</a>
+                {% else %}
+                    <a href="/login">Log in</a>
+                    <a href="/register">Sign up</a>
+                {% endif %}
+            </div>
+        </nav>
+    </div>
+ 
+    <main class="page">
+        {% block content %}{% endblock %}
+    </main>
