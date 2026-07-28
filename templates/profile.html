@@ -1,29 +1,44 @@
 {% extends "base.html" %}
-{% block title %}Profile – Shift Planner{% endblock %}
+
+{% block title %}Profile — Shiftmates{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Shift Planner</h1>
+<div class="wrap">
+  <div class="form-card">
+
+    <h2>Your profile</h2>
+    <p class="muted">Where you work, and when your reminders arrive.</p>
+
+    {% if error_message %}
+      <div class="alert alert-error">{{ error_message }}</div>
+    {% endif %}
+    {% if good_message %}
+      <div class="alert alert-success">{{ good_message }}</div>
+    {% endif %}
+
     <form method="POST" action="/profile">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="Felder">
-            <div class="Eintrag">
-                <label>City</label>
-                <input type="text" name="city" placeholder="Enter your city">
-            </div>
-            <div class="Eintrag">
-                <label>Time for daily email</label>
-                <input type="time" name="email_time" >
-            </div>
-            <div class="Eintragen">
-                <button type="submit" class="button">Save</button>
-            </div>
-        </div>
-        {% if error_message %}
-        <p class="error">{{ error_message|e }}</p>
-        {% elif good_message %}
-        <p class="good">{{good_message|e }}</p>
-        {% endif %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="field">
+        <label for="city">City</label>
+        <input type="text" id="city" name="city"
+               placeholder="Ludwigshafen"
+               value="{{ user.user_city or '' if user else '' }}" required autofocus>
+      </div>
+
+      <div class="field">
+        <label for="email_time">Reminder time</label>
+        <input type="time" id="email_time" name="email_time"
+               value="{{ user.email_time or '' if user else '' }}" required>
+      </div>
+
+      <button type="submit" class="btn btn-block">Save profile</button>
     </form>
-    <p><a href="/index">Ready? Add a shift here</a></p>
+
+    <div class="form-foot">
+      <a href="/index">Add a shift</a>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

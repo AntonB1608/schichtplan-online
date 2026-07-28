@@ -1,30 +1,42 @@
 {% extends "base.html" %}
-{% block title %}Register – Shift Planner{% endblock %}
-{% block content %}
 
-<div class="container">
-    <h1>Register</h1>
-    <form method="POST" action="/">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="Felder">
-            <div class="Eintrag">
-                <label>Username</label>
-                <input type="text" name="username" placeholder="Enter a username" value="{{ user_name|default('')|e }}">
-            </div>
-            <div class="Eintrag">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="yourmail@example.com">
-            </div>
-            <div class="Eintragen">
-                <button type="submit" class="button">Register</button>
-            </div>
-        </div>
-        {% if error_message %}
-        <p class="error">{{ error_message|e }}</p>
-        {% elif good_message %}
-        <p class="good">{{good_message|e }}</p>
-        {% endif %}
+{% block title %}Sign up — Shiftmates{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <div class="form-card">
+
+    <h2>Create an account</h2>
+    <p class="muted">We'll send a link to confirm your email address.</p>
+
+    {% if error_message %}
+      <div class="alert alert-error">{{ error_message }}</div>
+    {% endif %}
+
+    <form method="POST" action="/register">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"
+               value="{{ user_name or '' }}" maxlength="20"
+               autocomplete="username" required autofocus>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email"
+               placeholder="you@example.com"
+               autocomplete="email" required>
+      </div>
+
+      <button type="submit" class="btn btn-block">Create account</button>
     </form>
-    <p><a href="/login">Already have an account? Login</a></p>
+
+    <div class="form-foot">
+      Already have an account? <a href="/login">Log in</a>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

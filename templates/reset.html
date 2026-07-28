@@ -1,23 +1,35 @@
 {% extends "base.html" %}
-{% block title %}Reset your password{% endblock %}
+
+{% block title %}Reset your password — Shiftmates{% endblock %}
+
 {% block content %}
-<div class="container">
+<div class="wrap">
+  <div class="form-card">
+
+    <h2>Reset your password</h2>
+    <p class="muted">Enter your email and we'll send you a link.</p>
+
+    {% if error_message %}
+      <div class="alert alert-error">{{ error_message }}</div>
+    {% endif %}
+
     <form method="POST" action="/reset">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="Felder">
-            <div class="Eintrag">
-                <label>Email</label>
-                <input type="email" name="mail">
-            </div>
-            <div class="Eintragen">
-                <button type="submit" class="button">Send email</button>
-            </div>
-        </div>
-        {% if error_message %}
-        <p class="error">{{ error_message|e }}</p>
-        {% elif good_message %}
-        <p class="good">{{good_message|e }}</p>
-        {% endif %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="field">
+        <label for="mail">Email</label>
+        <input type="email" id="mail" name="mail"
+               placeholder="you@example.com"
+               autocomplete="email" required autofocus>
+      </div>
+
+      <button type="submit" class="btn btn-block">Send reset link</button>
     </form>
+
+    <div class="form-foot">
+      <a href="/login">Back to log in</a>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

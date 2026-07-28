@@ -1,9 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Verify Email – Shift Planner{% endblock %}
+
+{% block title %}Check your email — Shiftmates{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Shift Planner</h1>
-    <p>We sent you an email. Click the link inside to verify your account.</p>
-    <p><a href="/login">Back to Login</a></p>
+<div class="wrap">
+  <div class="form-card center">
+
+    <h2>Check your email</h2>
+    <p class="muted">
+      We sent you a confirmation link. Open it to verify your address
+      and set your password.
+    </p>
+    <p class="muted">Nothing there? Look in your spam folder.</p>
+
+    <div class="form-foot">
+      <a href="/login">Back to log in</a>
+    </div>
+
+  </div>
 </div>
 {% endblock %}
