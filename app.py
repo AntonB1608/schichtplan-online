@@ -79,7 +79,7 @@ EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
 
 
 
-@app.route("/", methods=["POST", "GET"])
+@app.route("/register", methods=["POST", "GET"])
 def register():
 
     if request.method == "POST":
@@ -246,7 +246,7 @@ def show_profile():
     if not request.method == "POST":
 
         return render_template("profile.html")
-    
+
     user_id = session["user_id"]
     email_time = request.form["email_time"]
     city = request.form["city"]
@@ -401,7 +401,9 @@ def unsubscribe():
         db.session.commit()
         return render_template("unsubscribe.html", error_message="Wrong username or password", username=username)
   
-       
+@app.route("/", methods=["GET"])   
+def homepage():
+    return render_template("homepage.html") 
 def get_date():
     user_name = request.form["name"]
     today = datetime.today()
