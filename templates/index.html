@@ -1,37 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Add Shift – Shift Planner{% endblock %}
+ 
+{% block title %}Add shift — Shiftmates{% endblock %}
+ 
 {% block content %}
-<div class="container">
-    <h1>Add Shift</h1>
+<div class="wrap">
+  <div class="form-card">
+ 
+    <h2>Add a shift</h2>
+    <p class="muted">Pick a date, or mark the day as time off.</p>
+ 
+    {% if error_message %}
+      <div class="alert alert-error">{{ error_message }}</div>
+    {% endif %}
+    {% if good_message %}
+      <div class="alert alert-success">{{ good_message }}</div>
+    {% endif %}
+ 
     <form method="POST" action="/index">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="Felder">
-            <div class="Eintrag">
-                <label>Date</label>
-                <input type="date" name="datum">
-            </div>
-            <div class="Eintrag">
-                <label>Shift Start</label>
-                <input type="time" name="zeit_anfang">
-            </div>
-            <div class="Eintrag">
-                <label>Shift End</label>
-                <input type="time" name="zeit_ende">
-            </div>
-            <div class="Eintrag">
-                <label>Day Off</label>
-                <input type="checkbox" name="frei">
-            </div>
-            <div class="Eintragen">
-                <button type="submit" class="button">Save Shift</button>
-            </div>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+ 
+      <div class="field">
+        <label for="datum">Date</label>
+        <input type="date" id="datum" name="datum" required>
+      </div>
+ 
+      <div class="field-inline">
+        <input type="checkbox" id="frei" name="frei" value="1">
+        <label for="frei">Day off — no shift on this date</label>
+      </div>
+ 
+      <div class="field-row" id="times">
+        <div class="field">
+          <label for="zeit_anfang">Starts</label>
+          <input type="time" id="zeit_anfang" name="zeit_anfang" required>
         </div>
-        {% if error_message %}
-        <p class="error">{{ error_message|e }}</p>
-        {% elif good_message %}
-        <p class="good">{{good_message|e }}</p>
-        {% endif %}
+        <div class="field">
+          <label for="zeit_ende">Ends</label>
+          <input type="time" id="zeit_ende" name="zeit_ende" required>
+        </div>
+      </div>
+ 
+      <button type="submit" class="btn btn-block">Save shift</button>
     </form>
-    <p><a href="/shifts">View your shifts here</a></p>
+ 
+    <div class="form-foot">
+      <a href="/shifts">See all your shifts</a>
+    </div>
+ 
+  </div>
 </div>
+{% endblock %}
+ 
+{% block scripts %}
+<script>
+  // Marks the day as off: the time fields are cleared and locked,
+  // but still submitted (empty) so the server keeps receiving them.
+  (function () {
+    var free   = document.getElementById('frei');
+    var block  = document.getElementById('times');
+    var inputs = block.querySelectorAll('input');
+ 
+    function sync() {
+      inputs.forEach(function (el) {
+        el.readOnly = free.checked;
+        el.required = !free.checked;
+        if (free.checked) { el.value = ''; }
+      });
+      block.style.opacity = free.checked ? '.45' : '1';
+    }
+ 
+    free.addEventListener('change', sync);
+    sync();
+  })();
+</script>
 {% endblock %}

@@ -167,7 +167,7 @@ def registeruser():
     sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
     password = request.form["password"]
     password_again = request.form["password_again"]
-    if len(password) < 15:
+    if len(password) < 8:
         return render_template("registeruser.html", error_message="Password too short (min. 15 characters)")
     if not any(z in password for z in sonderzeichen):
         return render_template("registeruser.html", error_message="Password must contain a special character")
@@ -238,15 +238,15 @@ def logout():
 
 @app.route("/profile", methods=["POST", "GET"])
 def show_profile():
-
+    if not request.method == "POST":
+        
+        user = Register.query.filter_by(user_id=session["user_id"]).first()
+        return render_template("profile.html", user=user)
+    
     if "user_id" not in session:
 
         return redirect("/login")
     
-    if not request.method == "POST":
-
-        return render_template("profile.html")
-
     user_id = session["user_id"]
     email_time = request.form["email_time"]
     city = request.form["city"]
@@ -321,12 +321,12 @@ def reset_token(token):
         sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
         password = request.form["password"]
         password_again = request.form["password_again"]
-        if len(password) < 15:
-            return render_template("newpassword.html", error_message="Password too short (min. 15 characters)")
+        if len(password) < 8:
+            return render_template("newpassword.html", token=token, error_message="Password too short (min. 8 characters)")
         if not any(z in password for z in sonderzeichen):
-            return render_template("newpassword.html", error_message="Password must contain a special character")
+            return render_template("newpassword.html", token=token, error_message="Password too short (min. 15 characters)")
         if password != password_again:
-            return render_template("newpassword.html", error_message="Passwords don't match")
+            return render_template("newpassword.html", token=token, error_message="Passwords don't match")
         user = Register.query.filter_by(user_id=verification.user_id).first()
         if not user:
             return redirect("/register")

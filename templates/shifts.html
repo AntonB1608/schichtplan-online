@@ -1,24 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Show shifts – Shift Planner{% endblock %}
+ 
+{% block title %}Your shifts — Shiftmates{% endblock %}
+ 
 {% block content %}
-<div class="container">
-    <h1>Your shifts</h1>
-    <div class="Felder">
-        {% for shift in shifts %}
-            <div class="shift">
-                {{ shift.date }} {{ shift.time_begin }} - {{ shift.time_end }}
-                <form method="POST" action="/delete/{{ shift.date_id }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="button button-delete">Delete</button>
+<div class="wrap" style="padding-top:56px;padding-bottom:80px;">
+ 
+  <h2>Your shifts</h2>
+  <p class="muted">Everything you have saved so far.</p>
+ 
+  {% if shifts %}
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Starts</th>
+            <th>Ends</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for shift in shifts %}
+            <tr>
+              <td>{{ shift.date }}</td>
+              {% if shift.free %}
+                <td colspan="2" class="muted">Day off</td>
+              {% else %}
+                <td>{{ shift.time_begin }}</td>
+                <td>{{ shift.time_end }}</td>
+              {% endif %}
+              <td class="is-right">
+                <form method="POST" action="/delete/{{ shift.date_id }}"
+                      style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
-            </div>
-        {% endfor %}
-     </div>  
-</div>        
-{% if error_message %}
-    <p class="error">{{ error_message|e }}</p>
-{% elif good_message %}
-    <p class="good">{{good_message|e }}</p>
-{% endif %}
-
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+ 
+    <a href="/index" class="btn">Add another shift</a>
+ 
+  {% else %}
+    <div class="empty-state">
+      <h3>No shifts saved yet</h3>
+      <p>Add your first one and the reminder arrives the evening before.</p>
+      <a href="/index" class="btn" style="margin-top:12px;">Add a shift</a>
+    </div>
+  {% endif %}
+ 
+</div>
 {% endblock %}
+ 

@@ -1,28 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Set Password – Shift Planner{% endblock %}
+
+{% block title %}Set your password — Shiftmates{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Shift Planner</h1>
-    <form method="POST" action="/registeruser">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="Felder">
-            <div class="Eintrag">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="Min. 15 characters + special character">
-            </div>
-            <div class="Eintrag">
-                <label>Repeat Password</label>
-                <input type="password" name="password_again" placeholder="Repeat your password">
-            </div>
-            <div class="Eintragen">
-                <button type="submit" class="button">Save</button>
-            </div>
-        </div>
-        {% if error_message %}
-        <p class="error">{{ error_message|e }}</p>
-        {% elif good_message %}
-        <p class="good">{{good_message|e }}</p>
-        {% endif %}
-    </form>q
+<div class="wrap">
+  <div class="form-card">
+
+    <h2>Set your password</h2>
+    <p class="muted">Min. 15 characters, including one special character.</p>
+
+    {% if error_message %}
+      <div class="alert alert-error">{{ error_message }}</div>
+    {% endif %}
+
+    <form method="POST" action="{% if token %}/reset/{{ token }}{% else %}/registeruser{% endif %}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               autocomplete="new-password" required autofocus>
+      </div>
+
+      <div class="field">
+        <label for="password_again">Repeat password</label>
+        <input type="password" id="password_again" name="password_again"
+               autocomplete="new-password" required>
+      </div>
+
+      <button type="submit" class="btn btn-block">Save password</button>
+    </form>
+
+  </div>
 </div>
 {% endblock %}
