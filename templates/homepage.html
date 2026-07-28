@@ -1,26 +1,194 @@
+Homepage · HTML
 {% extends "base.html" %}
-{% block title %}Register – Shift Planner{% endblock %}
+ 
+{% block title %}Shiftmates — Know your shift before the day starts{% endblock %}
+ 
 {% block content %}
-
-<div class="container">
-    <form method="POST" action="/">
-        <h1>Shiftmate</h1>
-        <h2>Wisse morgens, wann du morgen arbeitest.<br>Kostenlos. Kein Abo. Jederzeit abbestellbar.</h2>
-        <div class="Felder">
-            <div class="Eintrag"></div>
-                <a href="/register" class="button"> Create a free account: Register</a>
-            </div>
-            <div class="Eintragen">
-                <a href="/login" class="button"> Already have an account? Login</a>
+ 
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Shiftmates</p>
+    <h1>Know your shift<br>before the day starts.</h1>
+    <p class="lede">
+      Save your shifts once. Get an email the evening before and again in the
+      morning — with the weather for your city.
+    </p>
+    <div class="btn-row">
+      <a href="/register" class="btn">Create an account</a>
+      <a href="#evening" class="btn btn-ghost">See how it works</a>
+    </div>
+  </div>
+ 
+  <div class="wrap hero-mail reveal">
+    <article class="mail">
+      <div class="mail-bar">
+        <span class="mail-dot" aria-hidden="true">S</span>
+        <span class="mail-from">Shiftmates</span>
+        <span class="mail-time">22:00</span>
+      </div>
+      <div class="mail-body">
+        <p class="mail-subject">Reminder for tomorrow</p>
+        <p class="mail-line">Good evening Marc,</p>
+        <p class="mail-line mail-line-strong">You work tomorrow from 06:00 to 14:30.</p>
+        <div class="mail-weather">
+          <span>Light drizzle expected tomorrow.</span>
+          <span class="mail-temp">7&deg;C</span>
         </div>
-        <p> 
-Shiftmates schickt dir jeden Abend eine Mail mit deiner Schicht für den nächsten Tag — plus dem Wetter. Du trägst deine Schichten einmal ein, den Rest macht das Tool.
-
-So funktioniert's
-Registrieren und Mail-Adresse bestätigen. Schichten eintragen. Jeden Abend die Erinnerung bekommen.
-
-</p>
-    </form>
-    <p></p>
-</div>
+      </div>
+    </article>
+  </div>
+</header>
+ 
+<section class="section section-night" id="evening">
+  <div class="wrap split">
+    <div class="split-copy reveal">
+      <p class="stamp">22:00</p>
+      <p class="stamp-label">The night before</p>
+      <h2>Set the alarm with a reason.</h2>
+      <p class="body-copy">
+        The evening email tells you when your shift starts, when it ends, and what
+        the sky will be doing. You decide when it arrives — one time, every day,
+        in your own timezone.
+      </p>
+      <p class="body-copy">Days off get their own email. So you never wonder.</p>
+    </div>
+    <div class="reveal">
+      <article class="mail mail-night">
+        <div class="mail-bar">
+          <span class="mail-dot" aria-hidden="true">S</span>
+          <span class="mail-from">Shiftmates</span>
+          <span class="mail-time">22:00</span>
+        </div>
+        <div class="mail-body">
+          <p class="mail-subject">Reminder for tomorrow</p>
+          <p class="mail-line">Good evening Marc,</p>
+          <p class="mail-line mail-line-strong">You are free tomorrow.</p>
+          <div class="mail-weather">
+            <span>Clear skies tomorrow.</span>
+            <span class="mail-temp">11&deg;C</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+ 
+<section class="section" id="morning">
+  <div class="wrap split">
+    <div class="reveal">
+      <article class="mail">
+        <div class="mail-bar">
+          <span class="mail-dot" aria-hidden="true">S</span>
+          <span class="mail-from">Shiftmates</span>
+          <span class="mail-time">05:00</span>
+        </div>
+        <div class="mail-body">
+          <p class="mail-subject">Reminder for today</p>
+          <p class="mail-line">Good morning Marc,</p>
+          <p class="mail-line mail-line-strong">You work today from 06:00 to 14:30.</p>
+          <div class="mail-weather">
+            <span>Light drizzle today.</span>
+            <span class="mail-temp">7&deg;C</span>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="split-copy reveal">
+      <p class="stamp">05:00</p>
+      <p class="stamp-label">The morning of</p>
+      <h2>One more look,<br>before the door.</h2>
+      <p class="body-copy">
+        The same shift, sent again on the day itself. Jacket or no jacket,
+        umbrella or no umbrella — decided before you put your shoes on.
+      </p>
+      <a href="/register" class="link-more">Create an account</a>
+    </div>
+  </div>
+</section>
+ 
+<section class="section section-alt" id="features">
+  <div class="wrap-wide">
+    <div class="center reveal" style="margin-bottom:48px;">
+      <h2>Everything it does.</h2>
+      <p class="lede" style="margin-bottom:0;">No app to install. No calendar to sync. Just email.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card reveal">
+        <h3>Your shifts</h3>
+        <p>Add a date with a start and end time, or mark it as a day off. Change
+           your mind and delete it in one click.</p>
+      </div>
+      <div class="card reveal">
+        <h3>Your city</h3>
+        <p>Pick the city you commute to. The forecast in every email comes from
+           there, not from wherever the server happens to be.</p>
+      </div>
+      <div class="card reveal">
+        <h3>Your time</h3>
+        <p>Choose the hour your reminders arrive. Night shift, early shift,
+           rotating — the schedule bends to yours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<section class="section section-tight">
+  <div class="wrap">
+    <h3 class="reveal" style="margin-bottom:22px;">Your account, handled properly.</h3>
+    <dl class="trust reveal">
+      <div>
+        <dt>Verified email</dt>
+        <dd>Nobody signs you up but you.</dd>
+      </div>
+      <div>
+        <dt>Hashed passwords</dt>
+        <dd>Stored with bcrypt. Never in plain text.</dd>
+      </div>
+      <div>
+        <dt>Locked after 5 tries</dt>
+        <dd>Wrong password five times and the account rests 15 minutes.</dd>
+      </div>
+      <div>
+        <dt>Leave anytime</dt>
+        <dd>Turn the reminders off from your account.</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+ 
+<section class="section section-night center">
+  <div class="wrap reveal">
+    <h2>Add your first shift.</h2>
+    <p class="body-copy" style="max-width:520px;margin:0 auto 30px;">
+      It takes about a minute. The first reminder arrives tonight.
+    </p>
+    <div class="btn-row">
+      <a href="/register" class="btn btn-light">Create an account</a>
+      <a href="/login" class="btn btn-ghost" style="color:#fff;border-color:#48484a;">Log in</a>
+    </div>
+  </div>
+</section>
+ 
+{% endblock %}
+ 
+{% block scripts %}
+<script>
+  (function () {
+    var items = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window) ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      items.forEach(function (el) { el.classList.add('is-in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    items.forEach(function (el) { io.observe(el); });
+  })();
+</script>
 {% endblock %}
