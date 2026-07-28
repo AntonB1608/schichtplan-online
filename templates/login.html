@@ -1,31 +1,41 @@
 {% extends "base.html" %}
-{% block title %}Login – Shift Planner{% endblock %}
+ 
+{% block title %}Log in — Shiftmates{% endblock %}
+ 
 {% block content %}
-<div class="container">
-    <h1>Login</h1>
+<div class="wrap">
+  <div class="form-card">
+ 
+    <h2>Log in</h2>
+    <p class="muted">Your shifts are waiting.</p>
+ 
+    {% if error_message %}
+      <div class="alert alert-error">{{ error_message }}</div>
+    {% endif %}
+ 
     <form method="POST" action="/login">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="Felder">
-            <div class="Eintrag">
-                <label>Username</label>
-                <input type="text" name="username" placeholder="Enter your username" value="{{ username|default('')|e }}">
-            </div>
-            <div class="Eintrag">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="Enter your password">
-            </div>
-            <div class="Eintragen">
-                <button type="submit" class="button">Login</button>
-            </div>
-            <p><a href="/reset">Forgot Password? Click here.</a></p>
-        </div>
-        {% if error_message %}
-        <p class="error">{{ error_message|e }}</p>
-        {% elif good_message %}
-        <p class="good">{{good_message|e }}</p>
-        {% endif %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+ 
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"
+               value="{{ username or '' }}" autocomplete="username" required autofocus>
+      </div>
+ 
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               autocomplete="current-password" required>
+      </div>
+ 
+      <button type="submit" class="btn btn-block">Log in</button>
     </form>
-    <p><a href="/">No account yet? Register</a></p>
-
+ 
+    <div class="form-foot">
+      <a href="/reset">Forgot your password?</a><br>
+      No account yet? <a href="/register">Sign up</a>
+    </div>
+ 
+  </div>
 </div>
 {% endblock %}

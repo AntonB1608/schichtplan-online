@@ -49,7 +49,8 @@ class Register(db.Model):
     user_locked_until = db.Column(db.DateTime, nullable=True)
     user_trys = db.Column(db.Integer, default=0)
     user_city = db.Column(db.String)
-    email_time = db.Column(db.String)
+    email_time_evening = db.Column(db.String)
+    email_time_morning = db.Column(db.String)
     user_registered = db.Column(db.Boolean, default=False)
     first_mail_send = db.Column(db.String)
     second_mail_send = db.Column(db.String)
@@ -239,7 +240,7 @@ def logout():
 @app.route("/profile", methods=["POST", "GET"])
 def show_profile():
     if not request.method == "POST":
-        
+
         user = Register.query.filter_by(user_id=session["user_id"]).first()
         return render_template("profile.html", user=user)
     
@@ -404,11 +405,9 @@ def unsubscribe():
 @app.route("/", methods=["GET"])   
 def homepage():
     return render_template("homepage.html") 
-def get_date():
-    user_name = request.form["name"]
-    today = datetime.today()
-    tomorrow = today + timedelta(days=1)
-    return tomorrow.strftime("%d.%m.%Y"), today.strftime("%d.%m.%Y")
+def get_date(now_local):
+    tomorrow = now_local + timedelta(days=1)
+    return tomorrow.strftime("%d.%m.%Y"), now_local.strftime("%d.%m.%Y")
 
 def get_shift_for_tomorrow(morgen_str, user_id):
     shift = Date.query.filter_by(user_id=user_id, date=morgen_str).first()
@@ -498,44 +497,59 @@ def build_second_mail(head_line, main_line, end_line, weather_line, temp_line, w
         """
 
 def send_daily_emails():
-    now = datetime.now(timezone.utc)
-    for user in Register.query.all():
-                
-        if not user.user_registered:
+    now_utc = datetime.now(timezone.utc)
 
-            continue
+    users = Register.query.filter(
+        Register.user_registered.is_(True),
+        Register.email_time.isnot(None),
+        Register.user_time_zone.isnot(None),
+    ).all()
 
-        if not user.email_time:
+    for user in users:
+        now_local = now_utc + timedelta(seconds=user.user_time_zone)
+        tomorrow_str, today_str = get_date(now_local)
 
-            continue
+        evening_time = datetime.strptime(user.email_time, "%H:%M").time()
+        morning_time = datetime.strptime(user.email_time_morning or "05:00", "%H:%M").time()
 
-        email_time = datetime.strptime(user.email_time, "%H:%M").time()
-        
-        
-        right_now = now + timedelta(seconds=user.user_time_zone)
-        right_now = right_now.time()
-        if right_now < email_time: 
+        if now_local.time() >= evening_time and user.first_mail_send != today_str:
+            if send_reminder(user, tomorrow_str, "evening"):
+                user.first_mail_send = today_str
+                db.session.commit()
 
-            continue
-        tomorrow_str, today_str = get_date()
-        wake_time = get_shift_for_tomorrow(tomorrow_str, user.user_id)
-        weather_text, temp, time_zone = find_weather_data(user.user_id)
-        head_line, main_line, end_line, weather_line, temp_line, work_line = mail_line(temp, user.user_name, tomorrow_str, weather_text, wake_time)
-        if user.first_mail_send != today_str:
-            html = build_first_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
-            subject = "Reminder for tomorrow"
-            to = user.user_mail
-            send_email(to, subject, html)
-            user.first_mail_send = today_str
-            db.session.commit()
+   
+        if now_local.time() >= morning_time and user.second_mail_send != today_str:
+            if send_reminder(user, today_str, "morning"):
+                user.second_mail_send = today_str
+                db.session.commit()
 
-        if user.second_mail_send != today_str:
-            html = build_second_mail(head_line, main_line, end_line, weather_line, temp_line, work_line)
-            subject = "Reminder for today"
-            to = user.user_mail
-            send_email(to, subject, html)
-            user.second_mail_send = today_str
-            db.session.commit()
+
+def send_reminder(user, date_str, kind):
+    shift = Date.query.filter_by(user_id=user.user_id, date=date_str).first()
+    day = "tomorrow" if kind == "evening" else "today"
+
+    if not shift:
+        line = f"No shift saved for {day}."
+    elif shift.free:
+        line = f"You are free {day}."
+    else:
+        line = f"You work {day} from {shift.time_begin} to {shift.time_end}."
+
+    weather_text, temp, _ = find_weather_data(user.user_id)
+    weather_text = weather_text.replace("tomorrow", day)
+
+    greeting = "Good evening" if kind == "evening" else "Good morning"
+    subject = f"Reminder for {day}"
+
+    html = f"""<html><body style="font-family:-apple-system,Helvetica Neue,Arial,sans-serif;">
+      <h1>Reminder for {day} ({date_str})</h1>
+      <p>{greeting} {user.user_name},</p>
+      <p>{line}</p>
+      {f"<p>{weather_text}</p>" if weather_text else ""}
+      {f"<p>The temperature will be {temp}.</p>" if temp else ""}
+    </body></html>"""
+
+    return send_email(user.user_mail, subject, html)
 
 @app.route("/shifts", methods=["GET", "POST"])
 def show_shift():
@@ -567,18 +581,27 @@ def scheduled_job():
     with app.app_context():
 
         send_daily_emails()
+
 def send_email(to, subject, html):
-    resp = requests.post(
-        "https://api.resend.com/emails",
-        headers= {"Authorization": f"Bearer {os.getenv('resend_api_key')}"},
-        json={
-            "from": "Shiftmates <noreply@send.shiftmates.org>",
-            "to": [to],
-            "subject": subject,
-            "html": html,
-        },
-    )
-    print(resp.status_code, resp.json())   
+    try:
+        resp = requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {os.getenv('resend_api_key')}"},
+            json={
+                "from": "Shiftmates <noreply@send.shiftmates.org>",
+                "to": [to],
+                "subject": subject,
+                "html": html,
+            },
+            timeout=10,
+        )
+        if resp.status_code >= 400:
+            print(f"Resend failed {resp.status_code}: {resp.text}")
+            return False
+        return True
+    except requests.RequestException as e:
+        print(f"Resend request failed: {e}")
+        return False  
 if __name__ == "__main__":
 
     app.run(host='0.0.0.0', port=5555, debug=debug_mode)
