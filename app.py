@@ -8,7 +8,7 @@ import bcrypt
 import emoji
 import requests
 from dotenv import load_dotenv
-from flask import Flask, request, render_template, session, redirect
+from flask import Flask, request, render_template, session, redirect, flash
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -100,23 +100,22 @@ def register():
         email = request.form["email"]
  
         if len(username) > 20:
- 
-            return render_template("register.html", error_message="Username too long")
- 
+            flash("Username too long (max. 20 characters).", "error")
+            return render_template("register.html", user_name=username)
+
         if not EMAIL_REGEX.match(email):
- 
-            return render_template("register.html", error_message="Invalid email address")
- 
+            flash("Invalid email address.", "error")
+            return render_template("register.html", user_name=username)
+
         existing_name = Register.query.filter_by(user_name=username).first()
         if existing_name and existing_name.user_registered:
- 
-            return render_template("register.html", error_message="Username already exists")
- 
+            flash("Username already exists.", "error")
+            return render_template("register.html")
+
         existing_mail = Register.query.filter_by(user_mail=email).first()
         if existing_mail and existing_mail.user_registered:
- 
-            return render_template("register.html", error_message="Email already exists", user_name=username)
- 
+            flash("Email already exists.", "error")
+            return render_template("register.html", user_name=username)
         for stale in {existing_name, existing_mail}:
  
             if stale is not None:
@@ -154,11 +153,13 @@ def register():
 def verify_user(token):
     verification = Verification.query.filter_by(user_token=token).first()
     if not verification:
-        return render_template("register.html", error_message="Invalid or expired token")
- 
+        flash("This link is invalid or has already been used.", "error")
+        return redirect("/register")
+
     real_user = Register.query.filter_by(user_id=verification.user_id).first()
     if not real_user:
-        return render_template("register.html", error_message="User not found")
+        flash("Account not found.", "error")
+        return redirect("/register")
  
     real_user.user_verification = True
     db.session.delete(verification)
@@ -181,12 +182,16 @@ def registeruser():
     password_again = request.form["password_again"]
  
     if len(password) < 8:
-        return render_template("registeruser.html", error_message="Password too short (min. 15 characters)")
+        flash("Password too short (min. 8 characters).", "error")
+        return render_template("registeruser.html")
+
     if not any(z in password for z in sonderzeichen):
-        return render_template("registeruser.html", error_message="Password must contain a special character")
+        flash("Password must contain a special character.", "error")
+        return render_template("registeruser.html")
+
     if password != password_again:
-        return render_template("registeruser.html", error_message="Passwords don't match")
- 
+        flash("Passwords don't match.", "error")
+        return render_template("registeruser.html")
     user = Register.query.filter_by(user_id=session["user_id"]).first()
     if not user:
         return redirect("/")
@@ -195,6 +200,7 @@ def registeruser():
     user.user_password_hash = user.user_password_hash.decode("utf-8")
     user.user_registered = True
     db.session.commit()
+    flash("Account created. You can log in now.", "success")
     return redirect("/login")
  
  
@@ -212,18 +218,24 @@ def login():
  
     user = Register.query.filter_by(user_name=username).first()
     if not user:
-        return render_template("login.html", error_message="Wrong username or password")
+
+        flash("Wrong username or password", "error")
+        return render_template("login.html")
  
     if user.user_locked_until and now < user.user_locked_until:
-        return render_template("login.html", error_message=f"Account locked until {user.user_locked_until.strftime('%H:%M:%S')}")
- 
+
+        flash(f"Account locked until {user.user_locked_until.strftime('%H:%M:%S')}", "error")
+        return render_template("login.html")
+    
     if user.user_locked_until and now >= user.user_locked_until:
         user.user_trys = 0
         user.user_locked_until = None
         db.session.commit()
  
     if not user.user_password_hash:
-        return render_template("login.html", error_message="Wrong username or password")
+
+        flash("Wrong username or password.", "error")
+        return render_template("login.html")
  
     if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash.encode("utf-8")):
         user.user_trys = 0
@@ -237,12 +249,16 @@ def login():
  
     user.user_trys = (user.user_trys or 0) + 1
     if user.user_trys >= 5:
+
         user.user_locked_until = datetime.today() + timedelta(minutes=15)
         db.session.commit()
-        return render_template("login.html", error_message="Too many failed attempts. Account locked for 15 minutes.")
+        flash("Too many failed attempts. Account locked for 15 minutes.", "error")
+        return render_template("login.html")
  
     db.session.commit()
-    return render_template("login.html", error_message="Wrong username or password", username=username)
+    
+    flash("Wrong username or password", "error")
+    return render_template("login.html")
  
  
 @app.route("/logout")
@@ -279,20 +295,30 @@ def reset_password():
  
 @app.route('/reset/<token>', methods=["GET", "POST"])
 def reset_token(token):
+
     if request.method == "GET":
+
         verification = Verification.query.filter_by(user_token=token).first()
+
         if not verification:
-            return render_template("register.html", error_message="Invalid token")
+
+            flash("Invalid token.", "error")
+            return render_template("register.html")
  
         real_user = Register.query.filter_by(user_id=verification.user_id).first()
+
         if not real_user:
-            return render_template("register.html", error_message="User not found")
+
+            flash("User not found.", "error")
+            return render_template("register.html")
  
         token_time = verification.user_token_date.replace(tzinfo=timezone.utc)
         date_expired = token_time + timedelta(hours=1)
  
         if datetime.now(timezone.utc) > date_expired:
-            return render_template("register.html", error_message="Expired token")
+
+            flash("Expired token", "error")
+            return render_template("register.html")
  
         return render_template("registeruser.html", token=token)
     else:
@@ -305,11 +331,18 @@ def reset_token(token):
         password_again = request.form["password_again"]
  
         if len(password) < 8:
-            return render_template("newpassword.html", token=token, error_message="Password too short (min. 8 characters)")
+            flash("Password too short (min. 8 characters)", "error")
+            return render_template("newpassword.html", token=token)
+
         if not any(z in password for z in sonderzeichen):
-            return render_template("newpassword.html", token=token, error_message="Password doesn't contain special caracter")
+
+            flash("Password doesn't contain special character", "error")
+            return render_template("newpassword.html", token=token)
+        
         if password != password_again:
-            return render_template("newpassword.html", token=token, error_message="Passwords don't match")
+
+            flash("Passwords don't match", "error")
+            return render_template("newpassword.html", token=token)
  
         user = Register.query.filter_by(user_id=verification.user_id).first()
         if not user:
@@ -340,26 +373,28 @@ def show_profile():
    
  
     user_id = session["user_id"]
+    user = Register.query.filter_by(user_id=user_id).first()
     email_time_morning = request.form["email_time_morning"]
     email_time_evening = request.form["email_time_evening"]
     city = request.form["city"]
  
     if not email_time_morning or not email_time_evening:
 
-        return render_template("profile.html", error_message="No email time set")
+        flash("No email time set", "error")
+        return render_template("profile.html", user=user)
     
     if not city:
-
-        return render_template("profile.html", error_message="No city set")
+        flash("No city set.", "error")
+        return render_template("profile.html")
  
     key = os.getenv("openweather_key")
     url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(city)}&appid={key}&units=metric&lang=de"
     response = requests.get(url, timeout=10).json()
     if str(response.get("cod")) == "404":
-
-        return render_template("profile.html", error_message="City not found")
+        flash("City not found.", "error") 
+        return render_template("profile.html", user=user)
     
-    user = Register.query.filter_by(user_id=user_id).first()
+    
     user.user_city = city
     user.user_time_zone = response["timezone"]
     user.email_time_morning = email_time_morning
@@ -370,43 +405,20 @@ def show_profile():
  
 @app.route("/unsubscribe", methods=["GET", "POST"])
 def unsubscribe():
+    if "user_id" not in session:
+
+        return redirect("/login")
+    if request.method == "GET":
+        return render_template("unsubscribe.html")
     if request.method == "POST":
-        now = datetime.today()
-        username = request.form["username"]
-        password = request.form["password"]
- 
-        user = Register.query.filter_by(user_name=username).first()
-        if not user:
-            return render_template("unsubscribe.html", error_message="Wrong username or password")
- 
-        if user.user_locked_until and now < user.user_locked_until:
-            return render_template("unsubscribe.html", error_message=f"Account locked until {user.user_locked_until.strftime('%H:%M:%S')}")
- 
-        if user.user_locked_until and now >= user.user_locked_until:
-            user.user_trys = 0
-            user.user_locked_until = None
-            db.session.commit()
- 
-        if not user.user_password_hash:
-            return render_template("unsubscribe.html", error_message="Wrong username or password")
- 
-        if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash.encode("utf-8")):
-            user.user_trys = 0
-            user.user_locked_until = None
-            user.email_time.delete()
-            session["user_id"] = user.user_id
-            db.session.commit()
-            return render_template("base.html", error_message="Unsubscribed.")
- 
-        user.user_trys = (user.user_trys or 0) + 1
-        if user.user_trys >= 5:
-            user.user_locked_until = datetime.today() + timedelta(minutes=15)
-            db.session.commit()
-            return render_template("unsubscribe.html", error_message="Too many failed attempts. Account locked for 15 minutes.")
- 
+        user = Register.query.filter_by(user_id=session["user_id"]).first()
+        user.email_time_morning = None
+        user.email_time_evening = None
         db.session.commit()
-        return render_template("unsubscribe.html", error_message="Wrong username or password", username=username)
- 
+        flash("Reminders turned off.", "success")
+        return redirect("/profile")
+    
+        
  
 # ROUTES - SHIFTS
  
@@ -416,6 +428,7 @@ def schicht_eintragen():
         return redirect("/login")
  
     user_id = session["user_id"]
+
     if request.method == "POST":
         datum = request.form["datum"]
         zeit_anfang = request.form["zeit_anfang"]
@@ -429,7 +442,8 @@ def schicht_eintragen():
             db.session.add(Date(user_id=user_id, date=datum_formatiert, time_begin=zeit_anfang, time_end=zeit_ende, free=False))
  
         db.session.commit()
-        return render_template("index.html", good_message="Shift saved successfully")
+        flash("Shift saved successfully", "success")
+        return redirect("/index")
     else:
         return render_template("index.html")
  
@@ -449,14 +463,16 @@ def show_shift():
  
 @app.route("/delete/<int:date_id>", methods=["POST"])
 def delete_shift(date_id):
- 
+    if "user_id" not in session:
+            return redirect("/login")
+    
     shift = Date.query.filter_by(date_id=date_id, user_id=session["user_id"]).first()
- 
     if shift:
- 
         db.session.delete(shift)
         db.session.commit()
- 
+        flash("Shift deleted.", "success")
+        return redirect("/shifts")
+
     return redirect("/shifts")
  
  
@@ -585,8 +601,8 @@ def send_daily_emails():
         now_local = now_utc + timedelta(seconds=user.user_time_zone)
         tomorrow_str, today_str = get_date(now_local)
  
-        evening_time = datetime.strptime(user.email_time_morning, "%H:%M").time()
-        morning_time = datetime.strptime(user.email_time_evening or "05:00", "%H:%M").time()
+        evening_time = datetime.strptime(user.email_time_evening or "05:00", "%H:%M").time()
+        morning_time = datetime.strptime(user.email_time_morning, "%H:%M").time()
  
         if now_local.time() >= evening_time and user.first_mail_send != today_str:
             if send_reminder(user, tomorrow_str, "evening"):
