@@ -25,13 +25,19 @@
                placeholder="Ludwigshafen"
                value="{{ user.user_city or '' if user else '' }}" required autofocus>
       </div>
-
       <div class="field">
-        <label for="email_time">Reminder time</label>
-        <input type="time" id="email_time" name="email_time"
-               value="{{ user.email_time or '' if user else '' }}" required>
+        <label for="email_time_evening">Evening reminder — the night before your shift</label>
+        <input type="time" id="email_time_evening" name="email_time_evening"
+                placeholder="Reminder for the next day"
+                value="{{ user.email_time_evening or '' if user else '' }}" required>
       </div>
-
+      <div class="field">
+        <label for="email_time_morning"> Morning reminder — on the day itself</label>
+        <input type="time" id="email_time_morning" name="email_time_morning"
+                placeholder="Reminder for the same day"
+                value="{{ user.email_time_morning or '' if user else '' }}" required>
+      </div>
+      
       <button type="submit" class="btn btn-block">Save profile</button>
     </form>
 
