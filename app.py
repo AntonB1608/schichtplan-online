@@ -601,15 +601,16 @@ def send_daily_emails():
         now_local = now_utc + timedelta(seconds=user.user_time_zone)
         tomorrow_str, today_str = get_date(now_local)
  
-        evening_time = datetime.strptime(user.email_time_evening or "05:00", "%H:%M").time()
+        evening_time = datetime.strptime(user.email_time_evening, "%H:%M").time()
         morning_time = datetime.strptime(user.email_time_morning, "%H:%M").time()
  
         if now_local.time() >= evening_time and user.first_mail_send != today_str:
             if send_reminder(user, tomorrow_str, "evening"):
+                
                 user.first_mail_send = today_str
                 db.session.commit()
  
-        if now_local.time() >= morning_time and user.second_mail_send != today_str:
+        if morning_time <= now_local.time() < evening_time and user.second_mail_send != today_str:
             if send_reminder(user, today_str, "morning"):
                 user.second_mail_send = today_str
                 db.session.commit()
