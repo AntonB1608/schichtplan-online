@@ -4,18 +4,32 @@
 
 {% block content %}
 <div class="wrap">
-  <div class="form-card center">
+  <div class="notice-card">
+
+    <div class="notice-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round" width="26" height="26">
+        <rect x="2" y="4" width="20" height="16" rx="3"/>
+        <path d="M2 7l10 6 10-6"/>
+      </svg>
+    </div>
 
     <h2>Check your email</h2>
-    <p class="muted">
-      We sent you a confirmation link. Open it to verify your address
-      and set your password.
+    <p class="notice-lead">
+      We sent a confirmation link to your inbox.
     </p>
-    <p class="muted">Nothing there? Look in your spam folder.</p>
 
-    <div class="form-foot">
-      <a href="/login">Back to log in</a>
-    </div>
+    <ol class="notice-steps">
+      <li>Open the email from Shiftmates</li>
+      <li>Click the confirmation button</li>
+      <li>Set your password and add your first shift</li>
+    </ol>
+
+    <p class="notice-hint">
+      Nothing there after a minute? Check your spam folder.
+    </p>
+
+    <a href="/login" class="btn btn-ghost">Back to log in</a>
 
   </div>
 </div>
