@@ -488,7 +488,15 @@ def delete_shift(date_id):
 
     return redirect("/shifts")
  
- 
+# ROUTES - INFORMATION
+
+@app.route("/impressum")
+def impressum():
+    return render_template("impressum.html")
+
+@app.route("/datenschutz")
+def datenschutz():
+    return render_template("datenschutz.html")
 
 # HELPERS - DATE & SHIFT
 
