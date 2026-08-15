@@ -1,13 +1,12 @@
 {% extends "base.html" %}
- 
+
 {% block title %}Shiftmates — Know your shift before the day starts{% endblock %}
- 
+
 {% block content %}
- 
+
 <header class="hero">
-  <div class="wrap">
-    <p class="eyebrow">Shiftmates</p>
-    <h1>Know your shift<br>before the day starts.</h1>
+  <div class="wrap center">
+    <h1>Know your shift before the day starts.</h1>
     <p class="lede">
       Save your shifts once. Get an email the evening before and again in the
       morning — with the weather for your city.
@@ -17,8 +16,8 @@
       <a href="#evening" class="btn btn-ghost">See how it works</a>
     </div>
   </div>
- 
-  <div class="wrap hero-mail reveal">
+
+  <div class="wrap hero-figure reveal">
     <article class="mail">
       <div class="mail-bar">
         <span class="mail-dot" aria-hidden="true">S</span>
@@ -37,8 +36,8 @@
     </article>
   </div>
 </header>
- 
-<section class="section section-night" id="evening">
+
+<section class="section surface-invert" id="evening">
   <div class="wrap split">
     <div class="split-copy reveal">
       <p class="stamp">22:00</p>
@@ -52,7 +51,7 @@
       <p class="body-copy">Days off get their own email. So you never wonder.</p>
     </div>
     <div class="reveal">
-      <article class="mail mail-night">
+      <article class="mail">
         <div class="mail-bar">
           <span class="mail-dot" aria-hidden="true">S</span>
           <span class="mail-from">Shiftmates</span>
@@ -71,7 +70,7 @@
     </div>
   </div>
 </section>
- 
+
 <section class="section" id="morning">
   <div class="wrap split">
     <div class="reveal">
@@ -95,21 +94,21 @@
     <div class="split-copy reveal">
       <p class="stamp">05:00</p>
       <p class="stamp-label">The morning of</p>
-      <h2>One more look,<br>before the door.</h2>
+      <h2>One more look, before the door.</h2>
       <p class="body-copy">
         The same shift, sent again on the day itself. Jacket or no jacket,
         umbrella or no umbrella — decided before you put your shoes on.
       </p>
-      <a href="/register" class="link-more">Create an account</a>
+      <p><a href="/register" class="link-more">Create an account</a></p>
     </div>
   </div>
 </section>
- 
-<section class="section section-alt" id="features">
-  <div class="wrap-wide">
-    <div class="center reveal" style="margin-bottom:48px;">
+
+<section class="section section-sunken" id="features">
+  <div class="wrap">
+    <div class="center section-head reveal">
       <h2>Everything it does.</h2>
-      <p class="lede" style="margin-bottom:0;">No app to install. No calendar to sync. Just email.</p>
+      <p class="lede">No app to install. No calendar to sync. Just email.</p>
     </div>
     <div class="grid-3">
       <div class="card reveal">
@@ -130,10 +129,10 @@
     </div>
   </div>
 </section>
- 
+
 <section class="section section-tight">
   <div class="wrap">
-    <h3 class="reveal" style="margin-bottom:22px;">Your account, handled properly.</h3>
+    <h2 class="section-head reveal">Your account, handled properly.</h2>
     <dl class="trust reveal">
       <div>
         <dt>Verified email</dt>
@@ -154,22 +153,22 @@
     </dl>
   </div>
 </section>
- 
-<section class="section section-night center">
-  <div class="wrap reveal">
+
+<section class="section surface-invert">
+  <div class="wrap center reveal">
     <h2>Add your first shift.</h2>
-    <p class="body-copy" style="max-width:520px;margin:0 auto 30px;">
+    <p class="body-copy">
       It takes about a minute. The first reminder arrives tonight.
     </p>
     <div class="btn-row">
-      <a href="/register" class="btn btn-light">Create an account</a>
-      <a href="/login" class="btn btn-ghost" style="color:#fff;border-color:#48484a;">Log in</a>
+      <a href="/register" class="btn">Create an account</a>
+      <a href="/login" class="btn btn-ghost">Log in</a>
     </div>
   </div>
 </section>
- 
+
 {% endblock %}
- 
+
 {% block scripts %}
 <script>
   (function () {
