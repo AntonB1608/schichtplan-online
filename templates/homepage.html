@@ -5,17 +5,24 @@
 
 {% block content %}
 
-<header class="hero wrap">
-  <h1>An email before every shift.</h1>
-  <p class="lede">
-    Save your shifts once. Shiftmates emails you the night before and again on
-    the morning of, with the weather for the city you commute to.
-  </p>
-  <div class="btn-row">
-    <a href="/register" class="btn">Create an account</a>
-    <a href="/login" class="btn btn-ghost">Log in</a>
+<header class="hero">
+  <div class="wrap hero-name">
+    <h1>An email before every shift.</h1>
   </div>
-  <p class="hero-note">Free. No app to install.</p>
+
+  <div class="wrap hero-foot">
+    <p class="lede">
+      Save your shifts once. Shiftmates emails you the night before and again on
+      the morning of, with the weather for the city you commute to.
+    </p>
+    <div class="hero-actions">
+      <div class="btn-row">
+        <a href="/register" class="btn">Create an account</a>
+        <a href="/login" class="btn btn-ghost">Log in</a>
+      </div>
+      <p class="hero-note">Free. No app to install.</p>
+    </div>
+  </div>
 </header>
 
 <section class="section wrap">
@@ -23,22 +30,24 @@
     <h2>How it works</h2>
   </div>
 
-  <ol class="steps">
-    <li>
-      <h3>Save a shift</h3>
-      <p>A date with a start and an end time. Or mark the day as time off.</p>
-    </li>
-    <li>
-      <h3>The night before, an email</h3>
-      <p>By default at 22:00, telling you what tomorrow looks like.</p>
-    </li>
-    <li>
-      <h3>On the day, one more</h3>
-      <p>By default at 05:00, so you know before you leave the house.</p>
-    </li>
-  </ol>
+  <div class="section-body">
+    <ol class="steps">
+      <li>
+        <h3>Save a shift</h3>
+        <p>A date with a start and an end time. Or mark the day as time off.</p>
+      </li>
+      <li>
+        <h3>The night before, an email</h3>
+        <p>By default at 22:00, telling you what tomorrow looks like.</p>
+      </li>
+      <li>
+        <h3>On the day, one more</h3>
+        <p>By default at 05:00, so you know before you leave the house.</p>
+      </li>
+    </ol>
 
-  <p class="hero-note">Both times are yours to change, in your own timezone.</p>
+    <p class="hero-note">Both times are yours to change, in your own timezone.</p>
+  </div>
 </section>
 
 <section class="section wrap">
@@ -46,25 +55,27 @@
     <h2>What arrives</h2>
   </div>
 
-  <article class="mail">
-    <div class="mail-bar">
-      <span class="mail-from">Shiftmates</span>
-      <span class="mail-time">22:00</span>
-    </div>
-    <div class="mail-body">
-      <p class="mail-subject">Reminder for tomorrow</p>
-      <p class="mail-line">Good evening Marc,</p>
-      <p class="mail-line mail-line-strong">You work tomorrow from 06:00 to 14:30.</p>
-      <div class="mail-weather">
-        <span>Light drizzle expected tomorrow.</span>
-        <span class="mail-temp">7&deg;C</span>
+  <div class="section-body">
+    <article class="mail">
+      <div class="mail-bar">
+        <span class="mail-from">Shiftmates</span>
+        <span class="mail-time">22:00</span>
       </div>
-    </div>
-  </article>
+      <div class="mail-body">
+        <p class="mail-subject">Reminder for tomorrow</p>
+        <p class="mail-line">Good evening Marc,</p>
+        <p class="mail-line mail-line-strong">You work tomorrow from 06:00 to 14:30.</p>
+        <div class="mail-weather">
+          <span>Light drizzle expected tomorrow.</span>
+          <span class="mail-temp">7&deg;C</span>
+        </div>
+      </div>
+    </article>
 
-  <p class="mail-caption">
-    Days off get their own email, so a missing message never means a missed shift.
-  </p>
+    <p class="mail-caption">
+      Days off get their own email, so a missing message never means a missed shift.
+    </p>
+  </div>
 </section>
 
 <section class="section wrap">
@@ -72,27 +83,29 @@
     <h2>Your account</h2>
   </div>
 
-  <dl class="trust">
-    <div>
-      <dt>Your email is verified</dt>
-      <dd>Nobody can sign you up but you.</dd>
-    </div>
-    <div>
-      <dt>Passwords are hashed with bcrypt</dt>
-      <dd>They are never stored in plain text.</dd>
-    </div>
-    <div>
-      <dt>Five wrong tries locks the account</dt>
-      <dd>It unlocks again after 15 minutes.</dd>
-    </div>
-    <div>
-      <dt>You can stop the emails at any time</dt>
-      <dd>One link, from your account or the footer of any reminder.</dd>
-    </div>
-  </dl>
+  <div class="section-body">
+    <dl class="trust">
+      <div>
+        <dt>Your email is verified</dt>
+        <dd>Nobody can sign you up but you.</dd>
+      </div>
+      <div>
+        <dt>Passwords are hashed with bcrypt</dt>
+        <dd>They are never stored in plain text.</dd>
+      </div>
+      <div>
+        <dt>Five wrong tries locks the account</dt>
+        <dd>It unlocks again after 15 minutes.</dd>
+      </div>
+      <div>
+        <dt>You can stop the emails at any time</dt>
+        <dd>One link, from your account or the footer of any reminder.</dd>
+      </div>
+    </dl>
 
-  <div class="btn-row">
-    <a href="/register" class="btn">Create an account</a>
+    <div class="btn-row">
+      <a href="/register" class="btn">Create an account</a>
+    </div>
   </div>
 </section>
 
