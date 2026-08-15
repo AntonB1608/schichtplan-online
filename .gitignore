@@ -11,3 +11,4 @@ venv/
 .venv/
 test.py
 Schichtplan_tool.code-workspace
+.claude/
