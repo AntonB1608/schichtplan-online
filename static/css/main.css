@@ -1,8 +1,9 @@
 /* Shiftmates
    ---------------------------------------------------------------------------
-   A utility, not a product launch. The page is set like a document: one column,
-   left aligned, separated by rules rather than by cards floating on shadows.
-   Headings are set in a serif so the page reads as written rather than assembled.
+   The page is set like a printed spread. Everything hangs off one left edge, and
+   only the line length changes: headings run wide, prose stops at 36rem. Rules
+   divide the page instead of cards floating on shadows, and every rule sits on
+   the same padding box so they all start and end on the same two verticals.
 
    1 Tokens · 2 Base · 3 Type · 4 Layout · 5 Nav · 6 Buttons · 7 Forms
    8 Tables · 9 Feedback · 10 Notice · 11 Home · 12 Footer · 13 Legal · 14 Print
@@ -19,13 +20,14 @@
           "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* Type — six steps, nothing outside this list */
+  /* Type — seven steps, nothing outside this list */
   --fs-1: 0.8125rem;
   --fs-2: 0.9375rem;
   --fs-3: 1.0625rem;
   --fs-4: 1.375rem;
   --fs-5: 1.875rem;
   --fs-6: clamp(2.25rem, 5vw, 3.25rem);
+  --fs-7: clamp(2.5rem, 6.5vw, 4.25rem);
 
   --lh-tight: 1.12;
   --lh-snug: 1.3;
@@ -45,7 +47,11 @@
   --r: 4px;
   --r-lg: 6px;
 
-  --wrap: 42rem;
+  /* One shell for every page so the nav, the headings and the footer share a
+     left edge. Content inside is capped separately — that is where the
+     hierarchy comes from, not from re-centring narrower boxes. */
+  --wrap: 58rem;
+  --column: 44rem;
   --measure: 36rem;
   --nav-h: 3.25rem;
 }
@@ -194,7 +200,9 @@ a:hover { color: var(--accent-hover); }
   padding-inline: var(--sp-5);
 }
 
-.wrap-read { max-width: var(--wrap); }
+/* Long documents keep the shell's left edge but a shorter line length, so the
+   rules under their headings stay in proportion to the text they introduce. */
+.wrap-read > * { max-width: var(--column); }
 
 .page-head { padding-top: var(--sp-7); margin-bottom: var(--sp-6); }
 .page-head h2 { margin-bottom: var(--sp-1); }
@@ -203,12 +211,27 @@ a:hover { color: var(--accent-hover); }
 .stack-lg > * + * { margin-top: var(--sp-6); }
 
 /* Sections are divided by a rule, not by alternating background colours. */
-.section { padding-block: var(--sp-8); }
-.section + .section { border-top: 1px solid var(--rule); }
+.section { padding-block: var(--sp-7); }
+.section + .section,
+.hero + .section { border-top: 1px solid var(--rule); }
 
-.section-head { margin-bottom: var(--sp-6); }
+.section-head { margin-bottom: var(--sp-5); }
 .section-head h2 { margin-bottom: var(--sp-2); }
 .section-head p { margin-bottom: 0; }
+
+.section-body > * + * { margin-top: var(--sp-5); }
+
+/* Wide enough for the heading to leave the text and stand in the margin. The
+   section then reads as a spread: label on the left, substance on the right. */
+@media (min-width: 62em) {
+  .section {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: var(--sp-7);
+    align-items: start;
+  }
+  .section-head { margin-bottom: 0; }
+}
 
 /* 5 · Nav ================================================================= */
 
@@ -285,7 +308,7 @@ a:hover { color: var(--accent-hover); }
 
 .btn-ghost {
   background: transparent;
-  border-color: var(--rule-strong);
+  border-color: var(--ink-3);
   color: var(--ink);
 }
 .btn-ghost:hover { background: transparent; border-color: var(--ink); color: var(--ink); }
@@ -404,7 +427,7 @@ form .btn-block { margin-top: var(--sp-5); }
 
 /* 8 · Tables ============================================================== */
 
-.table-card { margin-block: var(--sp-5); }
+.table-card { margin-block: var(--sp-5); max-width: var(--column); }
 
 table {
   width: 100%;
@@ -430,9 +453,14 @@ tbody td {
 
 tbody tr:last-child td { border-bottom: none; }
 
+/* The first column hangs on the same left edge as the heading above it. */
+thead th:first-child, tbody td:first-child { padding-left: 0; }
+thead th:last-child, tbody td:last-child { padding-right: 0; }
+
 td.is-right { text-align: right; width: 1%; white-space: nowrap; }
 
 .empty-state {
+  max-width: var(--column);
   padding: var(--sp-6) 0;
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
@@ -478,6 +506,7 @@ td.is-right { text-align: right; width: 1%; white-space: nowrap; }
 .flash-wrap { margin-top: var(--sp-5); }
 
 .alert {
+  max-width: var(--column);
   margin-bottom: var(--sp-4);
   padding: var(--sp-3) var(--sp-4);
   border-left: 3px solid;
@@ -542,14 +571,41 @@ td.is-right { text-align: right; width: 1%; white-space: nowrap; }
 
 /* 11 · Home =============================================================== */
 
+/* The masthead. One sentence at the largest size on the site, a rule under it
+   in full ink, then the explanation and the way in sitting side by side. */
 .hero { padding-block: var(--sp-8) var(--sp-7); }
 
-.hero h1 { margin-bottom: var(--sp-5); }
+.hero-name {
+  padding-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--ink);
+}
 
-.hero .lede { max-width: var(--measure); }
+.hero-name h1 {
+  font-size: var(--fs-7);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.hero-foot {
+  padding-top: var(--sp-5);
+  display: grid;
+  gap: var(--sp-5);
+}
+
+@media (min-width: 52em) {
+  .hero-foot {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--sp-7);
+    align-items: start;
+  }
+}
+
+.hero-foot .lede { margin: 0; max-width: 28rem; }
+.hero-actions .btn-row { margin-top: 0; }
 
 .hero-note {
-  margin-top: var(--sp-4);
+  margin-top: var(--sp-3);
   font-size: var(--fs-2);
   color: var(--ink-3);
 }
@@ -665,7 +721,7 @@ td.is-right { text-align: right; width: 1%; white-space: nowrap; }
 
 footer {
   flex-shrink: 0;
-  margin-top: var(--sp-8);
+  margin-top: var(--sp-6);
   border-top: 1px solid var(--rule);
   padding-block: var(--sp-5);
   font-size: var(--fs-1);
@@ -754,7 +810,7 @@ footer p {
 @media (max-width: 40em) {
   .navbar { padding-block: var(--sp-3); }
   .navbar-links { gap: var(--sp-4); }
-  .section { padding-block: var(--sp-7); }
-  .hero { padding-block: var(--sp-7) var(--sp-6); }
+  .section { padding-block: var(--sp-6); }
+  .hero { padding-block: var(--sp-6) var(--sp-5); }
   .field-row { flex-direction: column; gap: 0; }
 }
