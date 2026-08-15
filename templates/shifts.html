@@ -1,13 +1,15 @@
 {% extends "base.html" %}
- 
+
 {% block title %}Your shifts — Shiftmates{% endblock %}
- 
+
 {% block content %}
-<div class="wrap" style="padding-top:56px;padding-bottom:80px;">
- 
-  <h2>Your shifts</h2>
-  <p class="muted">Everything you have saved so far.</p>
- 
+<div class="wrap stack-lg">
+
+  <div class="page-head">
+    <h2>Your shifts</h2>
+    <p class="muted">Everything you have saved so far.</p>
+  </div>
+
   {% if shifts %}
     <div class="table-card">
       <table>
@@ -16,22 +18,21 @@
             <th>Date</th>
             <th>Starts</th>
             <th>Ends</th>
-            <th></th>
+            <th><span class="visually-hidden">Actions</span></th>
           </tr>
         </thead>
         <tbody>
           {% for shift in shifts %}
             <tr>
-              <td>{{ shift.date }}</td>
+              <td data-label="Date">{{ shift.date }}</td>
               {% if shift.free %}
-                <td colspan="2" class="muted">Day off</td>
+                <td colspan="2" data-label="Shift" class="muted">Day off</td>
               {% else %}
-                <td>{{ shift.time_begin }}</td>
-                <td>{{ shift.time_end }}</td>
+                <td data-label="Starts">{{ shift.time_begin }}</td>
+                <td data-label="Ends">{{ shift.time_end }}</td>
               {% endif %}
               <td class="is-right">
-                <form method="POST" action="/delete/{{ shift.date_id }}"
-                      style="display:inline;">
+                <form method="POST" action="/delete/{{ shift.date_id }}">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
@@ -41,17 +42,16 @@
         </tbody>
       </table>
     </div>
- 
+
     <a href="/index" class="btn">Add another shift</a>
- 
+
   {% else %}
     <div class="empty-state">
       <h3>No shifts saved yet</h3>
       <p>Add your first one and the reminder arrives the evening before.</p>
-      <a href="/index" class="btn" style="margin-top:12px;">Add a shift</a>
+      <a href="/index" class="btn">Add a shift</a>
     </div>
   {% endif %}
- 
+
 </div>
 {% endblock %}
- 

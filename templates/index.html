@@ -29,7 +29,7 @@
         <label for="frei">Day off — no shift on this date</label>
       </div>
  
-      <div class="field-row" id="times">
+      <div class="field-row field-group" id="times">
         <div class="field">
           <label for="zeit_anfang">Starts</label>
           <input type="time" id="zeit_anfang" name="zeit_anfang" required>
@@ -65,7 +65,7 @@
         el.required = !free.checked;
         if (free.checked) { el.value = ''; }
       });
-      block.style.opacity = free.checked ? '.45' : '1';
+      block.dataset.disabled = free.checked;
     }
  
     free.addEventListener('change', sync);

@@ -6,34 +6,35 @@
     <title>{% block title %}Shiftmates{% endblock %}</title>
     <meta name="description" content="{% block description %}Email reminders for your work shifts, with the weather for your city.{% endblock %}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script>document.documentElement.classList.add('js');</script>
     {% block head %}{% endblock %}
 </head>
 <body>
- 
+
     <div class="navbar-wrap">
         <nav class="navbar">
             <div class="navbar-logo">
                 <a href="/">Shiftmates</a>
             </div>
- 
+
             <div class="navbar-links">
                 {% if session.user_id %}
-                    <a href="/index">Add shift</a>
-                    <a href="/shifts">Shifts</a>
-                    <a href="/profile">Profile</a>
+                    <a href="/index"{% if request.path == '/index' %} aria-current="page"{% endif %}>Add shift</a>
+                    <a href="/shifts"{% if request.path == '/shifts' %} aria-current="page"{% endif %}>Shifts</a>
+                    <a href="/profile"{% if request.path == '/profile' %} aria-current="page"{% endif %}>Profile</a>
                     <a href="/logout">Log out</a>
                 {% else %}
-                    <a href="/login">Log in</a>
-                    <a href="/register">Sign up</a>
+                    <a href="/login"{% if request.path == '/login' %} aria-current="page"{% endif %}>Log in</a>
+                    <a href="/register"{% if request.path == '/register' %} aria-current="page"{% endif %}>Sign up</a>
                 {% endif %}
             </div>
         </nav>
     </div>
- 
+
     <main class="page">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="wrap" style="padding-top:24px;">
+            <div class="wrap flash-wrap">
             {% for category, message in messages %}
                 <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">{{ message }}</div>
             {% endfor %}
@@ -42,16 +43,14 @@
     {% endwith %}
     {% block content %}{% endblock %}
     </main>
-<footer>
-        <p>
-            <a href="/reset">Reset password</a>
-            <span class="sep">|</span>
-            <a href="/unsubscribe">Unsubscribe</a>
-            <span class="sep">|</span>
-            <a href="/impressum">Impressum</a>
-            <span class="sep">|</span>
-            <a href="/datenschutz">Datenschutz</a>
-        </p>
+
+    <footer>
+        <ul class="footer-links">
+            <li><a href="/reset">Reset password</a></li>
+            <li><a href="/unsubscribe">Unsubscribe</a></li>
+            <li><a href="/impressum">Impressum</a></li>
+            <li><a href="/datenschutz">Datenschutz</a></li>
+        </ul>
         <p>Copyright &copy; 2026 Shiftmates &middot; Weather data by OpenWeather.</p>
     </footer>
 
