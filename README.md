@@ -82,12 +82,8 @@ python worker.py
  
 ## What I would change next
  
-- Store `Date.date` as a real `DATE` column instead of a formatted string, so
-  shifts can be sorted and range-queried
-- Add an account deletion route; right now turning reminders off keeps the record
-- Expire registration tokens the way reset tokens already expire
-- Add `List-Unsubscribe` headers and a plain-text part to outgoing mail
-- Add tests around the reminder scheduling logic
+- change mail logic: First mail the evening before, second one f.e. 1 hour before work
+
 ## Notes
  
 Built as a personal side project while working full-time, before starting a
