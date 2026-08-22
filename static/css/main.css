@@ -334,10 +334,13 @@ a:hover { color: var(--accent-hover); }
 
 /* 7 · Forms =============================================================== */
 
-/* A form is a document too, so it gets a rule and not a floating panel. */
+/* No rule and no floating panel — a form is set as plainly as the rest of the
+   site. But a card is the only thing on its page, so it centres rather than
+   hanging on the left edge with nothing beside it. */
 .form-card {
   max-width: 26rem;
   margin-block: var(--sp-8);
+  margin-inline: auto;
   padding: 0;
 }
 
@@ -522,6 +525,7 @@ td.is-right { text-align: right; width: 1%; white-space: nowrap; }
 .notice-card {
   max-width: 30rem;
   margin-block: var(--sp-8);
+  margin-inline: auto;
 }
 
 .notice-icon { display: none; }
