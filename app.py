@@ -46,42 +46,48 @@ EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
  
 # MODELS
  
-class Register(db.Model):
+class User(db.Model):
  
-    user_id = db.Column(db.Integer, primary_key=True)
-    user_name = db.Column(db.String(40), unique=True)
-    user_mail = db.Column(db.String(100), unique=True)
-    user_verification = db.Column(db.Boolean, default=False)
-    user_password_hash = db.Column(db.String)
-    user_locked_until = db.Column(db.DateTime, nullable=True)
-    user_trys = db.Column(db.Integer, default=0)
-    user_city = db.Column(db.String)
-    email_time_evening = db.Column(db.String)
-    email_time_morning = db.Column(db.String)
-    user_registered = db.Column(db.Boolean, default=False)
-    first_mail_send = db.Column(db.String)
-    second_mail_send = db.Column(db.String)
-    user_time_zone = db.Column(db.Integer)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), unique=True)
+    mail = db.Column(db.String(100), unique=True)
+    mail_verified = db.Column(db.Boolean, default=False)
+    password_hash = db.Column(db.String)
+    locked_until = db.Column(db.DateTime, nullable=True)
+    failed_login_attempts = db.Column(db.Integer, default=0)
+    city = db.Column(db.String)
+    registered = db.Column(db.Boolean, default=False)
+    time_zone = db.Column(db.String)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
  
  
-class Date(db.Model):
+class Team(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    invite_code = db.Column(db.String, unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
  
-    date_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("register.user_id"))
-    date = db.Column(db.String(10))
-    time_begin = db.Column(db.String(12))
-    time_end = db.Column(db.String(12))
-    free = db.Column(db.Boolean)
- 
- 
-class Verification(db.Model):
- 
-    user_verification_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("register.user_id"))
-    user_token = db.Column(db.String)
-    user_token_date = db.Column(db.DateTime)
- 
- 
+class TeamMember(db.Model):
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    team_id = db.Column(db.Integer, db.ForeignKey("team.id"))
+    role = db.Column(db.String)
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Shift(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    team_id = db.Column(db.Integer, db.ForeignKey("team.id"))
+    start = db.Column(db.DateTime)
+    end = db.Column(db.DateTime)
+    shift_type = db.Column(db.String)
+    note = db.Column(db.String)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 # ROUTES - PUBLIC
  
 @app.route("/", methods=["GET"])
