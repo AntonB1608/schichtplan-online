@@ -56,11 +56,17 @@ class User(db.Model):
     locked_until = db.Column(db.DateTime, nullable=True)
     failed_login_attempts = db.Column(db.Integer, default=0)
     city = db.Column(db.String)
-    registered = db.Column(db.Boolean, default=False)
+    registration_completed = db.Column(db.Boolean, default=False)
     time_zone = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
  
- 
+class Verification(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_token = db.Column(db.String, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_token_date = db.Column(db.DateTime, default=datetime.utcnow)
+
 class Team(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -113,26 +119,26 @@ def register():
             flash("Invalid email address.", "error")
             return render_template("register.html", user_name=username)
 
-        existing_name = Register.query.filter_by(user_name=username).first()
-        if existing_name and existing_name.user_registered:
+        existing_name = User.query.filter_by(name=username).first()
+        if existing_name and existing_name.registration_completed:
             flash("Username already exists.", "error")
             return render_template("register.html")
 
-        existing_mail = Register.query.filter_by(user_mail=email).first()
-        if existing_mail and existing_mail.user_registered:
+        existing_mail = User.query.filter_by(mail=email).first()
+        if existing_mail and existing_mail.registration_completed:
             flash("Email already exists.", "error")
             return render_template("register.html", user_name=username)
         for stale in {existing_name, existing_mail}:
  
             if stale is not None:
  
-                Verification.query.filter_by(user_id=stale.user_id).delete()
+                Verification.query.filter_by(user_id=stale.id).delete()
                 db.session.delete(stale)
  
         db.session.commit()
         token = secrets.token_urlsafe(64)
         token_date = datetime.now(timezone.utc)
-        new_user = Register(user_name=username, user_mail=email, user_token_date=token_date)
+        new_user = User(name=username, mail=email, created_at=token_date)
         db.session.add(new_user)
         try:
  
@@ -155,7 +161,7 @@ def register():
         )
         send_email(email, subject, html)
  
-        db.session.add(Verification(user_token=token, user_id=new_user.user_id))
+        db.session.add(Verification(user_token=token, user_id=new_user.id))
         db.session.commit()
         return render_template("verifyregister.html")
  
