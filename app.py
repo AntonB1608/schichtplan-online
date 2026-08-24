@@ -113,11 +113,11 @@ def register():
  
         if len(username) > 20:
             flash("Username too long (max. 20 characters).", "error")
-            return render_template("register.html", user_name=username)
+            return render_template("register.html", name=username)
 
         if not EMAIL_REGEX.match(email):
             flash("Invalid email address.", "error")
-            return render_template("register.html", user_name=username)
+            return render_template("register.html", name=username)
 
         existing_name = User.query.filter_by(name=username).first()
         if existing_name and existing_name.registration_completed:
@@ -127,7 +127,7 @@ def register():
         existing_mail = User.query.filter_by(mail=email).first()
         if existing_mail and existing_mail.registration_completed:
             flash("Email already exists.", "error")
-            return render_template("register.html", user_name=username)
+            return render_template("register.html", name=username)
         for stale in {existing_name, existing_mail}:
  
             if stale is not None:
@@ -175,7 +175,7 @@ def verify_user(token):
         flash("This link is invalid or has already been used.", "error")
         return redirect("/register")
 
-    real_user = Register.query.filter_by(user_id=verification.user_id).first()
+    real_user = User.query.filter_by(id=verification.user_id).first()
     if not real_user:
         flash("Account not found.", "error")
         return redirect("/register")
@@ -211,7 +211,7 @@ def registeruser():
     if password != password_again:
         flash("Passwords don't match.", "error")
         return render_template("registeruser.html")
-    user = Register.query.filter_by(user_id=session["user_id"]).first()
+    user = User.query.filter_by(id=session["user_id"]).first()
     if not user:
         return redirect("/")
  
@@ -235,7 +235,7 @@ def login():
     username = request.form["username"]
     password = request.form["password"]
  
-    user = Register.query.filter_by(user_name=username).first()
+    user = User.query.filter_by(name=username).first()
     if not user:
 
         flash("Wrong username or password", "error")
