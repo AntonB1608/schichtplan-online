@@ -63,9 +63,9 @@ class User(db.Model):
 class Verification(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    user_token = db.Column(db.String, unique=True)
+    token = db.Column(db.String, unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    user_token_date = db.Column(db.DateTime, default=datetime.utcnow)
+    token_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Team(db.Model):
 
@@ -161,7 +161,7 @@ def register():
         )
         send_email(email, subject, html)
  
-        db.session.add(Verification(user_token=token, user_id=new_user.id))
+        db.session.add(Verification(token=token, user_id=new_user.id))
         db.session.commit()
         return render_template("verifyregister.html")
  
@@ -170,7 +170,7 @@ def register():
  
 @app.route('/verify/<token>')
 def verify_user(token):
-    verification = Verification.query.filter_by(user_token=token).first()
+    verification = Verification.query.filter_by(token=token).first()
     if not verification:
         flash("This link is invalid or has already been used.", "error")
         return redirect("/register")
@@ -184,7 +184,7 @@ def verify_user(token):
     db.session.delete(verification)
     db.session.commit()
  
-    session["user_id"] = real_user.user_id
+    session["user_id"] = real_user.id
     return redirect("/registeruser")
  
  
@@ -215,9 +215,9 @@ def registeruser():
     if not user:
         return redirect("/")
  
-    user.user_password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    user.user_password_hash = user.user_password_hash.decode("utf-8")
-    user.user_registered = True
+    user.password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    user.password_hash = user.password_hash.decode("utf-8")
+    user.registered = True
     db.session.commit()
     flash("Account created. You can log in now.", "success")
     return redirect("/login")
@@ -241,35 +241,35 @@ def login():
         flash("Wrong username or password", "error")
         return render_template("login.html")
  
-    if user.user_locked_until and now < user.user_locked_until:
+    if user.locked_until and now < user.locked_until:
 
-        flash(f"Account locked until {user.user_locked_until.strftime('%H:%M:%S')}", "error")
+        flash(f"Account locked until {user.locked_until.strftime('%H:%M:%S')}", "error")
         return render_template("login.html")
     
-    if user.user_locked_until and now >= user.user_locked_until:
-        user.user_trys = 0
-        user.user_locked_until = None
+    if user.locked_until and now >= user.locked_until:
+        user.failed_login_attempts = 0
+        user.locked_until = None
         db.session.commit()
  
-    if not user.user_password_hash:
+    if not user.password_hash:
 
         flash("Wrong username or password.", "error")
         return render_template("login.html")
  
-    if bcrypt.checkpw(password.encode("utf-8"), user.user_password_hash.encode("utf-8")):
-        user.user_trys = 0
-        user.user_locked_until = None
-        session["user_id"] = user.user_id
+    if bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        session["user_id"] = user.id
         db.session.commit()
-        if not user.user_city or not user.email_time_morning or not user.email_time_evening:
+        if not user.city or not user.email_time_morning or not user.email_time_evening:
             return redirect("/profile")
         else:
             return redirect("/index")
  
-    user.user_trys = (user.user_trys or 0) + 1
-    if user.user_trys >= 5:
+    user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
+    if user.failed_login_attempts >= 5:
 
-        user.user_locked_until = datetime.today() + timedelta(minutes=15)
+        user.locked_until = datetime.today() + timedelta(minutes=15)
         db.session.commit()
         flash("Too many failed attempts. Account locked for 15 minutes.", "error")
         return render_template("login.html")
@@ -293,7 +293,7 @@ def logout():
 def reset_password():
     if request.method == "POST":
         mail = request.form["mail"]
-        user = Register.query.filter_by(user_mail=mail).first()
+        user = User.query.filter_by(email=mail).first()
         if not user:
             return render_template("passwordreset.html")
  
@@ -309,9 +309,9 @@ def reset_password():
             link=verify_link,
             note="This link expires in one hour. If you didn't request a reset, ignore this email — your password stays unchanged.",
         )
-        send_email(user.user_mail, subject, html)
+        send_email(user.mail, subject, html)
  
-        db.session.add(Verification(user_token=token, user_id=user.user_id, user_token_date=token_date))
+        db.session.add(Verification(token=token, user_id=user.user_id, user_token_date=token_date))
         db.session.commit()
         return render_template("passwordreset.html")
     else:
@@ -321,16 +321,16 @@ def reset_password():
 @app.route('/reset/<token>', methods=["GET", "POST"])
 def reset_token(token):
 
-    if request.method == "GET":
+    if request.method == "GET":failed_login_attempts
 
-        verification = Verification.query.filter_by(user_token=token).first()
+        verification = Verification.query.filter_by(token=token).first()
 
         if not verification:
 
             flash("Invalid token.", "error")
             return render_template("register.html")
  
-        real_user = Register.query.filter_by(user_id=verification.user_id).first()
+        real_user = User.query.filter_by(id=verification.user_id).first()
 
         if not real_user:
 
@@ -369,12 +369,12 @@ def reset_token(token):
             flash("Passwords don't match", "error")
             return render_template("newpassword.html", token=token)
  
-        user = Register.query.filter_by(user_id=verification.user_id).first()
+        user = User.query.filter_by(id=verification.user_id).first()
         if not user:
             return redirect("/register")
  
-        user.user_password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        user.user_password_hash = user.user_password_hash.decode("utf-8")
+        user.password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        user.password_hash = user.password_hash.decode("utf-8")
         db.session.delete(verification)
         db.session.commit()
         return redirect("/login")
@@ -392,13 +392,13 @@ def show_profile():
      
     if not request.method == "POST":
  
-        user = Register.query.filter_by(user_id=session["user_id"]).first()
+        user = User.query.filter_by(id=session["user_id"]).first()
         return render_template("profile.html", user=user)
  
    
  
     user_id = session["user_id"]
-    user = Register.query.filter_by(user_id=user_id).first()
+    user = User.query.filter_by(id=user_id).first()
     email_time_morning = request.form["email_time_morning"]
     email_time_evening = request.form["email_time_evening"]
     city = request.form["city"]
@@ -436,7 +436,7 @@ def unsubscribe():
     if request.method == "GET":
         return render_template("unsubscribe.html")
     if request.method == "POST":
-        user = Register.query.filter_by(user_id=session["user_id"]).first()
+        user = User.query.filter_by(id=session["user_id"]).first()
         user.email_time_morning = None
         user.email_time_evening = None
         db.session.commit()
@@ -524,9 +524,9 @@ def find_weather_data(user_id):
  
     try:
  
-        user = Register.query.filter_by(user_id=user_id).first()
+        user = User.query.filter_by(id=user_id).first()
         key = os.getenv("openweather_key")
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.user_city)}&appid={key}&units=metric&lang=de"
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.city)}&appid={key}&units=metric&lang=de"
         response = requests.get(url, timeout=10).json()
         mapping = {
             "Thunderstorm": emoji.emojize("There will be thunderstorms tomorrow :thunder_cloud_and_rain:"),
@@ -697,21 +697,21 @@ def send_reminder(user, date_str, kind):
 </body>
 </html>"""
 
-    return send_email(user.user_mail, subject, html)
+    return send_email(user.email, subject, html)
  
  
 def send_daily_emails():
     now_utc = datetime.now(timezone.utc)
  
-    users = Register.query.filter(
-        Register.user_registered.is_(True),
-        Register.email_time_morning.isnot(None),
-        Register.email_time_evening.isnot(None),
-        Register.user_time_zone.isnot(None),
+    users = User.query.filter(
+        User.registered.is_(True),
+        User.email_time_morning.isnot(None),
+        User.email_time_evening.isnot(None),
+        User.time_zone.isnot(None),
     ).all()
  
     for user in users:
-        now_local = now_utc + timedelta(seconds=user.user_time_zone)
+        now_local = now_utc + timedelta(seconds=user.time_zone)
         tomorrow_str, today_str = get_date(now_local)
  
         evening_time = datetime.strptime(user.email_time_evening, "%H:%M").time()
@@ -813,7 +813,8 @@ def build_action_mail(subject, headline, intro, button_label, link, note=""):
 
 </body>
 </html>"""
-# JOBS
+
+# MAIN
 
 
 if __name__ == "__main__":
