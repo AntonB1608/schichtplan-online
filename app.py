@@ -245,7 +245,7 @@ def login():
 
         flash(f"Account locked until {user.locked_until.strftime('%H:%M:%S')}", "error")
         return render_template("login.html")
-    
+   
     if user.locked_until and now >= user.locked_until:
         user.failed_login_attempts = 0
         user.locked_until = None
@@ -321,8 +321,7 @@ def reset_password():
 @app.route('/reset/<token>', methods=["GET", "POST"])
 def reset_token(token):
 
-    if request.method == "GET":failed_login_attempts
-
+    if request.method == "GET":
         verification = Verification.query.filter_by(token=token).first()
 
         if not verification:
@@ -337,7 +336,7 @@ def reset_token(token):
             flash("User not found.", "error")
             return render_template("register.html")
  
-        token_time = verification.user_token_date.replace(tzinfo=timezone.utc)
+        token_time = verification.token_date.replace(tzinfo=timezone.utc)
         date_expired = token_time + timedelta(hours=1)
  
         if datetime.now(timezone.utc) > date_expired:
@@ -347,7 +346,7 @@ def reset_token(token):
  
         return render_template("registeruser.html", token=token)
     else:
-        verification = Verification.query.filter_by(user_token=token).first()
+        verification = Verification.query.filter_by(token=token).first()
         if not verification:
             return render_template("register.html")
  
@@ -420,8 +419,8 @@ def show_profile():
         return render_template("profile.html", user=user)
     
     
-    user.user_city = city
-    user.user_time_zone = response["timezone"]
+    user.city = city
+    user.time_zone = response["timezone"]
     user.email_time_morning = email_time_morning
     user.email_time_evening = email_time_evening
     db.session.commit()
