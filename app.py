@@ -3,7 +3,6 @@ import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
- 
 import bcrypt
 import emoji
 import requests
@@ -13,8 +12,10 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.exc import IntegrityError
- 
- 
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from typing import Optional
+from sqlalchemy import String, DateTime, ForeignKey, Boolean, Integer
+
 # APP CONFIG
  
 load_dotenv()
@@ -45,34 +46,39 @@ EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
  
  
 # MODELS
+
+class Base(DeclarativeBase):
+    pass
  
+db = SQLAlchemy(app, model_class=Base)
+
 class User(db.Model):
  
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(40), unique=True)
-    mail = db.Column(db.String(100), unique=True)
-    mail_verified = db.Column(db.Boolean, default=False)
-    password_hash = db.Column(db.String)
-    locked_until = db.Column(db.DateTime, nullable=True)
-    failed_login_attempts = db.Column(db.Integer, default=0)
-    city = db.Column(db.String)
-    registration_completed = db.Column(db.Boolean, default=False)
-    time_zone = db.Column(db.String)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
- 
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(40), unique=True)
+    mail: Mapped[str] = mapped_column(String(100), unique=True)
+    mail_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    password_hash: Mapped[Optional[str]] = mapped_column(String)
+    locked_until: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    city: Mapped[Optional[str]] = mapped_column(String)
+    registration_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    time_zone: Mapped[Optional[str]] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+
 class Verification(db.Model):
 
-    id = db.Column(db.Integer, primary_key=True)
-    token = db.Column(db.String, unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    token: Mapped[str] = mapped_column(db.String, unique=True)
+    user_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey("user.id"))
     token_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Team(db.Model):
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    invite_code = db.Column(db.String, unique=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(db.String)
+    invite_code: Mapped[str] = mapped_column(db.String, unique=True)
+    created_at: Mapped[datetime] = mapped_column(db.DateTime, default=lambda: datetime.now(timezone.utc))
  
 class TeamMember(db.Model):
     
