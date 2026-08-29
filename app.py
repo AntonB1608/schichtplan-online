@@ -14,7 +14,7 @@ from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from typing import Optional
-from sqlalchemy import String, DateTime, ForeignKey, Boolean, Integer
+from sqlalchemy import String, DateTime, ForeignKey, Boolean, Integer, MetaData
 
 # APP CONFIG
  
@@ -37,9 +37,9 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
  
-db = SQLAlchemy(app)
+
 csrf = CSRFProtect(app)
-migrate = Migrate(app, db)
+
  
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
@@ -48,56 +48,62 @@ EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
 # MODELS
 
 class Base(DeclarativeBase):
-    pass
+    metadata = MetaData(naming_convention={
+        "ix": "ix_%(column_0_label)s",
+        "uq": "uq_%(table_name)s_%(column_0_name)s",
+        "ck": "ck_%(table_name)s_%(constraint_name)s",
+        "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+        "pk": "pk_%(table_name)s",
+    })
  
 db = SQLAlchemy(app, model_class=Base)
-
+migrate = Migrate(app, db)
 class User(db.Model):
  
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(40), unique=True)
     mail: Mapped[str] = mapped_column(String(100), unique=True)
-    mail_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    password_hash: Mapped[Optional[str]] = mapped_column(String)
-    locked_until: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0)
-    city: Mapped[Optional[str]] = mapped_column(String)
-    registration_completed: Mapped[bool] = mapped_column(Boolean, default=False)
-    time_zone: Mapped[Optional[str]] = mapped_column(String)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    mail_verified: Mapped[bool] = mapped_column(default=False)
+    password_hash: Mapped[Optional[str]] = mapped_column()
+    locked_until: Mapped[Optional[datetime]] = mapped_column()
+    failed_login_attempts: Mapped[int] = mapped_column(default=0)
+    city: Mapped[Optional[str]] = mapped_column()
+    registration_completed: Mapped[bool] = mapped_column(default=False)
+    time_zone: Mapped[Optional[str]] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
 class Verification(db.Model):
 
-    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    token: Mapped[str] = mapped_column(db.String, unique=True)
-    user_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey("user.id"))
-    token_date = db.Column(db.DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    token_date: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
 class Team(db.Model):
 
-    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(db.String)
-    invite_code: Mapped[str] = mapped_column(db.String, unique=True)
-    created_at: Mapped[datetime] = mapped_column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
+    invite_code: Mapped[str] = mapped_column(unique=True)
+    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
  
 class TeamMember(db.Model):
     
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    team_id = db.Column(db.Integer, db.ForeignKey("team.id"))
-    role = db.Column(db.String)
-    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    team_id: Mapped[int] = mapped_column(ForeignKey("team.id"))
+    role: Mapped[str] = mapped_column()
+    joined_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
 class Shift(db.Model):
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    team_id = db.Column(db.Integer, db.ForeignKey("team.id"))
-    start = db.Column(db.DateTime)
-    end = db.Column(db.DateTime)
-    shift_type = db.Column(db.String)
-    note = db.Column(db.String)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    team_id: Mapped[Optional[int]] = mapped_column(ForeignKey("team.id"))
+    start: Mapped[Optional[datetime]]= mapped_column()
+    end: Mapped[Optional[datetime]] = mapped_column()
+    shift_type: Mapped[str] = mapped_column()
+    note: Mapped[Optional[str]] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
 
 # ROUTES - PUBLIC
@@ -186,7 +192,7 @@ def verify_user(token):
         flash("Account not found.", "error")
         return redirect("/register")
  
-    real_user.user_verification = True
+    real_user.mail_verified = True
     db.session.delete(verification)
     db.session.commit()
  
