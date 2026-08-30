@@ -186,9 +186,14 @@ def verify_user(token):
     if not verification:
         flash("This link is invalid or has already been used.", "error")
         return redirect("/register")
-
+    token_time = verification.token_date.replace(tzinfo=timezone.utc)
+    if token_time + timedelta(hours=1) < datetime.now(timezone.utc):
+        flash("This link has expired.", "error")
+        db.session.delete(verification)
+        db.session.commit()
+        return redirect("/register")
+    
     real_user = User.query.filter_by(id=verification.user_id).first()
-    if not real_user:
         flash("Account not found.", "error")
         return redirect("/register")
  
@@ -229,7 +234,7 @@ def registeruser():
  
     user.password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     user.password_hash = user.password_hash.decode("utf-8")
-    user.registered = True
+    user.registration_completed = True
     db.session.commit()
     flash("Account created. You can log in now.", "success")
     return redirect("/login")
@@ -305,25 +310,25 @@ def logout():
 def reset_password():
     if request.method == "POST":
         mail = request.form["mail"]
-        user = User.query.filter_by(email=mail).first()
+        user = User.query.filter_by(mail=mail).first()
         if not user:
             return render_template("passwordreset.html")
  
         token = secrets.token_urlsafe(64)
-        token_date = datetime.now(timezone.utc)
+        token_date = Verification.token_date.replace(tzinfo=timezone.utc)
         verify_link = f"{request.url_root}reset/{token}"
         subject = "Reset your password"
         html = build_action_mail(
             subject=subject,
             headline="Reset your password",
-            intro=f"Hi {user.user_name}, use the link below to set a new password.",
+            intro=f"Hi {user.name}, use the link below to set a new password.",
             button_label="Set a new password",
             link=verify_link,
             note="This link expires in one hour. If you didn't request a reset, ignore this email — your password stays unchanged.",
         )
         send_email(user.mail, subject, html)
  
-        db.session.add(Verification(token=token, user_id=user.user_id, user_token_date=token_date))
+        db.session.add(Verification(token=token, user_id=user.id, token_date=token_date))
         db.session.commit()
         return render_template("passwordreset.html")
     else:
@@ -489,11 +494,12 @@ def show_shift():
  
     if "user_id" not in session:
         return redirect("/login")
- 
+
     else:
  
         user_id = session["user_id"]
-        shifts = Date.query.filter_by(user_id=user_id).all()
+        user = User.query.filter_by(id=user_id).first()
+        shifts = Shifts.query.filter_by(user_id=user_id).all()
         return render_template("shifts.html", shifts=shifts)
  
  
