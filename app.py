@@ -194,6 +194,7 @@ def verify_user(token):
         return redirect("/register")
     
     real_user = User.query.filter_by(id=verification.user_id).first()
+    if not real_user:
         flash("Account not found.", "error")
         return redirect("/register")
  
@@ -471,17 +472,29 @@ def schicht_eintragen():
     user_id = session["user_id"]
 
     if request.method == "POST":
-        datum = request.form["datum"]
+        date = request.form["datum"]
+        shift_type = request.form["shift_type"]
+        note = request.form["note"]
+        if not note:
+            note = None
+        if not shift_type:
+            flash("Please select a shift type.", "error")
+            return render_template("index.html")
         zeit_anfang = request.form["zeit_anfang"]
         zeit_ende = request.form["zeit_ende"]
-        datum_formatiert = datetime.strptime(datum, "%Y-%m-%d").strftime("%d.%m.%Y")
-        free = request.form.get("frei")
- 
-        if free:
-            db.session.add(Date(user_id=user_id, date=datum_formatiert, free=True))
-        else:
-            db.session.add(Date(user_id=user_id, date=datum_formatiert, time_begin=zeit_anfang, time_end=zeit_ende, free=False))
- 
+        if not date or not zeit_anfang or not zeit_ende:
+            flash("Please fill in all fields.", "error")
+            return render_template("index.html")
+        date= datetime.strptime(date, "%Y-%m-%d")
+        zeit_anfang = datetime.strptime(zeit_anfang, "%H:%M").time()
+        zeit_ende = datetime.strptime(zeit_ende, "%H:%M").time()
+        start = datetime.combine(date, zeit_anfang)
+        end = datetime.combine(date, zeit_ende)
+        if end <= start:
+            end = end + timedelta(days=1)
+        created_at = datetime.now(timezone.utc)
+
+        db.session.add(Shift(user_id=user_id, start=start, end=end, shift_type=shift_type, note=note, created_at=created_at))
         db.session.commit()
         flash("Shift saved successfully", "success")
         return redirect("/index")
@@ -499,7 +512,7 @@ def show_shift():
  
         user_id = session["user_id"]
         user = User.query.filter_by(id=user_id).first()
-        shifts = Shifts.query.filter_by(user_id=user_id).all()
+        shifts = Shift.query.filter_by(user_id=user_id).all()
         return render_template("shifts.html", shifts=shifts)
  
  
@@ -508,7 +521,7 @@ def delete_shift(date_id):
     if "user_id" not in session:
             return redirect("/login")
     
-    shift = Date.query.filter_by(date_id=date_id, user_id=session["user_id"]).first()
+    shift = Shift.query.filter_by(id=date_id, user_id=session["user_id"]).first()
     if shift:
         db.session.delete(shift)
         db.session.commit()
@@ -598,7 +611,7 @@ def send_email(to, subject, html):
  
  
 def send_reminder(user, date_str, kind):
-    shift = Date.query.filter_by(user_id=user.user_id, date=date_str).first()
+    shift = Shift.query.filter_by(user_id=user.user_id, date=date_str).first()
     day = "tomorrow" if kind == "evening" else "today"
 
     if not shift:
