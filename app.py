@@ -15,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from typing import Optional
 from sqlalchemy import String, DateTime, ForeignKey, Boolean, Integer, MetaData
+from datetime import time, datetime, timedelta, timezone
 
 # APP CONFIG
  
@@ -70,6 +71,10 @@ class User(db.Model):
     city: Mapped[Optional[str]] = mapped_column()
     registration_completed: Mapped[bool] = mapped_column(default=False)
     time_zone: Mapped[Optional[str]] = mapped_column()
+    daily_reminder_enabled: Mapped[bool] = mapped_column(default=True, nullable=False)
+    daily_reminder_time: Mapped[datetime] = mapped_column(default=time(18, 0), nullable=False)
+    shift_reminder_enabled: Mapped[bool] = mapped_column(default=True, nullable=False)
+    shift_reminder_lead_minutes: Mapped[int] = mapped_column(default=60, nullable=False)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
 class Verification(db.Model):
@@ -104,6 +109,8 @@ class Shift(db.Model):
     shift_type: Mapped[str] = mapped_column()
     note: Mapped[Optional[str]] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    daily_reminder_sent_at: Mapped[datetime] = mapped_column(default=None, nullable=True)
+    shift_reminder_sent_at: Mapped[datetime] = mapped_column(default=None, nullable=True)
 
 
 # ROUTES - PUBLIC
@@ -404,47 +411,50 @@ def reset_token(token):
 @app.route("/profile", methods=["POST", "GET"])
 def show_profile():
     if "user_id" not in session:
-     
-            return redirect("/login")
-     
-    if not request.method == "POST":
- 
-        user = User.query.filter_by(id=session["user_id"]).first()
-        return render_template("profile.html", user=user)
- 
-   
- 
-    user_id = session["user_id"]
-    user = User.query.filter_by(id=user_id).first()
-    email_time_morning = request.form["email_time_morning"]
-    email_time_evening = request.form["email_time_evening"]
-    city = request.form["city"]
- 
-    if not email_time_morning or not email_time_evening:
+        return redirect("/login")
 
+    user = db.session.get(User, session["user_id"])
+    user = db.session.get(User, session["user_id"])
+    if user is None:
+        return redirect("/login")
+    if request.method != "POST":
+        return render_template("profile.html", user=user)
+
+    email_time_morning = request.form.get("email_time_morning")
+    email_time_evening = request.form.get("email_time_evening")
+    city = request.form.get("city")
+
+    if not email_time_morning or not email_time_evening:
         flash("No email time set", "error")
         return render_template("profile.html", user=user)
-    
+
     if not city:
         flash("No city set.", "error")
         return render_template("profile.html", user=user)
- 
+
     key = os.getenv("openweather_key")
     url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(city)}&appid={key}&units=metric&lang=de"
-    response = requests.get(url, timeout=10).json()
-    if str(response.get("cod")) == "404":
-        flash("City not found.", "error") 
+
+    try:
+        response = requests.get(url, timeout=10).json()
+    except requests.RequestException:
+        flash("Weather service unavailable. Try again later.", "error")
         return render_template("profile.html", user=user)
-    
-    
+
+    if str(response.get("cod")) != "200":
+        flash("City not found.", "error")
+        return render_template("profile.html", user=user)
+
     user.city = city
     user.time_zone = response["timezone"]
-    user.email_time_morning = email_time_morning
-    user.email_time_evening = email_time_evening
+    user.shift_reminder_lead_minutes = int(request.form.get("shift_reminder_lead_minutes", 60))
+    daily_reminder_time = request.form.get("daily_reminder_time")
+    if daily_reminder_time:
+        user.daily_reminder_time = datetime.strptime(daily_reminder_time, "%H:%M").time()
+    
     db.session.commit()
     return redirect("/index")
 
- 
 @app.route("/unsubscribe", methods=["GET", "POST"])
 def unsubscribe():
     if "user_id" not in session:
@@ -511,7 +521,6 @@ def show_shift():
     else:
  
         user_id = session["user_id"]
-        user = User.query.filter_by(id=user_id).first()
         shifts = Shift.query.filter_by(user_id=user_id).all()
         return render_template("shifts.html", shifts=shifts)
  
