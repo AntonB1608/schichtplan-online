@@ -16,23 +16,42 @@
         <thead>
           <tr>
             <th>Date</th>
-            <th>Starts</th>
-            <th>Ends</th>
+            <th>Type</th>
+            <th>Time</th>
+            <th>Note</th>
             <th><span class="visually-hidden">Actions</span></th>
           </tr>
         </thead>
         <tbody>
           {% for shift in shifts %}
             <tr>
-              <td data-label="Date">{{ shift.date }}</td>
-              {% if shift.free %}
-                <td colspan="2" data-label="Shift" class="muted">Day off</td>
-              {% else %}
-                <td data-label="Starts">{{ shift.time_begin }}</td>
-                <td data-label="Ends">{{ shift.time_end }}</td>
-              {% endif %}
+              <td data-label="Date">
+                {{ shift.start.strftime('%a, %d.%m.%Y') if shift.start else '—' }}
+              </td>
+
+              <td data-label="Type">
+                <span class="tag{% if shift.shift_type == 'off' %} tag-off{% endif %}">
+                  {{ SHIFT_TYPES.get(shift.shift_type, shift.shift_type) }}
+                </span>
+              </td>
+
+              <td data-label="Time">
+                {% if shift.shift_type == 'off' or not shift.start or not shift.end %}
+                  <span class="muted">—</span>
+                {% else %}
+                  {{ shift.start.strftime('%H:%M') }}–{{ shift.end.strftime('%H:%M') }}
+                  {% if shift.end.date() != shift.start.date() %}
+                    <span class="muted">+1</span>
+                  {% endif %}
+                {% endif %}
+              </td>
+
+              <td data-label="Note">
+                {% if shift.note %}{{ shift.note }}{% else %}<span class="muted">—</span>{% endif %}
+              </td>
+
               <td class="is-right">
-                <form method="POST" action="/delete/{{ shift.date_id }}">
+                <form method="POST" action="/delete/{{ shift.id }}">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
@@ -48,7 +67,7 @@
   {% else %}
     <div class="empty-state">
       <h3>No shifts saved yet</h3>
-      <p>Add your first one and the reminder arrives the evening before.</p>
+      <p>Add your first one and your reminders start arriving.</p>
       <a href="/index" class="btn">Add a shift</a>
     </div>
   {% endif %}

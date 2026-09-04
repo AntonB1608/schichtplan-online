@@ -8,13 +8,9 @@
 
     <h2>Unsubscribe</h2>
     <p class="muted">
-      This stops all reminder emails. You can turn them back on any time by
-      setting a new reminder time in your profile.
+      This switches off both the daily email and the reminder before each shift.
+      Your shifts stay saved, and you can turn either one back on in your profile.
     </p>
-
-    {% if error_message %}
-      <div class="alert alert-error">{{ error_message }}</div>
-    {% endif %}
 
     <form method="POST" action="/unsubscribe">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

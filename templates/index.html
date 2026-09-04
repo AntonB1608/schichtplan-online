@@ -1,35 +1,39 @@
 {% extends "base.html" %}
- 
+
 {% block title %}Add shift — Shiftmates{% endblock %}
- 
+
 {% block content %}
 <div class="wrap">
   <div class="form-card">
- 
+
     <h2>Add a shift</h2>
-    <p class="muted">Pick a date, or mark the day as time off.</p>
- 
-    {% if error_message %}
-      <div class="alert alert-error">{{ error_message }}</div>
-    {% endif %}
-    {% if good_message %}
-      <div class="alert alert-success">{{ good_message }}</div>
-    {% endif %}
- 
+    <p class="muted">Pick a date, choose a shift type, and add a note if you need one.</p>
+
     <form method="POST" action="/index">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
- 
+
       <div class="field">
         <label for="datum">Date</label>
         <input type="date" id="datum" name="datum" required>
       </div>
- 
-      <div class="field-inline">
-        <input type="checkbox" id="frei" name="frei" value="1">
-        <label for="frei">Day off — no shift on this date</label>
+
+      <div class="field">
+        <label for="shift_type">Shift type</label>
+        <select id="shift_type" name="shift_type" required>
+          {% for value, label in SHIFT_TYPES.items() %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+          <option value="custom">Own name…</option>
+        </select>
       </div>
- 
-      <div class="field-row field-group" id="times">
+
+      <div class="field" id="custom-field" hidden>
+        <label for="shift_type_custom">Name of your shift type</label>
+        <input type="text" id="shift_type_custom" name="shift_type_custom"
+               placeholder="Split shift" maxlength="30">
+      </div>
+
+      <div class="field-row" id="times">
         <div class="field">
           <label for="zeit_anfang">Starts</label>
           <input type="time" id="zeit_anfang" name="zeit_anfang" required>
@@ -39,36 +43,47 @@
           <input type="time" id="zeit_ende" name="zeit_ende" required>
         </div>
       </div>
- 
+
+      <div class="field">
+        <label for="note">Note <span class="label-hint">optional</span></label>
+        <textarea id="note" name="note" rows="2" maxlength="200"
+                  placeholder="Handover at the gate"></textarea>
+      </div>
+
       <button type="submit" class="btn btn-block">Save shift</button>
     </form>
- 
+
     <div class="form-foot">
       <a href="/shifts">See all your shifts</a>
     </div>
- 
+
   </div>
 </div>
 {% endblock %}
- 
+
 {% block scripts %}
 <script>
-
   (function () {
-    var free   = document.getElementById('frei');
-    var block  = document.getElementById('times');
-    var inputs = block.querySelectorAll('input');
- 
+    var type   = document.getElementById('shift_type');
+    var custom = document.getElementById('custom-field');
+    var name   = document.getElementById('shift_type_custom');
+    var times  = document.getElementById('times');
+
     function sync() {
-      inputs.forEach(function (el) {
-        el.readOnly = free.checked;
-        el.required = !free.checked;
-        if (free.checked) { el.value = ''; }
+      var isOff    = type.value === 'off';
+      var isCustom = type.value === 'custom';
+
+      custom.hidden = !isCustom;
+      name.required = isCustom;
+
+      times.hidden = isOff;
+      times.querySelectorAll('input').forEach(function (el) {
+        el.required = !isOff;
+        if (isOff) { el.value = ''; }
       });
-      block.dataset.disabled = free.checked;
     }
- 
-    free.addEventListener('change', sync);
+
+    type.addEventListener('change', sync);
     sync();
   })();
 </script>
