@@ -1,112 +1,149 @@
 {% extends "base.html" %}
 
-{% block title %}Shiftmates — an email before every shift{% endblock %}
-{% block description %}Save your shifts once. Shiftmates emails you the night before and again on the morning of, with the weather for your city.{% endblock %}
+{% block title %}Shiftmates — never miss the start of a shift{% endblock %}
+{% block description %}Save your roster once. Shiftmates emails you the evening before and again before you leave, with the weather for your city.{% endblock %}
 
 {% block content %}
 
 <header class="hero">
-  <div class="wrap hero-name">
-    <h1>An email before every shift.</h1>
-  </div>
+  <div class="wrap">
+    <h1>Never miss the start of a shift.</h1>
 
-  <div class="wrap hero-foot">
     <p class="lede">
-      Save your shifts once. Shiftmates emails you the night before and again on
-      the morning of, with the weather for the city you commute to.
+      Save your roster once. Get an email the evening before, and another
+      before you leave. The weather for your city comes with it.
     </p>
+
     <div class="hero-actions">
-      <div class="btn-row">
-        <a href="/register" class="btn">Create an account</a>
-        <a href="/login" class="btn btn-ghost">Log in</a>
-      </div>
+      <a href="/register" class="btn btn-lg">Get shift reminders</a>
       <p class="hero-note">Free. No app to install.</p>
+    </div>
+
+    <div class="mail-frame">
+      <article class="mail">
+        <div class="mail-bar">
+          <svg class="mail-avatar" viewBox="0 0 28 28" aria-hidden="true">
+            <circle cx="14" cy="14" r="14" fill="#0071e3"/>
+            <circle cx="14" cy="14" r="8" fill="none" stroke="#ffffff"
+                    stroke-opacity=".45" stroke-width="2.5"/>
+            <circle cx="14" cy="14" r="8" fill="none" stroke="#ffffff"
+                    stroke-width="2.5" stroke-linecap="round"
+                    stroke-dasharray="12.6 37.7"
+                    transform="rotate(-90 14 14)"/>
+          </svg>
+          <span class="mail-from">Shiftmates</span>
+          <span class="mail-time">18:00</span>
+        </div>
+
+        <div class="mail-body">
+          <p class="mail-subject">Tomorrow: early shift</p>
+          <p class="mail-line">Good evening Marc,</p>
+
+          <div class="mail-shift">
+            <p class="mail-shift-line">
+              <span>Early shift</span>
+              <span>06:00 &ndash; 14:30</span>
+            </p>
+            <p class="mail-shift-meta">
+              Tuesday, 8 September &middot; Mannheim &middot; light rain, 7&thinsp;&deg;C
+            </p>
+          </div>
+
+          <p class="mail-line">
+            Set your alarm for the commute &mdash; the roads will be wet.
+          </p>
+        </div>
+
+        <div class="mail-foot">
+          You are getting this because you saved a shift. Unsubscribe anytime.
+        </div>
+      </article>
+
+      <p class="mail-caption">
+        An actual reminder. Days off get one too, so a quiet inbox never means
+        a missed shift.
+      </p>
     </div>
   </div>
 </header>
 
-<section class="section wrap">
+<section class="section wrap" data-reveal>
   <div class="section-head">
-    <h2>How it works</h2>
+    <h2>Three steps, then it runs</h2>
+    <p class="muted">Set it up once. Nothing to open again until your roster changes.</p>
   </div>
 
-  <div class="section-body">
-    <ol class="steps">
-      <li>
-        <h3>Save a shift</h3>
-        <p>A date with a start and an end time. Or mark the day as time off.</p>
-      </li>
-      <li>
-        <h3>The night before, an email</h3>
-        <p>By default at 22:00, telling you what tomorrow looks like.</p>
-      </li>
-      <li>
-        <h3>On the day, one more</h3>
-        <p>By default at 05:00, so you know before you leave the house.</p>
-      </li>
-    </ol>
+  <ol class="steps">
+    <li>
+      <h3>Save a shift</h3>
+      <p>A date, a start and an end time, and the kind of shift it is.</p>
+    </li>
+    <li>
+      <h3>One email in the evening</h3>
+      <p>At 18:00 by default, telling you what tomorrow looks like.</p>
+    </li>
+    <li>
+      <h3>One before you leave</h3>
+      <p>Anywhere from 30 minutes to 3 hours ahead. You pick the lead time.</p>
+    </li>
+  </ol>
 
-    <p class="hero-note">Both times are yours to change, in your own timezone.</p>
+  <p class="hero-note">
+    Both run in your own timezone, and either one can be switched off on its own.
+  </p>
+</section>
+
+<section class="section wrap" data-reveal>
+  <div class="section-head">
+    <h2>Your shifts, your names</h2>
+    <p class="muted">Four types are built in. If your roster calls it something
+      else, type that instead.</p>
+  </div>
+
+  <div class="types">
+    <span class="type-chip">Early shift</span>
+    <span class="type-chip">Late shift</span>
+    <span class="type-chip">Night shift</span>
+    <span class="type-chip">Day off</span>
+    <span class="type-chip">Your own name</span>
   </div>
 </section>
 
-<section class="section wrap">
+<section class="section wrap" data-reveal>
   <div class="section-head">
-    <h2>What arrives</h2>
+    <h2>Built by someone who overslept</h2>
   </div>
 
-  <div class="section-body">
-    <article class="mail">
-      <div class="mail-bar">
-        <span class="mail-from">Shiftmates</span>
-        <span class="mail-time">22:00</span>
-      </div>
-      <div class="mail-body">
-        <p class="mail-subject">Reminder for tomorrow</p>
-        <p class="mail-line">Good evening Marc,</p>
-        <p class="mail-line mail-line-strong">You work tomorrow from 06:00 to 14:30.</p>
-        <div class="mail-weather">
-          <span>Light drizzle expected tomorrow.</span>
-          <span class="mail-temp">7&deg;C</span>
-        </div>
-      </div>
-    </article>
+  <p class="maker">
+    Built by a shift worker who got tired of missing his own roster. It does
+    one thing, it does not sell anything, and your address is used for the
+    reminders and nothing else.
+  </p>
 
-    <p class="mail-caption">
-      Days off get their own email, so a missing message never means a missed shift.
-    </p>
-  </div>
-</section>
-
-<section class="section wrap">
-  <div class="section-head">
-    <h2>Your account</h2>
-  </div>
-
-  <div class="section-body">
-    <dl class="trust">
-      <div>
-        <dt>Your email is verified</dt>
-        <dd>Nobody can sign you up but you.</dd>
-      </div>
-      <div>
-        <dt>Passwords are hashed with bcrypt</dt>
-        <dd>They are never stored in plain text.</dd>
-      </div>
-      <div>
-        <dt>Five wrong tries locks the account</dt>
-        <dd>It unlocks again after 15 minutes.</dd>
-      </div>
-      <div>
-        <dt>You can stop the emails at any time</dt>
-        <dd>One link, from your account or the footer of any reminder.</dd>
-      </div>
-    </dl>
-
-    <div class="btn-row">
-      <a href="/register" class="btn">Create an account</a>
+  <dl class="trust">
+    <div>
+      <dt>Your email is verified</dt>
+      <dd>Nobody can sign you up but you.</dd>
     </div>
-  </div>
+    <div>
+      <dt>Passwords are hashed with bcrypt</dt>
+      <dd>They are never stored in plain text.</dd>
+    </div>
+    <div>
+      <dt>Five wrong tries locks the account</dt>
+      <dd>It unlocks again after 15 minutes.</dd>
+    </div>
+    <div>
+      <dt>You can stop the emails at any time</dt>
+      <dd>One link, from your account or the foot of any reminder.</dd>
+    </div>
+  </dl>
+</section>
+
+<section class="closing wrap" data-reveal>
+  <h2>Save tomorrow&rsquo;s shift now.</h2>
+  <a href="/register" class="btn btn-lg">Get shift reminders</a>
+  <p class="hero-note">Free. No app to install.</p>
 </section>
 
 {% endblock %}

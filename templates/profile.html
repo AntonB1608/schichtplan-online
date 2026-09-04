@@ -9,13 +9,6 @@
     <h2>Your profile</h2>
     <p class="muted">Where you work, and when your reminders arrive.</p>
 
-    {% if error_message %}
-      <div class="alert alert-error">{{ error_message }}</div>
-    {% endif %}
-    {% if good_message %}
-      <div class="alert alert-success">{{ good_message }}</div>
-    {% endif %}
-
     <form method="POST" action="/profile">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
@@ -23,26 +16,57 @@
         <label for="city">City</label>
         <input type="text" id="city" name="city"
                placeholder="Ludwigshafen"
-               value="{{ user.user_city or '' if user else '' }}" required autofocus>
+               value="{{ user.city or '' }}" required autofocus>
+        <p class="field-hint">Sets your timezone and the weather in your reminders.</p>
       </div>
-      <div class="field">
-        <label for="email_time_evening">Evening reminder — the night before your shift</label>
-        <input type="time" id="email_time_evening" name="email_time_evening"
-                placeholder="Reminder for the next day"
-                value="{{ user.email_time_evening or '' if user else '' }}" required>
+
+      <div class="form-section">
+        <h3>Daily reminder</h3>
+        <p class="muted">One email a day about the day ahead.</p>
+
+        <div class="field-inline">
+          <input type="checkbox" id="daily_reminder_enabled" name="daily_reminder_enabled"
+                 {% if user.daily_reminder_enabled %}checked{% endif %}>
+          <label for="daily_reminder_enabled">Send me a daily reminder</label>
+        </div>
+
+        <div class="field">
+          <label for="daily_reminder_time">Time</label>
+          <input type="time" id="daily_reminder_time" name="daily_reminder_time"
+                 value="{{ user.daily_reminder_time.strftime('%H:%M') }}" required>
+          <p class="field-hint">In your local time.</p>
+        </div>
       </div>
-      <div class="field">
-        <label for="email_time_morning"> Morning reminder — on the day itself</label>
-        <input type="time" id="email_time_morning" name="email_time_morning"
-                placeholder="Reminder for the same day"
-                value="{{ user.email_time_morning or '' if user else '' }}" required>
+
+      <div class="form-section">
+        <h3>Shift reminder</h3>
+        <p class="muted">A second email shortly before a shift starts.</p>
+
+        <div class="field-inline">
+          <input type="checkbox" id="shift_reminder_enabled" name="shift_reminder_enabled"
+                 {% if user.shift_reminder_enabled %}checked{% endif %}>
+          <label for="shift_reminder_enabled">Send me a shift reminder</label>
+        </div>
+
+        <div class="field">
+          <label for="shift_reminder_lead_minutes">How far ahead</label>
+          <select id="shift_reminder_lead_minutes" name="shift_reminder_lead_minutes">
+            {% for minutes in LEAD_MINUTES %}
+              <option value="{{ minutes }}"
+                      {% if user.shift_reminder_lead_minutes == minutes %}selected{% endif %}>
+                {{ minutes }} minutes before
+              </option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
-      
+
       <button type="submit" class="btn btn-block">Save profile</button>
     </form>
 
     <div class="form-foot">
-      <a href="/index">Add a shift</a>
+      <p><a href="/index">Add a shift</a></p>
+      <p><a href="/unsubscribe">Turn all reminders off</a></p>
     </div>
 
   </div>

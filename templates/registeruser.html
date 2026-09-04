@@ -9,11 +9,7 @@
     <h2>Set your password</h2>
     <p class="muted">Min. 8 characters, including one special character.</p>
 
-    {% if error_message %}
-      <div class="alert alert-error">{{ error_message }}</div>
-    {% endif %}
-
-    <form method="POST" action="{% if token %}/reset/{{ token }}{% else %}/registeruser{% endif %}">
+    <form method="POST" action="/registeruser">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="field">

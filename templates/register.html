@@ -9,10 +9,6 @@
     <h2>Create an account</h2>
     <p class="muted">We'll send a link to confirm your email address.</p>
 
-    {% if error_message %}
-      <div class="alert alert-error">{{ error_message }}</div>
-    {% endif %}
-
     <form method="POST" action="/register">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 

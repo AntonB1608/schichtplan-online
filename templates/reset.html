@@ -9,10 +9,6 @@
     <h2>Reset your password</h2>
     <p class="muted">Enter your email and we'll send you a link.</p>
 
-    {% if error_message %}
-      <div class="alert alert-error">{{ error_message }}</div>
-    {% endif %}
-
     <form method="POST" action="/reset">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
