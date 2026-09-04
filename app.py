@@ -44,6 +44,23 @@ csrf = CSRFProtect(app)
  
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
+
+# daily_reminder_time is a DateTime column, but only its time part is used.
+REMINDER_DAY = datetime(2000, 1, 1)
+
+SHIFT_TYPES = {
+    "early": "Early shift",
+    "late": "Late shift",
+    "night": "Night shift",
+    "off": "Day off",
+}
+
+LEAD_MINUTES = [30, 60, 90, 120, 180]
+
+
+@app.context_processor
+def inject_shift_types():
+    return {"SHIFT_TYPES": SHIFT_TYPES, "LEAD_MINUTES": LEAD_MINUTES}
  
  
 # MODELS
@@ -60,7 +77,7 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(app, model_class=Base)
 migrate = Migrate(app, db)
 class User(db.Model):
- 
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(40), unique=True)
     mail: Mapped[str] = mapped_column(String(100), unique=True)
@@ -72,7 +89,7 @@ class User(db.Model):
     registration_completed: Mapped[bool] = mapped_column(default=False)
     time_zone: Mapped[Optional[str]] = mapped_column()
     daily_reminder_enabled: Mapped[bool] = mapped_column(default=True, nullable=False)
-    daily_reminder_time: Mapped[datetime] = mapped_column(default=time(18, 0), nullable=False)
+    daily_reminder_time: Mapped[datetime] = mapped_column(default=REMINDER_DAY.replace(hour=18), nullable=False)
     shift_reminder_enabled: Mapped[bool] = mapped_column(default=True, nullable=False)
     shift_reminder_lead_minutes: Mapped[int] = mapped_column(default=60, nullable=False)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
@@ -256,7 +273,7 @@ def login():
     if not request.method == "POST":
         return render_template("login.html")
  
-    now = datetime.today()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     username = request.form["username"]
     password = request.form["password"]
  
@@ -286,7 +303,7 @@ def login():
         user.locked_until = None
         session["user_id"] = user.id
         db.session.commit()
-        if not user.city or not user.email_time_morning or not user.email_time_evening:
+        if not user.city:
             return redirect("/profile")
         else:
             return redirect("/index")
@@ -294,7 +311,7 @@ def login():
     user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
     if user.failed_login_attempts >= 5:
 
-        user.locked_until = datetime.today() + timedelta(minutes=15)
+        user.locked_until = now + timedelta(minutes=15)
         db.session.commit()
         flash("Too many failed attempts. Account locked for 15 minutes.", "error")
         return render_template("login.html")
@@ -323,7 +340,7 @@ def reset_password():
             return render_template("passwordreset.html")
  
         token = secrets.token_urlsafe(64)
-        token_date = Verification.token_date.replace(tzinfo=timezone.utc)
+        token_date = datetime.now(timezone.utc)
         verify_link = f"{request.url_root}reset/{token}"
         subject = "Reset your password"
         html = build_action_mail(
@@ -346,62 +363,57 @@ def reset_password():
 @app.route('/reset/<token>', methods=["GET", "POST"])
 def reset_token(token):
 
-    if request.method == "GET":
-        verification = Verification.query.filter_by(token=token).first()
+    verification = Verification.query.filter_by(token=token).first()
 
-        if not verification:
+    if not verification:
 
-            flash("Invalid token.", "error")
-            return render_template("register.html")
- 
-        real_user = User.query.filter_by(id=verification.user_id).first()
+        flash("This link is invalid or has already been used.", "error")
+        return redirect("/reset")
 
-        if not real_user:
+    token_time = verification.token_date.replace(tzinfo=timezone.utc)
+    date_expired = token_time + timedelta(hours=1)
 
-            flash("User not found.", "error")
-            return render_template("register.html")
- 
-        token_time = verification.token_date.replace(tzinfo=timezone.utc)
-        date_expired = token_time + timedelta(hours=1)
- 
-        if datetime.now(timezone.utc) > date_expired:
+    if datetime.now(timezone.utc) > date_expired:
 
-            flash("Expired token", "error")
-            return render_template("register.html")
- 
-        return render_template("registeruser.html", token=token)
-    else:
-        verification = Verification.query.filter_by(token=token).first()
-        if not verification:
-            return render_template("register.html")
- 
-        sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
-        password = request.form["password"]
-        password_again = request.form["password_again"]
- 
-        if len(password) < 8:
-            flash("Password too short (min. 8 characters)", "error")
-            return render_template("newpassword.html", token=token)
-
-        if not any(z in password for z in sonderzeichen):
-
-            flash("Password doesn't contain special character", "error")
-            return render_template("newpassword.html", token=token)
-        
-        if password != password_again:
-
-            flash("Passwords don't match", "error")
-            return render_template("newpassword.html", token=token)
- 
-        user = User.query.filter_by(id=verification.user_id).first()
-        if not user:
-            return redirect("/register")
- 
-        user.password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        user.password_hash = user.password_hash.decode("utf-8")
+        flash("This link has expired.", "error")
         db.session.delete(verification)
         db.session.commit()
-        return redirect("/login")
+        return redirect("/reset")
+
+    real_user = User.query.filter_by(id=verification.user_id).first()
+
+    if not real_user:
+
+        flash("Account not found.", "error")
+        return redirect("/reset")
+
+    if request.method == "GET":
+        return render_template("newpassword.html", token=token)
+
+    sonderzeichen = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
+    password = request.form["password"]
+    password_again = request.form["password_again"]
+
+    if len(password) < 8:
+        flash("Password too short (min. 8 characters)", "error")
+        return render_template("newpassword.html", token=token)
+
+    if not any(z in password for z in sonderzeichen):
+
+        flash("Password doesn't contain special character", "error")
+        return render_template("newpassword.html", token=token)
+
+    if password != password_again:
+
+        flash("Passwords don't match", "error")
+        return render_template("newpassword.html", token=token)
+
+    real_user.password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    real_user.password_hash = real_user.password_hash.decode("utf-8")
+    db.session.delete(verification)
+    db.session.commit()
+    flash("Password changed. You can log in now.", "success")
+    return redirect("/login")
  
  
 
@@ -414,22 +426,36 @@ def show_profile():
         return redirect("/login")
 
     user = db.session.get(User, session["user_id"])
-    user = db.session.get(User, session["user_id"])
     if user is None:
         return redirect("/login")
     if request.method != "POST":
         return render_template("profile.html", user=user)
 
-    email_time_morning = request.form.get("email_time_morning")
-    email_time_evening = request.form.get("email_time_evening")
     city = request.form.get("city")
-
-    if not email_time_morning or not email_time_evening:
-        flash("No email time set", "error")
-        return render_template("profile.html", user=user)
+    daily_reminder_enabled = request.form.get("daily_reminder_enabled") == "on"
+    daily_reminder_time = request.form.get("daily_reminder_time")
+    shift_reminder_enabled = request.form.get("shift_reminder_enabled") == "on"
+    lead_minutes = request.form.get("shift_reminder_lead_minutes")
 
     if not city:
         flash("No city set.", "error")
+        return render_template("profile.html", user=user)
+
+    if daily_reminder_enabled and not daily_reminder_time:
+        flash("No time set for the daily reminder.", "error")
+        return render_template("profile.html", user=user)
+
+    if daily_reminder_time:
+        try:
+            parsed_time = datetime.strptime(daily_reminder_time, "%H:%M").time()
+        except ValueError:
+            flash("Invalid reminder time.", "error")
+            return render_template("profile.html", user=user)
+    else:
+        parsed_time = user.daily_reminder_time.time()
+
+    if shift_reminder_enabled and (not lead_minutes or not lead_minutes.isdigit() or int(lead_minutes) not in LEAD_MINUTES):
+        flash("Invalid lead time for the shift reminder.", "error")
         return render_template("profile.html", user=user)
 
     key = os.getenv("openweather_key")
@@ -446,16 +472,19 @@ def show_profile():
         return render_template("profile.html", user=user)
 
     user.city = city
-    user.time_zone = response["timezone"]
-    user.shift_reminder_lead_minutes = int(request.form.get("shift_reminder_lead_minutes", 60))
-    daily_reminder_time = request.form.get("daily_reminder_time")
-    if daily_reminder_time:
-        user.daily_reminder_time = datetime.strptime(daily_reminder_time, "%H:%M").time()
-    
-    db.session.commit()
-    return redirect("/index")
+    user.time_zone = str(response["timezone"])
+    user.daily_reminder_enabled = daily_reminder_enabled
+    user.daily_reminder_time = datetime.combine(REMINDER_DAY.date(), parsed_time)
+    user.shift_reminder_enabled = shift_reminder_enabled
+    if shift_reminder_enabled:
+        user.shift_reminder_lead_minutes = int(lead_minutes)
 
-@app.route("/unsubscribe", methods=["GET", "POST"])
+    db.session.commit()
+    flash("Profile saved.", "success")
+    return redirect("/index")
+ 
+
+@app.route("/unsubscribe", methods=["POST", "GET"])
 def unsubscribe():
     if "user_id" not in session:
 
@@ -463,9 +492,11 @@ def unsubscribe():
     if request.method == "GET":
         return render_template("unsubscribe.html")
     if request.method == "POST":
-        user = User.query.filter_by(id=session["user_id"]).first()
-        user.email_time_morning = None
-        user.email_time_evening = None
+        user = db.session.get(User, session["user_id"])
+        if user is None:
+            return redirect("/login")
+        user.daily_reminder_enabled = False
+        user.shift_reminder_enabled = False
         db.session.commit()
         flash("Reminders turned off.", "success")
         return redirect("/profile")
@@ -482,29 +513,55 @@ def schicht_eintragen():
     user_id = session["user_id"]
 
     if request.method == "POST":
-        date = request.form["datum"]
-        shift_type = request.form["shift_type"]
-        note = request.form["note"]
-        if not note:
-            note = None
-        if not shift_type:
+        date = request.form.get("datum")
+        shift_type = request.form.get("shift_type")
+        note = request.form.get("note") or None
+
+        if shift_type not in SHIFT_TYPES and shift_type != "custom":
             flash("Please select a shift type.", "error")
             return render_template("index.html")
-        zeit_anfang = request.form["zeit_anfang"]
-        zeit_ende = request.form["zeit_ende"]
-        if not date or not zeit_anfang or not zeit_ende:
-            flash("Please fill in all fields.", "error")
-            return render_template("index.html")
-        date= datetime.strptime(date, "%Y-%m-%d")
-        zeit_anfang = datetime.strptime(zeit_anfang, "%H:%M").time()
-        zeit_ende = datetime.strptime(zeit_ende, "%H:%M").time()
-        start = datetime.combine(date, zeit_anfang)
-        end = datetime.combine(date, zeit_ende)
-        if end <= start:
-            end = end + timedelta(days=1)
-        created_at = datetime.now(timezone.utc)
 
-        db.session.add(Shift(user_id=user_id, start=start, end=end, shift_type=shift_type, note=note, created_at=created_at))
+        if shift_type == "custom":
+            shift_type = (request.form.get("shift_type_custom") or "").strip()
+            if not shift_type:
+                flash("Please name your own shift type.", "error")
+                return render_template("index.html")
+            if len(shift_type) > 30:
+                flash("Shift type too long (max. 30 characters).", "error")
+                return render_template("index.html")
+
+        if not date:
+            flash("Please pick a date.", "error")
+            return render_template("index.html")
+
+        try:
+            date = datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            flash("Invalid date.", "error")
+            return render_template("index.html")
+
+        if shift_type == "off":
+            start = date
+            end = None
+        else:
+            zeit_anfang = request.form.get("zeit_anfang")
+            zeit_ende = request.form.get("zeit_ende")
+            if not zeit_anfang or not zeit_ende:
+                flash("Please fill in all fields.", "error")
+                return render_template("index.html")
+            try:
+                zeit_anfang = datetime.strptime(zeit_anfang, "%H:%M").time()
+                zeit_ende = datetime.strptime(zeit_ende, "%H:%M").time()
+            except ValueError:
+                flash("Invalid time.", "error")
+                return render_template("index.html")
+            start = datetime.combine(date, zeit_anfang)
+            end = datetime.combine(date, zeit_ende)
+            if end <= start:
+                end = end + timedelta(days=1)
+
+        db.session.add(Shift(user_id=user_id, start=start, end=end, shift_type=shift_type,
+                             note=note, created_at=datetime.now(timezone.utc)))
         db.session.commit()
         flash("Shift saved successfully", "success")
         return redirect("/index")
@@ -512,17 +569,14 @@ def schicht_eintragen():
         return render_template("index.html")
  
  
-@app.route("/shifts", methods=["GET", "POST"])
+@app.route("/shifts", methods=["GET"])
 def show_shift():
- 
     if "user_id" not in session:
         return redirect("/login")
 
-    else:
- 
-        user_id = session["user_id"]
-        shifts = Shift.query.filter_by(user_id=user_id).all()
-        return render_template("shifts.html", shifts=shifts)
+    user_id = session["user_id"]
+    shifts = Shift.query.filter_by(user_id=user_id).order_by(Shift.start).all()
+    return render_template("shifts.html", shifts=shifts)
  
  
 @app.route("/delete/<int:date_id>", methods=["POST"])
