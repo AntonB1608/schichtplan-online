@@ -6,20 +6,22 @@
 {% block content %}
 
 <header class="hero">
-  <div class="wrap">
-    <h1>Never miss the start of a shift.</h1>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <h1>Never miss the start of a shift.</h1>
 
-    <p class="lede">
-      Save your roster once. Get an email the evening before, and another
-      before you leave. The weather for your city comes with it.
-    </p>
+      <p class="lede">
+        Save your roster once. Get an email the evening before, and another
+        before you leave. The weather for your city comes with it.
+      </p>
 
-    <div class="hero-actions">
-      <a href="/register" class="btn btn-lg">Get shift reminders</a>
-      <p class="hero-note">Free. No app to install.</p>
+      <div class="hero-actions">
+        <a href="/register" class="btn btn-lg">Get shift reminders</a>
+        <p class="hero-note">Free. No app to install.</p>
+      </div>
     </div>
 
-    <div class="mail-frame">
+    <div class="hero-mail">
       <article class="mail">
         <div class="mail-bar">
           <svg class="mail-avatar" viewBox="0 0 28 28" aria-hidden="true">
@@ -67,80 +69,94 @@
   </div>
 </header>
 
-<section class="section wrap" data-reveal>
-  <div class="section-head">
-    <h2>Three steps, then it runs</h2>
-    <p class="muted">Set it up once. Nothing to open again until your roster changes.</p>
-  </div>
+<section class="band">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Three steps, then it runs</h2>
+      <p class="muted">Set it up once. Nothing to open again until your roster changes.</p>
+    </div>
 
-  <ol class="steps">
-    <li>
-      <h3>Save a shift</h3>
-      <p>A date, a start and an end time, and the kind of shift it is.</p>
-    </li>
-    <li>
-      <h3>One email in the evening</h3>
-      <p>At 18:00 by default, telling you what tomorrow looks like.</p>
-    </li>
-    <li>
-      <h3>One before you leave</h3>
-      <p>Anywhere from 30 minutes to 3 hours ahead. You pick the lead time.</p>
-    </li>
-  </ol>
+    <ol class="steps">
+      <li>
+        <div>
+          <h3>Save a shift</h3>
+          <p>A date, a start and an end time, and the kind of shift it is.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>One email in the evening</h3>
+          <p>At 18:00 by default, telling you what tomorrow looks like.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>One before you leave</h3>
+          <p>Anywhere from 30 minutes to 3 hours ahead. You pick the lead time.</p>
+        </div>
+      </li>
+    </ol>
 
-  <p class="hero-note">
-    Both run in your own timezone, and either one can be switched off on its own.
-  </p>
-</section>
-
-<section class="section wrap" data-reveal>
-  <div class="section-head">
-    <h2>Your shifts, your names</h2>
-    <p class="muted">Four types are built in. If your roster calls it something
-      else, type that instead.</p>
-  </div>
-
-  <div class="types">
-    <span class="type-chip">Early shift</span>
-    <span class="type-chip">Late shift</span>
-    <span class="type-chip">Night shift</span>
-    <span class="type-chip">Day off</span>
-    <span class="type-chip">Your own name</span>
+    <p class="fineprint">
+      Both run in your own timezone, and either one can be switched off on its own.
+    </p>
   </div>
 </section>
 
-<section class="section wrap" data-reveal>
-  <div class="section-head">
+<section class="band band-plain">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Your shifts, your names</h2>
+      <p class="muted">Four types are built in. If your roster calls it something
+        else, type that instead.</p>
+    </div>
+
+    <div class="types">
+      <span class="type-chip">Early shift</span>
+      <span class="type-chip">Late shift</span>
+      <span class="type-chip">Night shift</span>
+      <span class="type-chip">Day off</span>
+      <span class="type-chip">Your own name</span>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
     <h2>Built by someone who overslept</h2>
+
+    <p class="maker">
+      Built by a shift worker who got tired of missing his own roster. It does
+      one thing, it does not sell anything, and your address is used for the
+      reminders and nothing else.
+    </p>
+
+    <dl class="trust">
+      <div>
+        <dt>Your email is verified</dt>
+        <dd>Nobody can sign you up but you.</dd>
+      </div>
+      <div>
+        <dt>Passwords are hashed with bcrypt</dt>
+        <dd>They are never stored in plain text.</dd>
+      </div>
+      <div>
+        <dt>Five wrong tries locks the account</dt>
+        <dd>It unlocks again after 15 minutes.</dd>
+      </div>
+      <div>
+        <dt>You can stop the emails at any time</dt>
+        <dd>One link, from your account or the foot of any reminder.</dd>
+      </div>
+    </dl>
+
+    <p class="fineprint">
+      What is stored and why, in plain words: <a href="/datenschutz">privacy policy</a>.
+    </p>
   </div>
-
-  <p class="maker">
-    Built by a shift worker who got tired of missing his own roster. It does
-    one thing, it does not sell anything, and your address is used for the
-    reminders and nothing else.
-  </p>
-
-  <dl class="trust">
-    <div>
-      <dt>Your email is verified</dt>
-      <dd>Nobody can sign you up but you.</dd>
-    </div>
-    <div>
-      <dt>Passwords are hashed with bcrypt</dt>
-      <dd>They are never stored in plain text.</dd>
-    </div>
-    <div>
-      <dt>Five wrong tries locks the account</dt>
-      <dd>It unlocks again after 15 minutes.</dd>
-    </div>
-    <div>
-      <dt>You can stop the emails at any time</dt>
-      <dd>One link, from your account or the foot of any reminder.</dd>
-    </div>
-  </dl>
 </section>
 
-<section class="closing wrap" data-reveal>
+<section class="closing wrap">
   <h2>Save tomorrow&rsquo;s shift now.</h2>
   <a href="/register" class="btn btn-lg">Get shift reminders</a>
   <p class="hero-note">Free. No app to install.</p>
