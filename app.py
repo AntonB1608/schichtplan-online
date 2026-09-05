@@ -45,7 +45,7 @@ csrf = CSRFProtect(app)
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
 
-# daily_reminder_time is a DateTime column, but only its time part is used.
+
 REMINDER_DAY = datetime(2000, 1, 1)
 
 SHIFT_TYPES = {
@@ -430,21 +430,17 @@ def show_profile():
         return redirect("/login")
     if request.method != "POST":
         return render_template("profile.html", user=user)
-
+    
     city = request.form.get("city")
-    daily_reminder_enabled = request.form.get("daily_reminder_enabled") == "on"
     daily_reminder_time = request.form.get("daily_reminder_time")
-    shift_reminder_enabled = request.form.get("shift_reminder_enabled") == "on"
     lead_minutes = request.form.get("shift_reminder_lead_minutes")
 
     if not city:
         flash("No city set.", "error")
         return render_template("profile.html", user=user)
 
-    if daily_reminder_enabled and not daily_reminder_time:
-        flash("No time set for the daily reminder.", "error")
-        return render_template("profile.html", user=user)
-
+    
+    
     if daily_reminder_time:
         try:
             parsed_time = datetime.strptime(daily_reminder_time, "%H:%M").time()
@@ -453,11 +449,18 @@ def show_profile():
             return render_template("profile.html", user=user)
     else:
         parsed_time = user.daily_reminder_time.time()
-
-    if shift_reminder_enabled and (not lead_minutes or not lead_minutes.isdigit() or int(lead_minutes) not in LEAD_MINUTES):
-        flash("Invalid lead time for the shift reminder.", "error")
-        return render_template("profile.html", user=user)
-
+    if lead_minutes:
+        try:
+            lead_minutes = int(lead_minutes)
+            if lead_minutes not in LEAD_MINUTES:
+                raise ValueError
+        except ValueError:
+            flash("Invalid lead time.", "error")
+            return render_template("profile.html", user=user)
+    user.daily_reminder_time = REMINDER_DAY.replace(hour=parsed_time.hour, minute=parsed_time.minute)
+    if lead_minutes:
+        user.shift_reminder_lead_minutes = lead_minutes
+        
     key = os.getenv("openweather_key")
     url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(city)}&appid={key}&units=metric&lang=de"
 
@@ -473,18 +476,15 @@ def show_profile():
 
     user.city = city
     user.time_zone = str(response["timezone"])
-    user.daily_reminder_enabled = daily_reminder_enabled
-    user.daily_reminder_time = datetime.combine(REMINDER_DAY.date(), parsed_time)
-    user.shift_reminder_enabled = shift_reminder_enabled
-    if shift_reminder_enabled:
-        user.shift_reminder_lead_minutes = int(lead_minutes)
-
+    
     db.session.commit()
     flash("Profile saved.", "success")
     return redirect("/index")
  
 
-@app.route("/unsubscribe", methods=["POST", "GET"])
+
+
+@app.route("/unsubscribe", methods=["POST", "GET"]) 
 def unsubscribe():
     if "user_id" not in session:
 
@@ -541,8 +541,8 @@ def schicht_eintragen():
             return render_template("index.html")
 
         if shift_type == "off":
-            start = date
-            end = None
+            start = datetime.combine(date, time(0, 0))
+            end = start
         else:
             zeit_anfang = request.form.get("zeit_anfang")
             zeit_ende = request.form.get("zeit_ende")
