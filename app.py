@@ -460,7 +460,7 @@ def show_profile():
     user.daily_reminder_time = REMINDER_DAY.replace(hour=parsed_time.hour, minute=parsed_time.minute)
     if lead_minutes:
         user.shift_reminder_lead_minutes = lead_minutes
-        
+
     key = os.getenv("openweather_key")
     url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(city)}&appid={key}&units=metric&lang=de"
 
@@ -699,7 +699,8 @@ def send_reminder(user, date_str, kind):
               <tr>
                 <td style="padding:0 32px;">
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
-                         style="border-top:1px solid #d2d2d7;">
+                         style="border-top:1
+                        px solid #d2d2d7;">
                     <tr>
                       <td style="padding:20px 0 0 0;font-family:{font};font-size:15px;color:#3a3a3c;">
                         {weather_text}
