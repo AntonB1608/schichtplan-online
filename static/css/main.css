@@ -1,82 +1,7 @@
-/* Shiftmates
-   ---------------------------------------------------------------------------
-   The page is set like a printed spread. Everything hangs off one left edge, and
-   only the line length changes: headings run wide, prose stops at 36rem. Rules
-   divide the page instead of cards floating on shadows, and every rule sits on
-   the same padding box so they all start and end on the same two verticals.
-
-   1 Tokens · 2 Base · 3 Type · 4 Layout · 5 Nav · 6 Buttons · 7 Forms
-   8 Tables · 9 Feedback · 10 Notice · 11 Home · 12 Footer · 13 Legal · 14 Print
-   ------------------------------------------------------------------------- */
-
-/* 1 · Tokens ============================================================== */
-
-:root {
-  color-scheme: light dark;
-
-  --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino,
-           "Book Antiqua", Georgia, serif;
-  --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-
-  /* Type — seven steps, nothing outside this list */
-  --fs-1: 0.8125rem;
-  --fs-2: 0.9375rem;
-  --fs-3: 1.0625rem;
-  --fs-4: 1.375rem;
-  --fs-5: 1.875rem;
-  --fs-6: clamp(2.25rem, 5vw, 3.25rem);
-  --fs-7: clamp(2.5rem, 6.5vw, 4.25rem);
-
-  --lh-tight: 1.12;
-  --lh-snug: 1.3;
-  --lh-body: 1.6;
-
-  /* Space — base 4, nothing outside this list */
-  --sp-1: 0.25rem;
-  --sp-2: 0.5rem;
-  --sp-3: 0.75rem;
-  --sp-4: 1rem;
-  --sp-5: 1.5rem;
-  --sp-6: 2rem;
-  --sp-7: 3rem;
-  --sp-8: 4.5rem;
-
-  /* Corners stay small. Large radii are what make a page look inflated. */
-  --r: 4px;
-  --r-lg: 6px;
-
-  /* One shell for every page so the nav, the headings and the footer share a
-     left edge. Content inside is capped separately — that is where the
-     hierarchy comes from, not from re-centring narrower boxes. */
-  --wrap: 58rem;
-  --column: 44rem;
-  --measure: 36rem;
-  --nav-h: 3.25rem;
-}
 /* Shiftmates — Editorial-Look: warmes Papier, Didot-Serifen für Überschriften,
    feine Linien statt Karten und Schatten, scharfe Ecken, ein schwarzer Button. */
 
 :root {
-  --paper: #fbfaf8;
-  --paper-2: #f4f2ee;
-  --surface: #ffffff;
-  --rule: #ded9d0;
-  --rule-strong: #b8b1a5;
-  --ink: #1a1a1c;
-  --ink-2: #55524c;
-  --ink-3: #6e6a62;
-  --accent: #9c3d16;
-  --accent-hover: #7d3011;
-  --accent-ink: #ffffff;
-  --accent-wash: #f6ece5;
-  --danger: #9b2119;
-  --danger-wash: #f9eae8;
-  --success: #1f5c37;
-  --success-wash: #e8f2eb;
-  --focus: #9c3d16;
-}
   /* Farben */
   --papier: #faf9f6;      /* Seitenhintergrund */
   --weiss: #fff;          /* Karten, Eingabefelder */
@@ -88,40 +13,16 @@
   --rot: #9e2b25;
   --gruen: #2e6b39;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #14130f;
-    --paper-2: #1c1a16;
-    --surface: #1c1a16;
-    --rule: #35322b;
-    --rule-strong: #555147;
-    --ink: #f2efe9;
-    --ink-2: #b3ada1;
-    --ink-3: #928c81;
-    --accent: #e8895c;
-    --accent-hover: #f2a985;
-    --accent-ink: #1a0f08;
-    --accent-wash: #2a1c14;
-    --danger: #f08b80;
-    --danger-wash: #2c1a17;
-    --success: #7fc79b;
-    --success-wash: #16251c;
-    --focus: #e8895c;
-  }
   /* Schriften */
   --serife: "Didot", "New York", Georgia, "Times New Roman", serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* 2 · Base ================================================================ */
 /* ===== Grundlagen ===== */
 
-*, *::before, *::after { box-sizing: border-box; }
 * { box-sizing: border-box; }
 
 html {
-  -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
   background: var(--papier);
   scroll-behavior: smooth; /* für den "See how it works"-Sprung */
 }
@@ -130,21 +31,463 @@ body {
   margin: 0;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: var(--fs-3);
-  line-height: var(--lh-body);
   flex-direction: column; /* damit der Footer unten bleibt */
   color: var(--tinte);
   font: 17px/1.5 var(--sans);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-.page { flex: 1 0 auto; }
-
-img, svg { max-width: 100%; height: auto; }
 a { color: var(--tinte); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--linie); }
 a:hover { text-decoration-color: var(--tinte); }
+
+:focus-visible { outline: 2px solid var(--tinte); outline-offset: 3px; }
+
+/* Nur für Screenreader sichtbar */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ===== Schrift ===== */
+
+h1, h2, h3 { margin: 0; color: var(--tinte); }
+h1 { font: 400 68px/1.04 var(--serife); }
+h2 { font: 400 40px/1.12 var(--serife); }
+h3 { font: 600 17px/1.35 var(--sans); }
+
+/* Kleinere Serifen-Titel auf Formular- und Rechtsseiten */
+.page-head h2, .form-card h2, .notice-card h2, .legal h2 { font: 400 32px/1.15 var(--serife); }
+
+p { margin: 0 0 16px; }
+p:last-child { margin-bottom: 0; }
+
+.lede { color: var(--text); font-size: 20px; }
+
+.muted, .field-hint, .hero-note, .notice-hint,
+.mail-caption, .fineprint, .legal-source {
+  color: var(--grau);
+  font-size: 13px;
+}
+
+/* Gesperrte Großbuchstaben, z. B. SHIFT TYPES */
+.caps, .kicker, .legal-caps {
+  color: var(--grau);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ===== Seitengerüst ===== */
+
+.wrap {
+  width: 100%;
+  max-width: 1024px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+.wrap-read { max-width: 640px; }
+
+.page { flex: 1; padding: 48px 0 96px; }
+.page-head { margin-bottom: 32px; }
+.page-head .muted { margin-top: 8px; }
+.stack-lg > * + * { margin-top: 24px; }
+
+/* ===== Navigation ===== */
+
+.navbar-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--papier);
+  border-bottom: 1px solid var(--linie);
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  max-width: 1024px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.navbar-logo a { font: 400 22px var(--serife); text-decoration: none; }
+
+.navbar-links { display: flex; gap: 24px; }
+
+.navbar-links a {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  color: var(--grau);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.navbar-links a:hover { color: var(--tinte); }
+.navbar-links a[aria-current="page"] { color: var(--tinte); border-bottom: 1px solid var(--tinte); }
+
+/* ===== Buttons ===== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 32px;
+  border: 1px solid var(--tinte);
+  background: var(--tinte);
+  color: var(--papier);
+  font: 500 16px var(--sans);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn:hover { background: #000; color: #fff; }
+
+.btn-lg { min-height: 52px; }
+.btn-block { display: flex; width: 100%; }
+
+/* Zweitrangiger Button: nur Rahmen */
+.btn-ghost { background: none; color: var(--tinte); border-color: var(--linie); }
+.btn-ghost:hover { background: none; color: var(--tinte); border-color: var(--tinte); }
+
+/* Löschen-Knopf in der Tabelle: unauffällig, rot beim Überfahren */
+.btn-danger { background: none; border: none; color: var(--grau); font-size: 14px; padding: 0 8px; }
+.btn-danger:hover { background: none; color: var(--rot); }
+
+.link-more { font-size: 16px; white-space: nowrap; }
+
+/* ===== Formulare ===== */
+
+.form-card, .notice-card {
+  max-width: 460px;
+  margin-inline: auto;
+  padding: 32px;
+  background: var(--weiss);
+  border: 1px solid var(--linie);
+}
+
+.form-card > .muted { margin-top: 8px; }
+.form-card form { margin-top: 24px; }
+
+.form-section { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--linie-hell); }
+.form-section > h3 { margin-bottom: 4px; }
+.form-section > .muted { margin-bottom: 16px; }
+
+.field { margin-bottom: 16px; }
+
+.field > label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--grau);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.field-hint { display: block; margin-top: 8px; }
+.label-hint { margin-left: 8px; color: var(--grau); letter-spacing: 0; text-transform: none; font-weight: 400; }
+
+input, select, textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  background: var(--weiss);
+  border: 1px solid var(--linie);
+  border-radius: 0;
+  color: var(--tinte);
+  font: 17px var(--sans);
+}
+input:hover, select:hover, textarea:hover { border-color: var(--grau); }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--tinte); }
+
+textarea { min-height: 96px; padding-block: 8px; line-height: 1.5; resize: vertical; }
+
+/* Nebeneinander liegende Felder (z. B. Start / Ende) */
+.field-row { display: flex; gap: 16px; }
+.field-row > .field { flex: 1; }
+
+/* Checkbox mit Beschriftung in einer Zeile */
+.field-inline { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 8px; }
+.field-inline label { margin: 0; font-size: 15px; font-weight: 500; cursor: pointer; }
+
+input[type="checkbox"] {
+  width: 20px; height: 20px;
+  min-height: 0;
+  padding: 0;
+  accent-color: var(--tinte); /* Browser-Checkbox, nur in Tinte gefärbt */
+  cursor: pointer;
+}
+
+.form-foot { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--linie-hell); font-size: 15px; }
+.form-foot p { margin-bottom: 8px; }
+
+/* ===== Tabelle (Schichtliste) ===== */
+
+.table-card { background: var(--weiss); border: 1px solid var(--linie); }
+
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+
+thead th {
+  height: 44px;
+  padding-inline: 24px;
+  border-bottom: 1px solid var(--linie);
+  color: var(--grau);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+tbody td { height: 56px; padding: 8px 24px; border-bottom: 1px solid var(--linie-hell); font-size: 15px; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--papier); }
+
+.is-right { text-align: right; }
+
+/* Schichttyp-Etikett in der Tabelle */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding-inline: 8px;
+  border: 1px solid var(--linie);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.tag-off { color: var(--grau); border-style: dashed; } /* freier Tag */
+
+.empty-state { padding: 96px 24px; text-align: center; color: var(--grau); }
+
+/* ===== Meldungen (Flash) ===== */
+
+.flash-wrap { margin-bottom: 24px; }
+
+.alert {
+  padding: 16px;
+  border: 1px solid var(--linie);
+  border-left: 2px solid var(--tinte);
+  background: var(--weiss);
+  font-size: 15px;
+}
+.alert + .alert { margin-top: 8px; }
+.alert-error { border-left-color: var(--rot); color: var(--rot); }
+.alert-success { border-left-color: var(--gruen); color: var(--gruen); }
+
+/* ===== Hinweiskarten (z. B. "Mail ist raus") ===== */
+
+.notice-icon {
+  display: grid;
+  place-items: center;
+  width: 48px; height: 48px;
+  margin-bottom: 24px;
+  border: 1px solid var(--linie);
+}
+.notice-icon svg { width: 24px; height: 24px; }
+
+.notice-lead { margin-top: 8px; color: var(--text); font-size: 15px; }
+
+/* Nummerierte Schritte, Zahl kommt per CSS-Zähler */
+.notice-steps { margin: 24px 0 0; padding: 0; list-style: none; counter-reset: schritt; }
+.notice-steps li {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 8px 0;
+  border-top: 1px solid var(--linie-hell);
+  color: var(--text);
+  font-size: 15px;
+  counter-increment: schritt;
+}
+.notice-steps li::before { content: counter(schritt) "."; min-width: 20px; font: 400 18px var(--serife); }
+
+.notice-hint { margin-top: 24px; }
+.notice-card .btn { margin-top: 24px; }
+
+/* ===== Startseite ===== */
+
+/* Hero: Text links, Beispiel-Mail rechts */
+.hero { padding-block: 96px; }
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 64px;
+  align-items: center;
+}
+
+.kicker { display: block; margin-bottom: 24px; }
+.hero h1 { max-width: 12ch; }
+.hero .lede { max-width: 38ch; margin-top: 24px; }
+.hero-actions { display: flex; align-items: center; gap: 24px; margin-top: 32px; }
+.hero-note { margin-top: 16px; }
+
+/* Jede Sektion beginnt mit einer Linie */
+.band { padding-block: 64px; border-top: 1px solid var(--linie); }
+
+.section-head { margin-bottom: 32px; }
+.section-head h2 { margin-top: 8px; }
+.section-head .muted { max-width: 52ch; margin-top: 16px; color: var(--text); font-size: 17px; }
+
+/* Die drei Schritte: große Serifen-Ziffer in der Randspalte */
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: schritt; max-width: 720px; }
+.steps li {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 24px;
+  padding-block: 24px;
+  border-top: 1px solid var(--linie-hell);
+  counter-increment: schritt;
+}
+.steps li:first-child { border-top: none; }
+.steps li::before { content: counter(schritt) "."; font: 400 32px/1 var(--serife); }
+.steps p { margin: 4px 0 0; color: var(--text); font-size: 15px; }
+
+.fineprint { max-width: 720px; margin-top: 24px; }
+
+/* Schichttypen als kursive Serifen-Zeile */
+.types-line { margin: 0; max-width: 32ch; font: italic 400 36px/1.4 var(--serife); }
+.types-line .sep { color: #b8b4ac; font-style: normal; }
+
+/* Vertrauens-Punkte: Begriff links, Erklärung rechts */
+.trust { margin: 0; max-width: 720px; }
+.trust > div {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  padding-block: 16px;
+  border-top: 1px solid var(--linie-hell);
+}
+.trust > div:first-child { border-top: none; }
+.trust dt { font-weight: 600; }
+.trust dd { margin: 0; color: var(--text); font-size: 15px; }
+
+.closing { padding-block: 96px; }
+.closing .btn { margin-top: 32px; }
+
+/* ===== Beispiel-Mail ===== */
+
+.mail { background: var(--weiss); border: 1px solid var(--linie); border-radius: 10px; overflow: hidden; }
+
+.mail-bar { display: flex; align-items: center; gap: 8px; padding: 16px 24px; border-bottom: 1px solid var(--linie-hell); }
+.mail-avatar { width: 28px; height: 28px; }
+.mail-from { font-size: 15px; font-weight: 600; }
+.mail-time { margin-left: auto; color: var(--grau); font-size: 13px; }
+
+.mail-body { padding: 24px; }
+.mail-subject { margin-bottom: 16px; font-size: 18px; font-weight: 600; }
+.mail-line { margin-bottom: 8px; color: var(--text); font-size: 15px; }
+
+.mail-shift { margin-top: 16px; padding: 16px 0; border-block: 1px solid var(--linie-hell); }
+.mail-shift-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.mail-shift-meta { margin: 4px 0 0; color: var(--grau); font-size: 13px; }
+.mail-shift + .mail-line { margin-top: 16px; }
+
+.mail-foot { padding: 16px 24px; border-top: 1px solid var(--linie-hell); color: var(--grau); font-size: 13px; }
+.mail-caption { margin-top: 16px; }
+
+/* ===== Footer ===== */
+
+footer {
+  padding: 48px 24px;
+  border-top: 1px solid var(--linie);
+  color: var(--grau);
+  font-size: 13px;
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--grau); text-decoration: none; }
+.footer-links a:hover { color: var(--tinte); }
+footer p { margin: 0; }
+
+/* ===== Rechtsseiten (Impressum, Datenschutz) ===== */
+
+.legal h2 { margin-bottom: 24px; }
+.legal h3 { margin: 48px 0 8px; font: 400 22px/1.25 var(--serife); }
+.legal p, .legal li { color: var(--text); font-size: 16px; }
+.legal ul { padding-left: 24px; }
+.legal .category { margin-top: 24px; font-weight: 600; }
+.legal-address { margin-bottom: 4px; }
+
+/* ===== Handy ===== */
+
+@media (max-width: 760px) {
+  h1 { font-size: 44px; }
+
+  /* Navbar: kleinere Schrift und Abstände, sonst passt sie eingeloggt nicht in eine Zeile */
+  .navbar { padding-inline: 16px; gap: 16px; }
+  .navbar-logo a { font-size: 18px; }
+  .navbar-links { gap: 10px; }
+  .navbar-links a { font-size: 10px; letter-spacing: 0.5px; white-space: nowrap; }
+
+  h2 { font-size: 32px; }
+  .page-head h2, .form-card h2, .notice-card h2, .legal h2 { font-size: 28px; }
+
+  .hero { padding-block: 48px; }
+  .hero-grid { grid-template-columns: 1fr; gap: 48px; } /* Mail rutscht unter den Text */
+  .hero .lede { font-size: 18px; }
+  .hero-actions { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .band { padding-block: 48px; }
+  .closing { padding-block: 64px; }
+  .page { padding: 32px 0 64px; }
+
+  .steps li { grid-template-columns: 48px 1fr; gap: 16px; }
+  .types-line { font-size: 24px; }
+  .trust > div { grid-template-columns: 1fr; gap: 4px; }
+  .field-row { flex-direction: column; gap: 0; }
+  .form-card, .notice-card { padding: 24px; }
+
+  /* Tabelle wird zu einzelnen Karten pro Schicht */
+  .table-card { background: none; border: none; }
+  thead { display: none; }
+  tbody tr { display: block; margin-bottom: 16px; padding: 8px 0; background: var(--weiss); border: 1px solid var(--linie); }
+  tbody tr:hover { background: var(--weiss); }
+  tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: auto;
+    padding: 8px 16px;
+    border-bottom: none;
+    text-align: right;
+  }
+  /* Spaltenname steht im data-label-Attribut der Zelle */
+  tbody td::before {
+    content: attr(data-label);
+    color: var(--grau);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+}
