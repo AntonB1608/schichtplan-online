@@ -8,6 +8,7 @@
 <header class="hero">
   <div class="wrap hero-grid">
     <div class="hero-copy">
+      <span class="kicker">Shift reminders by email</span>
       <h1>Never miss the start of a shift.</h1>
 
       <p class="lede">
@@ -17,21 +18,18 @@
 
       <div class="hero-actions">
         <a href="/register" class="btn btn-lg">Get shift reminders</a>
-        <p class="hero-note">Free. No app to install.</p>
+        <a href="#how" class="link-more">See how it works&nbsp;&rsaquo;</a>
       </div>
+      <p class="hero-note">Free. No app to install.</p>
     </div>
 
     <div class="hero-mail">
       <article class="mail">
         <div class="mail-bar">
           <svg class="mail-avatar" viewBox="0 0 28 28" aria-hidden="true">
-            <circle cx="14" cy="14" r="14" fill="#0071e3"/>
-            <circle cx="14" cy="14" r="8" fill="none" stroke="#ffffff"
-                    stroke-opacity=".45" stroke-width="2.5"/>
-            <circle cx="14" cy="14" r="8" fill="none" stroke="#ffffff"
-                    stroke-width="2.5" stroke-linecap="round"
-                    stroke-dasharray="12.6 37.7"
-                    transform="rotate(-90 14 14)"/>
+            <circle cx="14" cy="14" r="14" fill="#1d1c1a"/>
+            <text x="14" y="19" text-anchor="middle" font-family="Georgia, serif"
+                  font-size="15" fill="#faf9f6">S</text>
           </svg>
           <span class="mail-from">Shiftmates</span>
           <span class="mail-time">18:00</span>
@@ -69,9 +67,10 @@
   </div>
 </header>
 
-<section class="band">
+<section class="band" id="how">
   <div class="wrap">
     <div class="section-head">
+      <span class="caps">How it works</span>
       <h2>Three steps, then it runs</h2>
       <p class="muted">Set it up once. Nothing to open again until your roster changes.</p>
     </div>
@@ -103,33 +102,35 @@
   </div>
 </section>
 
-<section class="band band-plain">
+<section class="band">
   <div class="wrap">
     <div class="section-head">
+      <span class="caps">Shift types</span>
       <h2>Your shifts, your names</h2>
       <p class="muted">Four types are built in. If your roster calls it something
         else, type that instead.</p>
     </div>
 
-    <div class="types">
-      <span class="type-chip">Early shift</span>
-      <span class="type-chip">Late shift</span>
-      <span class="type-chip">Night shift</span>
-      <span class="type-chip">Day off</span>
-      <span class="type-chip">Your own name</span>
-    </div>
+    <p class="types-line">
+      Early shift<span class="sep"> &middot; </span>Late
+      shift<span class="sep"> &middot; </span>Night
+      shift<span class="sep"> &middot; </span>Day
+      off<span class="sep"> &middot; </span>Your own name
+    </p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap">
-    <h2>Built by someone who overslept</h2>
-
-    <p class="maker">
-      Built by a shift worker who got tired of missing his own roster. It does
-      one thing, it does not sell anything, and your address is used for the
-      reminders and nothing else.
-    </p>
+    <div class="section-head">
+      <span class="caps">Who runs this</span>
+      <h2>Built by someone who overslept</h2>
+      <p class="muted">
+        Built by a shift worker who got tired of missing his own roster. It does
+        one thing, it does not sell anything, and your address is used for the
+        reminders and nothing else.
+      </p>
+    </div>
 
     <dl class="trust">
       <div>
@@ -156,10 +157,12 @@
   </div>
 </section>
 
-<section class="closing wrap">
-  <h2>Save tomorrow&rsquo;s shift now.</h2>
-  <a href="/register" class="btn btn-lg">Get shift reminders</a>
-  <p class="hero-note">Free. No app to install.</p>
+<section class="band closing">
+  <div class="wrap">
+    <h2>Save tomorrow&rsquo;s shift now.</h2>
+    <a href="/register" class="btn btn-lg">Get shift reminders</a>
+    <p class="hero-note">Free. No app to install.</p>
+  </div>
 </section>
 
 {% endblock %}
