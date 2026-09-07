@@ -66,8 +66,8 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.execute("DROP TABLE IF EXISTS register CASCADE")
-    op.drop_table('date')
-    op.drop_table('verification')
+    op.execute("DROP TABLE IF EXISTS date CASCADE")
+    op.execute("DROP TABLE IF EXISTS verification CASCADE")
     # ### end Alembic commands ###
 
 

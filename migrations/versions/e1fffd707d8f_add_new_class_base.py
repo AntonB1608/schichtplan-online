@@ -40,8 +40,7 @@ def upgrade():
         batch_op.alter_column('created_at',
                existing_type=sa.DATETIME(),
                nullable=False)
-        batch_op.create_unique_constraint(batch_op.f('uq_team_invite_code'), ['invite_code'])
-        batch_op.create_unique_constraint(batch_op.f('uq_team_name'), ['name'])
+        
 
     with op.batch_alter_table('team_member', schema=None) as batch_op:
         batch_op.alter_column('user_id',
@@ -76,8 +75,7 @@ def upgrade():
         batch_op.alter_column('created_at',
                existing_type=sa.DATETIME(),
                nullable=False)
-        batch_op.create_unique_constraint(batch_op.f('uq_user_mail'), ['mail'])
-        batch_op.create_unique_constraint(batch_op.f('uq_user_name'), ['name'])
+        
 
     with op.batch_alter_table('verification', schema=None) as batch_op:
         batch_op.add_column(sa.Column('token', sa.String(), nullable=False))
@@ -85,10 +83,19 @@ def upgrade():
         batch_op.alter_column('user_id',
                existing_type=sa.INTEGER(),
                nullable=False)
-        batch_op.create_unique_constraint(batch_op.f('uq_verification_token'), ['token'])
         batch_op.drop_column('user_token')
         batch_op.drop_column('user_token_date')
 
+    op.execute('ALTER TABLE team DROP CONSTRAINT IF EXISTS uq_team_invite_code')
+    op.execute('ALTER TABLE team ADD CONSTRAINT uq_team_invite_code UNIQUE (invite_code)')
+    op.execute('ALTER TABLE team DROP CONSTRAINT IF EXISTS uq_team_name')
+    op.execute('ALTER TABLE team ADD CONSTRAINT uq_team_name UNIQUE (name)')
+    op.execute('ALTER TABLE "user" DROP CONSTRAINT IF EXISTS uq_user_mail')
+    op.execute('ALTER TABLE "user" ADD CONSTRAINT uq_user_mail UNIQUE (mail)')
+    op.execute('ALTER TABLE "user" DROP CONSTRAINT IF EXISTS uq_user_name')
+    op.execute('ALTER TABLE "user" ADD CONSTRAINT uq_user_name UNIQUE (name)')
+    op.execute('ALTER TABLE verification DROP CONSTRAINT IF EXISTS uq_verification_token')
+    op.execute('ALTER TABLE verification ADD CONSTRAINT uq_verification_token UNIQUE (token)')
     # ### end Alembic commands ###
 
 
