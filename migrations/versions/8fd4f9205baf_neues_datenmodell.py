@@ -65,7 +65,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.drop_table('register')
+    op.execute("DROP TABLE IF EXISTS register CASCADE")
     op.drop_table('date')
     op.drop_table('verification')
     # ### end Alembic commands ###
