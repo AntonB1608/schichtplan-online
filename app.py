@@ -1,7 +1,7 @@
 import os
 import re
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import time, datetime, timedelta, timezone
 from urllib.parse import quote
 import bcrypt
 import emoji
@@ -15,7 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from typing import Optional
 from sqlalchemy import String, DateTime, ForeignKey, Boolean, Integer, MetaData
-from datetime import time, datetime, timedelta, timezone
+
 
 # APP CONFIG
  
@@ -606,14 +606,14 @@ def datenschutz():
 # HELPERS - DATE & SHIFT
 
  
-def get_date(now_local):
+#def get_date(now_local):
     tomorrow = now_local + timedelta(days=1)
     return tomorrow.strftime("%d.%m.%Y"), now_local.strftime("%d.%m.%Y")
  
 
 # HELPERS - WEATHER
 
-def find_weather_data(user_id):
+#def find_weather_data(user_id):
  
     try:
  
@@ -673,7 +673,7 @@ def send_email(to, subject, html):
         return False
  
  
-def send_reminder(user, date_str, kind):
+#def send_reminder(user, date_str, kind):
     shift = Shift.query.filter_by(user_id=user.user_id, date=date_str).first()
     day = "tomorrow" if kind == "evening" else "today"
 
@@ -792,15 +792,14 @@ def send_reminder(user, date_str, kind):
 </html>"""
 
     return send_email(user.email, subject, html)
- 
- 
-def send_daily_emails():
+
+#def send_daily_emails():
     now_utc = datetime.now(timezone.utc)
  
     users = User.query.filter(
-        User.registered.is_(True),
-        User.email_time_morning.isnot(None),
-        User.email_time_evening.isnot(None),
+        User.registration_completed.is_(True),
+        User.daily_reminder_time.isnot(None),
+        User.shift_reminder_enabled.isnot(None),
         User.time_zone.isnot(None),
     ).all()
  
@@ -811,13 +810,13 @@ def send_daily_emails():
         evening_time = datetime.strptime(user.email_time_evening, "%H:%M").time()
         morning_time = datetime.strptime(user.email_time_morning, "%H:%M").time()
  
-        if now_local.time() >= evening_time and user.first_mail_send != today_str:
+        if now_local.time() >= evening_time and user.first_mail_send != today_str and user.shift_reminder_enabled:
             if send_reminder(user, tomorrow_str, "evening"):
                 
                 user.first_mail_send = today_str
                 db.session.commit()
  
-        if morning_time <= now_local.time() < evening_time and user.second_mail_send != today_str:
+        if morning_time <= now_local.time() < evening_time and user.second_mail_send != today_str and user.daily_reminder_enabled:
             if send_reminder(user, today_str, "morning"):
                 user.second_mail_send = today_str
                 db.session.commit()

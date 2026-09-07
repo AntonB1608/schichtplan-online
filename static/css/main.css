@@ -1,37 +1,35 @@
-/* Shiftmates — Editorial-Look: warmes Papier, Didot-Serifen für Überschriften,
-   feine Linien statt Karten und Schatten, scharfe Ecken, ein schwarzer Button. */
+
 
 :root {
-  /* Farben */
-  --papier: #faf9f6;      /* Seitenhintergrund */
-  --weiss: #fff;          /* Karten, Eingabefelder */
-  --tinte: #1d1c1a;       /* Überschriften, Buttons, wichtiger Text */
-  --text: #454440;        /* normaler Fließtext */
-  --grau: #706e69;        /* Nebentext, Hinweise */
-  --linie: #d8d5cf;       /* sichtbare Trennlinien */
-  --linie-hell: #e8e5df;  /* zartere Trennlinien */
+
+  --papier: #faf9f6;      
+  --weiss: #fff;          
+  --tinte: #1d1c1a;       
+  --text: #454440;       
+  --grau: #706e69;       
+  --linie: #d8d5cf;       
+  --linie-hell: #e8e5df;  
   --rot: #9e2b25;
   --gruen: #2e6b39;
 
-  /* Schriften */
   --serife: "Didot", "New York", Georgia, "Times New Roman", serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* ===== Grundlagen ===== */
+
 
 * { box-sizing: border-box; }
 
 html {
   background: var(--papier);
-  scroll-behavior: smooth; /* für den "See how it works"-Sprung */
+  scroll-behavior: smooth; 
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   display: flex;
-  flex-direction: column; /* damit der Footer unten bleibt */
+  flex-direction: column; 
   color: var(--tinte);
   font: 17px/1.5 var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -42,7 +40,6 @@ a:hover { text-decoration-color: var(--tinte); }
 
 :focus-visible { outline: 2px solid var(--tinte); outline-offset: 3px; }
 
-/* Nur für Screenreader sichtbar */
 .visually-hidden {
   position: absolute;
   width: 1px; height: 1px;
@@ -52,14 +49,14 @@ a:hover { text-decoration-color: var(--tinte); }
   white-space: nowrap;
 }
 
-/* ===== Schrift ===== */
+
 
 h1, h2, h3 { margin: 0; color: var(--tinte); }
 h1 { font: 400 68px/1.04 var(--serife); }
 h2 { font: 400 40px/1.12 var(--serife); }
 h3 { font: 600 17px/1.35 var(--sans); }
 
-/* Kleinere Serifen-Titel auf Formular- und Rechtsseiten */
+
 .page-head h2, .form-card h2, .notice-card h2, .legal h2 { font: 400 32px/1.15 var(--serife); }
 
 p { margin: 0 0 16px; }
@@ -73,7 +70,7 @@ p:last-child { margin-bottom: 0; }
   font-size: 13px;
 }
 
-/* Gesperrte Großbuchstaben, z. B. SHIFT TYPES */
+
 .caps, .kicker, .legal-caps {
   color: var(--grau);
   font-size: 11px;
@@ -82,7 +79,7 @@ p:last-child { margin-bottom: 0; }
   text-transform: uppercase;
 }
 
-/* ===== Seitengerüst ===== */
+
 
 .wrap {
   width: 100%;
@@ -97,7 +94,7 @@ p:last-child { margin-bottom: 0; }
 .page-head .muted { margin-top: 8px; }
 .stack-lg > * + * { margin-top: 24px; }
 
-/* ===== Navigation ===== */
+
 
 .navbar-wrap {
   position: sticky;
@@ -135,7 +132,7 @@ p:last-child { margin-bottom: 0; }
 .navbar-links a:hover { color: var(--tinte); }
 .navbar-links a[aria-current="page"] { color: var(--tinte); border-bottom: 1px solid var(--tinte); }
 
-/* ===== Buttons ===== */
+
 
 .btn {
   display: inline-flex;
@@ -156,17 +153,15 @@ p:last-child { margin-bottom: 0; }
 .btn-lg { min-height: 52px; }
 .btn-block { display: flex; width: 100%; }
 
-/* Zweitrangiger Button: nur Rahmen */
+
 .btn-ghost { background: none; color: var(--tinte); border-color: var(--linie); }
 .btn-ghost:hover { background: none; color: var(--tinte); border-color: var(--tinte); }
 
-/* Löschen-Knopf in der Tabelle: unauffällig, rot beim Überfahren */
 .btn-danger { background: none; border: none; color: var(--grau); font-size: 14px; padding: 0 8px; }
 .btn-danger:hover { background: none; color: var(--rot); }
 
 .link-more { font-size: 16px; white-space: nowrap; }
 
-/* ===== Formulare ===== */
 
 .form-card, .notice-card {
   max-width: 460px;
@@ -213,11 +208,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--t
 
 textarea { min-height: 96px; padding-block: 8px; line-height: 1.5; resize: vertical; }
 
-/* Nebeneinander liegende Felder (z. B. Start / Ende) */
+
 .field-row { display: flex; gap: 16px; }
 .field-row > .field { flex: 1; }
 
-/* Checkbox mit Beschriftung in einer Zeile */
+
 .field-inline { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 8px; }
 .field-inline label { margin: 0; font-size: 15px; font-weight: 500; cursor: pointer; }
 
@@ -225,14 +220,14 @@ input[type="checkbox"] {
   width: 20px; height: 20px;
   min-height: 0;
   padding: 0;
-  accent-color: var(--tinte); /* Browser-Checkbox, nur in Tinte gefärbt */
+  accent-color: var(--tinte); 
   cursor: pointer;
 }
 
 .form-foot { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--linie-hell); font-size: 15px; }
 .form-foot p { margin-bottom: 8px; }
 
-/* ===== Tabelle (Schichtliste) ===== */
+
 
 .table-card { background: var(--weiss); border: 1px solid var(--linie); }
 
@@ -256,7 +251,7 @@ tbody tr:hover { background: var(--papier); }
 
 .is-right { text-align: right; }
 
-/* Schichttyp-Etikett in der Tabelle */
+
 .tag {
   display: inline-flex;
   align-items: center;
@@ -272,7 +267,7 @@ tbody tr:hover { background: var(--papier); }
 
 .empty-state { padding: 96px 24px; text-align: center; color: var(--grau); }
 
-/* ===== Meldungen (Flash) ===== */
+
 
 .flash-wrap { margin-bottom: 24px; }
 
@@ -287,7 +282,7 @@ tbody tr:hover { background: var(--papier); }
 .alert-error { border-left-color: var(--rot); color: var(--rot); }
 .alert-success { border-left-color: var(--gruen); color: var(--gruen); }
 
-/* ===== Hinweiskarten (z. B. "Mail ist raus") ===== */
+
 
 .notice-icon {
   display: grid;
@@ -300,7 +295,7 @@ tbody tr:hover { background: var(--papier); }
 
 .notice-lead { margin-top: 8px; color: var(--text); font-size: 15px; }
 
-/* Nummerierte Schritte, Zahl kommt per CSS-Zähler */
+
 .notice-steps { margin: 24px 0 0; padding: 0; list-style: none; counter-reset: schritt; }
 .notice-steps li {
   display: flex;
@@ -317,9 +312,7 @@ tbody tr:hover { background: var(--papier); }
 .notice-hint { margin-top: 24px; }
 .notice-card .btn { margin-top: 24px; }
 
-/* ===== Startseite ===== */
 
-/* Hero: Text links, Beispiel-Mail rechts */
 .hero { padding-block: 96px; }
 .hero-grid {
   display: grid;
@@ -334,14 +327,13 @@ tbody tr:hover { background: var(--papier); }
 .hero-actions { display: flex; align-items: center; gap: 24px; margin-top: 32px; }
 .hero-note { margin-top: 16px; }
 
-/* Jede Sektion beginnt mit einer Linie */
+
 .band { padding-block: 64px; border-top: 1px solid var(--linie); }
 
 .section-head { margin-bottom: 32px; }
 .section-head h2 { margin-top: 8px; }
 .section-head .muted { max-width: 52ch; margin-top: 16px; color: var(--text); font-size: 17px; }
 
-/* Die drei Schritte: große Serifen-Ziffer in der Randspalte */
 .steps { margin: 0; padding: 0; list-style: none; counter-reset: schritt; max-width: 720px; }
 .steps li {
   display: grid;
@@ -357,11 +349,9 @@ tbody tr:hover { background: var(--papier); }
 
 .fineprint { max-width: 720px; margin-top: 24px; }
 
-/* Schichttypen als kursive Serifen-Zeile */
 .types-line { margin: 0; max-width: 32ch; font: italic 400 36px/1.4 var(--serife); }
 .types-line .sep { color: #b8b4ac; font-style: normal; }
 
-/* Vertrauens-Punkte: Begriff links, Erklärung rechts */
 .trust { margin: 0; max-width: 720px; }
 .trust > div {
   display: grid;
@@ -377,7 +367,7 @@ tbody tr:hover { background: var(--papier); }
 .closing { padding-block: 96px; }
 .closing .btn { margin-top: 32px; }
 
-/* ===== Beispiel-Mail ===== */
+
 
 .mail { background: var(--weiss); border: 1px solid var(--linie); border-radius: 10px; overflow: hidden; }
 
@@ -406,7 +396,7 @@ tbody tr:hover { background: var(--papier); }
 .mail-foot { padding: 16px 24px; border-top: 1px solid var(--linie-hell); color: var(--grau); font-size: 13px; }
 .mail-caption { margin-top: 16px; }
 
-/* ===== Footer ===== */
+
 
 footer {
   padding: 48px 24px;
@@ -429,7 +419,7 @@ footer {
 .footer-links a:hover { color: var(--tinte); }
 footer p { margin: 0; }
 
-/* ===== Rechtsseiten (Impressum, Datenschutz) ===== */
+
 
 .legal h2 { margin-bottom: 24px; }
 .legal h3 { margin: 48px 0 8px; font: 400 22px/1.25 var(--serife); }
@@ -438,12 +428,11 @@ footer p { margin: 0; }
 .legal .category { margin-top: 24px; font-weight: 600; }
 .legal-address { margin-bottom: 4px; }
 
-/* ===== Handy ===== */
+
 
 @media (max-width: 760px) {
   h1 { font-size: 44px; }
 
-  /* Navbar: kleinere Schrift und Abstände, sonst passt sie eingeloggt nicht in eine Zeile */
   .navbar { padding-inline: 16px; gap: 16px; }
   .navbar-logo a { font-size: 18px; }
   .navbar-links { gap: 10px; }
@@ -466,7 +455,6 @@ footer p { margin: 0; }
   .field-row { flex-direction: column; gap: 0; }
   .form-card, .notice-card { padding: 24px; }
 
-  /* Tabelle wird zu einzelnen Karten pro Schicht */
   .table-card { background: none; border: none; }
   thead { display: none; }
   tbody tr { display: block; margin-bottom: 16px; padding: 8px 0; background: var(--weiss); border: 1px solid var(--linie); }
@@ -481,7 +469,6 @@ footer p { margin: 0; }
     border-bottom: none;
     text-align: right;
   }
-  /* Spaltenname steht im data-label-Attribut der Zelle */
   tbody td::before {
     content: attr(data-label);
     color: var(--grau);
