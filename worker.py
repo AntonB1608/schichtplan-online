@@ -1,10 +1,15 @@
-from apscheduler.schedulers.blocking import BlockingScheduler
-from app import app, send_daily_emails
 
-def job():
+from app import app, db, User, Shift
+def run_once():
     with app.app_context():
-        send_daily_emails()
-
-scheduler = BlockingScheduler()
-scheduler.add_job(job, "interval", minutes=1)
-scheduler.start()
+        users = User.query.filter_by(shift_reminder_enabled=True).all()
+        for user in users:
+            shifts = Shift.query.filter(
+            Shift.user_id == user.id,
+            Shift.shift_reminder_sent_at == None,
+            Shift.start > now,
+            Shift.start <= now + timedelta(minutes=user.shift_reminder_lead_minutes)
+        ).all()
+if __name__ == "__main__":
+    run_once()
+    
