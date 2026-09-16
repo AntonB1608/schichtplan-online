@@ -613,7 +613,7 @@ def datenschutz():
 
 # HELPERS - WEATHER
 
-#def find_weather_data(user_id):
+def find_weather_data(user_id):
  
     try:
  
@@ -651,6 +651,8 @@ def datenschutz():
 # HELPERS - MAIL 
 
  
+
+ 
 def send_email(to, subject, html):
     try:
         resp = requests.post(
@@ -671,156 +673,7 @@ def send_email(to, subject, html):
     except requests.RequestException as e:
         print(f"Resend request failed: {e}")
         return False
- 
- 
-#def send_reminder(user, date_str, kind):
-    shift = Shift.query.filter_by(user_id=user.user_id, date=date_str).first()
-    day = "tomorrow" if kind == "evening" else "today"
-
-    if not shift:
-        line = f"No shift saved for {day}."
-    elif shift.free:
-        line = f"You are free {day}."
-    else:
-        line = f"You work {day} from {shift.time_begin} to {shift.time_end}."
-
-    weather_text, temp, _ = find_weather_data(user.user_id)
-    weather_text = weather_text.replace("tomorrow", day)
-
-    greeting = "Good evening" if kind == "evening" else "Good morning"
-    subject = f"Reminder for {day}"
-
-    font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-    label = "The night before" if kind == "evening" else "The morning of"
-
-    weather_block = ""
-    if weather_text or temp:
-        weather_block = f"""
-              <tr>
-                <td style="padding:0 32px;">
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
-                         style="border-top:1
-                        px solid #d2d2d7;">
-                    <tr>
-                      <td style="padding:20px 0 0 0;font-family:{font};font-size:15px;color:#3a3a3c;">
-                        {weather_text}
-                      </td>
-                      <td align="right" style="padding:20px 0 0 0;font-family:{font};font-size:20px;font-weight:600;color:#1d1d1f;white-space:nowrap;">
-                        {temp}
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>"""
-
-    html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <title>{subject}</title>
-</head>
-<body style="margin:0;padding:0;background-color:#f5f5f7;">
-
-  <div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#f5f5f7;">
-    {line}
-  </div>
-
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
-         style="background-color:#f5f5f7;">
-    <tr>
-      <td align="center" style="padding:32px 16px;">
-
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600"
-               style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;">
-
-          <tr>
-            <td style="padding:24px 32px 0 32px;font-family:{font};font-size:15px;font-weight:600;color:#0071e3;letter-spacing:-0.01em;">
-              Shiftmates
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding:20px 32px 0 32px;font-family:{font};font-size:12px;color:#6e6e73;text-transform:uppercase;letter-spacing:0.04em;">
-              {label} &middot; {date_str}
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding:6px 32px 0 32px;font-family:{font};font-size:28px;line-height:1.2;font-weight:600;color:#1d1d1f;letter-spacing:-0.02em;">
-              {line}
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding:14px 32px 24px 32px;font-family:{font};font-size:16px;color:#6e6e73;">
-              {greeting}, {user.user_name}.
-            </td>
-          </tr>
-{weather_block}
-          <tr>
-            <td style="padding:28px 32px 24px 32px;">
-              <a href="https://www.shiftmates.org/shifts"
-                 style="display:inline-block;font-family:{font};font-size:16px;color:#ffffff;background-color:#0071e3;padding:12px 24px;border-radius:980px;text-decoration:none;">
-                View your shifts
-              </a>
-            </td>
-          </tr>
-
-        </table>
-
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600"
-               style="max-width:600px;width:100%;">
-          <tr>
-            <td align="center" style="padding:24px 32px;font-family:{font};font-size:12px;line-height:1.6;color:#6e6e73;">
-              You are receiving this because you set a reminder time on Shiftmates.<br>
-              <a href="https://www.shiftmates.org/profile" style="color:#6e6e73;text-decoration:underline;">Change your times</a>
-              &nbsp;&middot;&nbsp;
-              <a href="https://www.shiftmates.org/unsubscribe" style="color:#6e6e73;text-decoration:underline;">Turn reminders off</a>
-              <br><br>
-              Shiftmates &middot; Weather data by OpenWeather
-            </td>
-          </tr>
-        </table>
-
-      </td>
-    </tr>
-  </table>
-
-</body>
-</html>"""
-
-    return send_email(user.email, subject, html)
-
-#def send_daily_emails():
-    now_utc = datetime.now(timezone.utc)
- 
-    users = User.query.filter(
-        User.registration_completed.is_(True),
-        User.daily_reminder_time.isnot(None),
-        User.shift_reminder_enabled.isnot(None),
-        User.time_zone.isnot(None),
-    ).all()
- 
-    for user in users:
-        now_local = now_utc + timedelta(seconds=user.time_zone)
-        tomorrow_str, today_str = get_date(now_local)
- 
-        evening_time = datetime.strptime(user.email_time_evening, "%H:%M").time()
-        morning_time = datetime.strptime(user.email_time_morning, "%H:%M").time()
- 
-        if now_local.time() >= evening_time and user.first_mail_send != today_str and user.shift_reminder_enabled:
-            if send_reminder(user, tomorrow_str, "evening"):
-                
-                user.first_mail_send = today_str
-                db.session.commit()
- 
-        if morning_time <= now_local.time() < evening_time and user.second_mail_send != today_str and user.daily_reminder_enabled:
-            if send_reminder(user, today_str, "morning"):
-                user.second_mail_send = today_str
-                db.session.commit()
- 
+    
 def build_action_mail(subject, headline, intro, button_label, link, note=""):
     font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
 
