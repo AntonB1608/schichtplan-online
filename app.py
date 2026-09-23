@@ -8,6 +8,7 @@ import emoji
 import requests
 from dotenv import load_dotenv
 from flask import Flask, request, render_template, session, redirect, flash
+from markupsafe import escape
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -674,14 +675,52 @@ def send_email(to, subject, html):
         print(f"Resend request failed: {e}")
         return False
     
-def build_action_mail(subject, headline, intro, button_label, link, note=""):
-    font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+MAIL_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+
+
+def build_shift_rows(shifts):
+    rows = ""
+    for shift in shifts:
+        label = escape(SHIFT_TYPES.get(shift.shift_type, shift.shift_type))
+
+        if shift.shift_type == "off" or not shift.start or not shift.end:
+            zeit = "&mdash;"
+        else:
+            zeit = f"{shift.start.strftime('%H:%M')}&ndash;{shift.end.strftime('%H:%M')}"
+            if shift.end.date() != shift.start.date():
+                zeit += " +1"
+
+        meta = shift.start.strftime("%A, %d %B") if shift.start else ""
+        if shift.note:
+            meta += f" &middot; {escape(shift.note)}"
+
+        rows += f"""
+      <tr>
+        <td style="padding:16px 0 0 0;border-top:1px solid #e8e5df;font-family:{MAIL_FONT};font-size:17px;font-weight:600;color:#1d1c1a;">{label}</td>
+        <td align="right" style="padding:16px 0 0 0;border-top:1px solid #e8e5df;font-family:{MAIL_FONT};font-size:17px;font-weight:600;color:#1d1c1a;white-space:nowrap;">{zeit}</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="padding:4px 0 16px 0;font-family:{MAIL_FONT};font-size:13px;color:#706e69;">{meta}</td>
+      </tr>"""
+
+    return f"""
+          <tr>
+            <td style="padding:8px 24px 0 24px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                     style="border-bottom:1px solid #e8e5df;">{rows}
+              </table>
+            </td>
+          </tr>"""
+
+
+def build_action_mail(subject, headline, intro, button_label, link, note="", shifts_html=""):
+    font = MAIL_FONT
 
     note_block = ""
     if note:
         note_block = f"""
           <tr>
-            <td style="padding:0 32px 8px 32px;font-family:{font};font-size:14px;line-height:1.6;color:#6e6e73;">
+            <td style="padding:8px 24px 0 24px;font-family:{font};font-size:13px;line-height:1.6;color:#706e69;">
               {note}
             </td>
           </tr>"""
@@ -694,61 +733,66 @@ def build_action_mail(subject, headline, intro, button_label, link, note=""):
   <meta name="color-scheme" content="light">
   <title>{subject}</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f5f5f7;">
+<body style="margin:0;padding:0;background-color:#faf9f6;">
 
-  <div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#f5f5f7;">
+  <div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#faf9f6;">
     {intro}
   </div>
 
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
-         style="background-color:#f5f5f7;">
+         style="background-color:#faf9f6;">
     <tr>
-      <td align="center" style="padding:32px 16px;">
+      <td align="center" style="padding:48px 16px;">
 
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600"
-               style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560"
+               style="max-width:560px;width:100%;background-color:#ffffff;border:1px solid #d8d5cf;border-radius:10px;">
 
           <tr>
-            <td style="padding:24px 32px 0 32px;font-family:{font};font-size:15px;font-weight:600;color:#0071e3;letter-spacing:-0.01em;">
-              Shiftmates
+            <td style="padding:16px 24px;border-bottom:1px solid #e8e5df;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="width:28px;height:28px;background-color:#1d1c1a;border-radius:50%;text-align:center;vertical-align:middle;font-family:Georgia, serif;font-size:15px;line-height:28px;color:#faf9f6;">S</td>
+                  <td style="padding-left:8px;font-family:{font};font-size:15px;font-weight:600;color:#1d1c1a;">Shiftmates</td>
+                </tr>
+              </table>
             </td>
           </tr>
 
           <tr>
-            <td style="padding:22px 32px 0 32px;font-family:{font};font-size:28px;line-height:1.2;font-weight:600;color:#1d1d1f;letter-spacing:-0.02em;">
+            <td style="padding:24px 24px 0 24px;font-family:{font};font-size:18px;line-height:1.35;font-weight:600;color:#1d1c1a;">
               {headline}
             </td>
           </tr>
 
           <tr>
-            <td style="padding:14px 32px 4px 32px;font-family:{font};font-size:16px;line-height:1.6;color:#3a3a3c;">
+            <td style="padding:16px 24px 0 24px;font-family:{font};font-size:15px;line-height:1.5;color:#454440;">
               {intro}
             </td>
           </tr>
-{note_block}
+{shifts_html}{note_block}
           <tr>
-            <td style="padding:20px 32px 8px 32px;">
+            <td style="padding:24px 24px 24px 24px;">
               <a href="{link}"
-                 style="display:inline-block;font-family:{font};font-size:16px;color:#ffffff;background-color:#0071e3;padding:12px 26px;border-radius:980px;text-decoration:none;">
+                 style="display:inline-block;font-family:{font};font-size:16px;font-weight:500;color:#faf9f6;background-color:#1d1c1a;border:1px solid #1d1c1a;padding:12px 32px;text-decoration:none;">
                 {button_label}
               </a>
             </td>
           </tr>
 
           <tr>
-            <td style="padding:8px 32px 28px 32px;font-family:{font};font-size:13px;line-height:1.6;color:#86868b;">
+            <td style="padding:16px 24px;border-top:1px solid #e8e5df;font-family:{font};font-size:13px;line-height:1.6;color:#706e69;">
               Button not working? Copy this link into your browser:<br>
-              <span style="color:#0071e3;word-break:break-all;">{link}</span>
+              <span style="color:#1d1c1a;word-break:break-all;">{link}</span>
             </td>
           </tr>
 
         </table>
 
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600"
-               style="max-width:600px;width:100%;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560"
+               style="max-width:560px;width:100%;">
           <tr>
-            <td align="center" style="padding:24px 32px;font-family:{font};font-size:12px;line-height:1.6;color:#6e6e73;">
-              Shiftmates &middot; <a href="https://www.shiftmates.org" style="color:#6e6e73;text-decoration:underline;">www.shiftmates.org</a>
+            <td align="center" style="padding:16px 24px;font-family:{font};font-size:13px;line-height:1.6;color:#706e69;">
+              Shiftmates &middot; <a href="https://www.shiftmates.org" style="color:#706e69;text-decoration:underline;">www.shiftmates.org</a>
             </td>
           </tr>
         </table>
