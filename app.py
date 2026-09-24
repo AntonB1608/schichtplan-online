@@ -94,6 +94,7 @@ class User(db.Model):
     shift_reminder_enabled: Mapped[bool] = mapped_column(default=True, nullable=False)
     shift_reminder_lead_minutes: Mapped[int] = mapped_column(default=60, nullable=False)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    daily_reminder_sent_at: Mapped[Optional[datetime]] = mapped_column(default=None)
 
 class Verification(db.Model):
 
@@ -127,7 +128,6 @@ class Shift(db.Model):
     shift_type: Mapped[str] = mapped_column()
     note: Mapped[Optional[str]] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
-    daily_reminder_sent_at: Mapped[datetime] = mapped_column(default=None, nullable=True)
     shift_reminder_sent_at: Mapped[datetime] = mapped_column(default=None, nullable=True)
 
 
