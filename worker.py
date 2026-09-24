@@ -3,7 +3,7 @@ from app import app, db, User, Shift, timedelta, send_email, build_action_mail, 
 from datetime import datetime, timezone, time
 
 
-DRY_RUN = False # Set to True to test without sending emails
+DRY_RUN = True # Set to True to test without sending emails
 
 
 def run_once():
@@ -13,12 +13,11 @@ def run_once():
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         users = User.query.filter_by(shift_reminder_enabled=True).all()
         for user in users:
-            now_local = now + timedelta(seconds=int(user.time_zone or 0))
             shifts = Shift.query.filter(
                 Shift.user_id == user.id,
                 Shift.shift_reminder_sent_at == None,
-                Shift.start > now_local,
-                Shift.start <= now_local + timedelta(minutes=user.shift_reminder_lead_minutes),
+                Shift.start > now,
+                Shift.start <= now + timedelta(minutes=user.shift_reminder_lead_minutes),
             ).all()
             for shift in shifts:
 
@@ -38,6 +37,8 @@ def run_once():
                     if DRY_RUN:
 
                         print(f"WOULD SEND to {user.mail}: {subject}")
+                        shift.shift_reminder_sent_at = now
+                        db.session.commit()
 
                     else:
 
@@ -56,24 +57,21 @@ def run_daily():
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         users = User.query.filter_by(daily_reminder_enabled=True).all()
         for user in users:
-
-            soll = datetime.combine(now.date(), user.daily_reminder_time.time())
-            if now< soll:
-                continue
+            now_user = now + timedelta(seconds=int(user.time_zone or 0))
+            soll = datetime.combine(now_user.date(), user.daily_reminder_time.time())
+            if now_user < soll or (user.daily_reminder_sent_at and user.daily_reminder_sent_at >= soll):                continue
 
             tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0, 0))
             shifts = Shift.query.filter(
                 Shift.user_id == user.id,
-                Shift.daily_reminder_sent_at == None,
                 Shift.start >= tomorrow,
                 Shift.start < tomorrow + timedelta(days=1),
             ).order_by(Shift.start).all()
 
-            if not shifts:
-                continue
+            
 
             try:
-                if all(shift.shift_type == "off" for shift in shifts):
+                if not shifts or all(shift.shift_type == "off" for shift in shifts):
                     subject = "Reminder: you are free tomorrow"
 
                     html = build_action_mail(
@@ -100,12 +98,13 @@ def run_daily():
                 if DRY_RUN:
 
                     print(f"WOULD SEND to {user.mail}: {subject}")
+                    user.daily_reminder_sent_at = now_user
+                    db.session.commit()
 
                 else:
 
                     if send_email(user.mail, subject, html):
-                        for shift in shifts:
-                            shift.daily_reminder_sent_at = now
+                        user.daily_reminder_sent_at = now_user
                         db.session.commit()
 
             except Exception:
