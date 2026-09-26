@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /login
+Disallow: /register
+Disallow: /registeruser
+Disallow: /verify/
+Disallow: /reset
+Disallow: /profile
+Disallow: /index
+Disallow: /shifts
+Disallow: /unsubscribe
+Disallow: /logout
+Disallow: /delete/
