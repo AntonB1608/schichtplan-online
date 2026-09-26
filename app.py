@@ -7,7 +7,7 @@ import bcrypt
 import emoji
 import requests
 from dotenv import load_dotenv
-from flask import Flask, request, render_template, session, redirect, flash
+from flask import Flask, request, render_template, session, redirect, flash, send_from_directory
 from markupsafe import escape
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -136,6 +136,11 @@ class Shift(db.Model):
 @app.route("/", methods=["GET"])
 def homepage():
     return render_template("homepage.html")
+
+
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory(app.static_folder, "robots.txt")
  
  
 # ROUTES - REGISTRATION
