@@ -3,7 +3,7 @@ from app import app, db, User, Shift, timedelta, send_email, build_action_mail, 
 from datetime import datetime, timezone, time
 
 
-DRY_RUN = True # Set to True to test without sending emails
+DRY_RUN = False # Set to True to test without sending emails
 
 
 def run_once():
@@ -11,13 +11,16 @@ def run_once():
     with app.app_context():
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
+
         users = User.query.filter_by(shift_reminder_enabled=True).all()
         for user in users:
+            now_user = now + timedelta(seconds=int(user.time_zone or 0))
+
             shifts = Shift.query.filter(
                 Shift.user_id == user.id,
                 Shift.shift_reminder_sent_at == None,
-                Shift.start > now,
-                Shift.start <= now + timedelta(minutes=user.shift_reminder_lead_minutes),
+                Shift.start > now_user,
+                Shift.start <= now_user + timedelta(minutes=user.shift_reminder_lead_minutes),
             ).all()
             for shift in shifts:
 
