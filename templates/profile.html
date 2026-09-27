@@ -17,7 +17,7 @@
         <input type="text" id="city" name="city"
                placeholder="Ludwigshafen"
                value="{{ user.city or '' }}" required autofocus>
-        <p class="field-hint">Sets your timezone, so reminders arrive at your local time.</p>
+        <p class="field-hint">Sets your timezone and the weather in your reminders.</p>
       </div>
 
       <div class="form-section">
@@ -25,8 +25,8 @@
         <p class="muted">One email a day about the day ahead.</p>
 
         <div class="field-inline">
-          <input type="checkbox" id="daily_reminder_enabled" name="daily_reminder_enabled"
-                 {% if user.daily_reminder_enabled %}checked{% endif %}>
+          <input type="checkbox" id="daily_reminder_enabled" name="daily_reminder_enabled"  
+            {% if user.daily_reminder_enabled %}checked{% endif %}>
           <label for="daily_reminder_enabled">Send me a daily reminder</label>
         </div>
 

@@ -1,5 +1,5 @@
 # Shiftmates
- 
+
 **Live:** https://www.shiftmates.org
  
 Email reminders for your work shifts
@@ -21,6 +21,9 @@ I built it because I worked rotating shifts and kept checking the plan on my pho
 - A background worker sends the reminders in each user's own timezone
 - Weather forecast pulled from OpenWeather for the city on your profile
 - Turn reminders off at any time, from the app or from a link in every email
+
+## Screenshots
+
 
 ## Tech
  
@@ -82,12 +85,11 @@ python worker.py
 - Include weather description for the next day
 - Building teams with leader who each have different rights in the process of setting shifts
 
-
 ## Notes
  
 Built as a personal side project while working full-time, before starting a
 Business Informatics degree in September 2026.
  
 ## License
- 
+
 MIT
