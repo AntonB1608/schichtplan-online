@@ -24,6 +24,8 @@ I built it because I worked rotating shifts and kept checking the plan on my pho
 
 ## Screenshots
 
+[Reminder the day before, daily reminder:](/screenshots/Daily_reminder.jpeg)
+[Reminder at the same day, shift reminder:](screenshots/Shift_reminder.jpeg)
 
 ## Tech
  
