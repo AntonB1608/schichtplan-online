@@ -1,97 +1,111 @@
 # Shiftmates
 
-**Live:** https://www.shiftmates.org
- 
-Email reminders for your work shifts
-You save your shifts once; the app sends you a mail the day before and again a few minutes before your shift begins. 
+Email reminders for your work shifts. Save your roster once — the app mails
+you the evening before and again shortly before the shift starts.
 
-You can set the reminder time the day before individually. 
-At the reminder a few minute before your shifts, you can choose between 30–180 minutes, shipping this week for the worker. 
+**Live:** [www.shiftmates.org](https://www.shiftmates.org)
 
-I built it because I worked rotating shifts and kept checking the plan on my phone at 11pm. 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Railway-4169E1?logo=postgresql&logoColor=white)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
+I built it because I worked rotating shifts and kept checking the plan on my
+phone at 11pm.
 
 ## Features
- 
-- Sign up with an email address, confirmed through a verification link, tokens expire
+
+- Sign up with an email address, confirmed through a verification link; tokens expire after one hour
 - Passwords hashed with bcrypt; login locks for 15 minutes after 5 failed attempts
-- Password reset via a token that expires after one hour
-- Add shifts with a start and end time, or mark a date as a day off
-- Add shifttypes or note to each shifts if you want
-- Set your city and the two times your reminders should arrive
-- A background worker sends the reminders in each user's own timezone
-- Weather forecast pulled from OpenWeather for the city on your profile
-- Turn reminders off at any time, from the app or from a link in every email
+- Password reset via a token that also expires after one hour
+- Add shifts with a start and end time, or mark a date as a day off — overnight shifts roll over to the next day automatically
+- Four built-in shift types, or name your own; optional note per shift
+- Daily reminder at a time you choose (18:00 by default), shift reminder 30–180 minutes before the start
+- A background worker sends both reminders in each user's own timezone and never sends the same mail twice
+- Days off get a short all-clear mail, so a quiet inbox never means a missed shift
+- Turn either reminder off on its own, or both at once from the app
 
 ## Screenshots
 
-[Reminder the day before, daily reminder:](/screenshots/Daily_reminder.jpeg)
-[Reminder at the same day, shift reminder:](screenshots/Shift_reminder.jpeg)
+| Daily reminder (evening before) | Shift reminder (same day) |
+|---|---|
+| ![Daily reminder](screenshots/Daily_reminder.jpeg) | ![Shift reminder](screenshots/Shift_reminder.jpeg) |
 
 ## Tech
- 
+
 | Layer | Choice |
 |---|---|
 | Web | Flask, Jinja2, gunicorn |
 | Data | PostgreSQL in production, SQLite locally, SQLAlchemy + Alembic |
 | Auth | bcrypt, Flask-WTF (CSRF), server-side sessions |
-| Jobs | APScheduler in a separate worker process |
+| Jobs | Separate worker process, deduplicated via sent-at timestamps |
 | Email | Resend API, hand-written table-based HTML |
 | Hosting | Railway, custom domain with SPF, DKIM and DMARC |
 
 ## Architecture
- 
+
 Two processes run side by side, defined in the `Procfile`:
- 
+
 - **web** — the Flask app. Applies migrations on boot, then serves requests.
-- **worker** — a blocking scheduler that wakes every minute, finds users whose
-  reminder time has passed in their own timezone, and sends
-  any mail not yet sent today.
-After a complete mail that is send the worker marks the reminer with sent_at. 
-I chose to make the time stamp after the mail was send. Not before the mail was send because here you have in the worst case 2 mails send. 
-They share the database but never call each other. The worker runs without a request context, so everything it needs is passed in explicitly rather than read from `request` — an early version read `request.form` inside a helper the worker
-called, which meant no reminder was ever sent.
- 
-The two reminders are scheduled against a window rather than a threshold. 
+- **worker** — checks every minute which reminders are due: shift reminders
+  inside their lead-time window, daily reminders once the user's chosen time
+  has passed in their timezone.
+
+They share the database but never call each other. The worker runs without a
+request context, so everything it needs is passed in explicitly — an early
+version read `request.form` inside a helper the worker called, which meant no
+reminder was ever sent.
+
+Two details that took a few attempts to get right:
+
+- **Send first, stamp after.** A reminder is marked as sent only after the
+  mail API confirms delivery. If sending fails, the next run retries; the
+  worst case is a late mail, never a missing one.
+- **Windows instead of exact times.** Reminders match against a time window
+  rather than an exact minute, so a slow or restarted worker cannot skip past
+  a due reminder.
 
 ## Running it locally
- 
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
- 
+
 cp example.env .env      # then fill in your own values
 flask db upgrade         # creates the local SQLite database
 python app.py            # http://localhost:5555
 ```
- 
+
 To send reminders, run the worker in a second terminal:
- 
+
 ```bash
 python worker.py
 ```
- 
+
 ## Environment variables
- 
+
 | Variable | Purpose |
 |---|---|
 | `secret_key` | Signs the session cookie. Any long random string. |
 | `resend_api_key` | API key from resend.com |
-| `openweather_key` | API key from openweathermap.org |
+| `openweather_key` | API key from openweathermap.org — resolves the city on your profile to a timezone |
 | `DATABASE_URL` | Postgres URL. Falls back to local SQLite if unset. |
 | `SESSION_COOKIE_SECURE` | `true` when serving over HTTPS |
 | `FLASK_DEBUG` | `true` during development only |
- 
-## What I would change next
- 
-- Include weather description for the next day
-- Building teams with leader who each have different rights in the process of setting shifts
+
+## Roadmap
+
+- Store IANA timezone names instead of a fixed UTC offset, so reminders stay
+  correct across daylight-saving changes
+- Weather for the next day in the daily reminder
+- Teams: share a roster, with a team lead who manages the shifts
 
 ## Notes
- 
+
 Built as a personal side project while working full-time, before starting a
-Business Informatics degree in September 2026.
- 
+Business Informatics degree.
+
 ## License
 
 MIT
