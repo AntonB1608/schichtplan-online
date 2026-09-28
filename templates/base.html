@@ -36,7 +36,7 @@
         {% if messages %}
             <div class="wrap flash-wrap">
             {% for category, message in messages %}
-                <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">{{ message }}</div>
+                <div class="alert alert-{{ category if category in ('error', 'deleted') else 'success' }}">{{ message }}</div>
             {% endfor %}
             </div>
         {% endif %}
