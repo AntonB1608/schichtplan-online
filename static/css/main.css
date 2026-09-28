@@ -281,6 +281,7 @@ tbody tr:hover { background: var(--papier); }
 .alert + .alert { margin-top: 8px; }
 .alert-error { border-left-color: var(--rot); color: var(--rot); }
 .alert-success { border-left-color: var(--gruen); color: var(--gruen); }
+.alert-deleted { border-left-color: var(--rot); color: var(--rot); }
 
 
 
