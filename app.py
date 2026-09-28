@@ -594,7 +594,7 @@ def delete_shift(date_id):
     if shift:
         db.session.delete(shift)
         db.session.commit()
-        flash("Shift deleted.", "success")
+        flash("Shift deleted.", "deleted")
         return redirect("/shifts")
 
     return redirect("/shifts")
