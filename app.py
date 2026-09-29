@@ -671,6 +671,7 @@ def send_email(to, subject, html):
             headers={"Authorization": f"Bearer {os.getenv('resend_api_key')}"},
             json={
                 "from": "Shiftmates <noreply@send.shiftmates.org>",
+                "reply_to": "team@shiftmates.org",
                 "to": [to],
                 "subject": subject,
                 "html": html,
