@@ -14,3 +14,7 @@ Schichtplan_tool.code-workspace
 .claude/
 Notes.md
 test.py
+
+# Datenbank-Backups nie ins Repository
+*.sql
+backup_*
