@@ -16,7 +16,10 @@
     <div class="navbar-wrap">
         <nav class="navbar">
             <div class="navbar-logo">
-                <a href="/"><img src="{{ url_for('static', filename='brand/shiftmates-logo.svg') }}" alt="Shiftmates" height="30" style="display:block;height:30px;width:auto"></a>
+                <a href="/"><picture>
+                    <source media="(max-width: 760px)" srcset="{{ url_for('static', filename='brand/shiftmates-symbol.svg') }}">
+                    <img src="{{ url_for('static', filename='brand/shiftmates-logo.svg') }}" alt="Shiftmates">
+                </picture></a>
             </div>
 
             <div class="navbar-links">
@@ -49,12 +52,11 @@
     <footer>
         <div class="footer-inner">
             <ul class="footer-links">
-                <li><a href="/reset">Reset password</a></li>
-                <li><a href="/unsubscribe">Unsubscribe</a></li>
+                <li><a href="/security">Security</a></li>
                 <li><a href="/impressum">Impressum</a></li>
                 <li><a href="/datenschutz">Datenschutz</a></li>
             </ul>
-            <p>Copyright &copy; 2026 Shiftmates &middot; Timezone data by OpenWeather.</p>
+            <p>&copy; 2026 Shiftmates</p>
         </div>
     </footer>
 

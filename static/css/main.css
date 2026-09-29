@@ -1,19 +1,27 @@
 
 
+@font-face { font-family: "Manrope"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/manrope-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-weight: 500; font-style: normal; font-display: swap; src: url("../fonts/manrope-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-weight: 600; font-style: normal; font-display: swap; src: url("../fonts/manrope-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-weight: 700; font-style: normal; font-display: swap; src: url("../fonts/manrope-latin-700-normal.woff2") format("woff2"); }
+
 :root {
 
-  --papier: #faf9f6;      
-  --weiss: #fff;          
-  --tinte: #1d1c1a;       
-  --text: #454440;       
-  --grau: #706e69;       
-  --linie: #d8d5cf;       
-  --linie-hell: #e8e5df;  
+  /* Farben aus dem Logo */
+  --papier: #f4f1ea;
+  --weiss: #fff;
+  --tinte: #14161a;
+  --text: #45443f;
+  --grau: #66635d;
+  --linie: #d9d4c9;
+  --linie-hell: #e7e2d8;
+  --messing: #b08d57;
   --rot: #9e2b25;
   --gruen: #2e6b39;
 
-  --serife: "Didot", "New York", Georgia, "Times New Roman", serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Eine Schrift ueberall, wie im Logo. Frueher Didot (nur auf Apple-Geraeten vorhanden). */
+  --serife: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 
@@ -52,12 +60,12 @@ a:hover { text-decoration-color: var(--tinte); }
 
 
 h1, h2, h3 { margin: 0; color: var(--tinte); }
-h1 { font: 400 68px/1.04 var(--serife); }
-h2 { font: 400 40px/1.12 var(--serife); }
+h1 { font: 600 64px/1.04 var(--serife); letter-spacing: -0.035em; }
+h2 { font: 600 38px/1.12 var(--serife); letter-spacing: -0.03em; }
 h3 { font: 600 17px/1.35 var(--sans); }
 
 
-.page-head h2, .form-card h2, .notice-card h2, .legal h2 { font: 400 32px/1.15 var(--serife); }
+.page-head h2, .form-card h2, .notice-card h2, .legal h2 { font: 600 30px/1.15 var(--serife); letter-spacing: -0.025em; }
 
 p { margin: 0 0 16px; }
 p:last-child { margin-bottom: 0; }
@@ -73,9 +81,9 @@ p:last-child { margin-bottom: 0; }
 
 .caps, .kicker, .legal-caps {
   color: var(--grau);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
 }
 
@@ -114,19 +122,18 @@ p:last-child { margin-bottom: 0; }
   padding-inline: 24px;
 }
 
-.navbar-logo a { font: 400 22px var(--serife); text-decoration: none; }
+.navbar-logo a { display: block; text-decoration: none; }
+.navbar-logo img { display: block; height: 30px; width: auto; }
 
-.navbar-links { display: flex; gap: 24px; }
+.navbar-links { display: flex; gap: 28px; }
 
 .navbar-links a {
   display: inline-flex;
   align-items: center;
   height: 44px;
   color: var(--grau);
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 2px;
-  text-transform: uppercase;
   text-decoration: none;
 }
 .navbar-links a:hover { color: var(--tinte); }
@@ -184,9 +191,9 @@ p:last-child { margin-bottom: 0; }
   display: block;
   margin-bottom: 8px;
   color: var(--grau);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
 }
 
@@ -238,9 +245,9 @@ thead th {
   padding-inline: 24px;
   border-bottom: 1px solid var(--linie);
   color: var(--grau);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   text-align: left;
 }
@@ -258,7 +265,7 @@ tbody tr:hover { background: var(--papier); }
   height: 24px;
   padding-inline: 8px;
   border: 1px solid var(--linie);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -308,7 +315,7 @@ tbody tr:hover { background: var(--papier); }
   font-size: 15px;
   counter-increment: schritt;
 }
-.notice-steps li::before { content: counter(schritt) "."; min-width: 20px; font: 400 18px var(--serife); }
+.notice-steps li::before { content: counter(schritt) "."; min-width: 20px; font: 600 17px var(--serife); color: var(--messing); }
 
 .notice-hint { margin-top: 24px; }
 .notice-card .btn { margin-top: 24px; }
@@ -345,12 +352,12 @@ tbody tr:hover { background: var(--papier); }
   counter-increment: schritt;
 }
 .steps li:first-child { border-top: none; }
-.steps li::before { content: counter(schritt) "."; font: 400 32px/1 var(--serife); }
+.steps li::before { content: counter(schritt) "."; font: 600 30px/1 var(--serife); color: var(--messing); letter-spacing: -0.02em; }
 .steps p { margin: 4px 0 0; color: var(--text); font-size: 15px; }
 
 .fineprint { max-width: 720px; margin-top: 24px; }
 
-.types-line { margin: 0; max-width: 32ch; font: italic 400 36px/1.4 var(--serife); }
+.types-line { margin: 0; max-width: 32ch; font: 600 34px/1.4 var(--serife); letter-spacing: -0.025em; }
 .types-line .sep { color: #b8b4ac; font-style: normal; }
 
 .trust { margin: 0; max-width: 720px; }
@@ -367,6 +374,22 @@ tbody tr:hover { background: var(--papier); }
 
 .closing { padding-block: 96px; }
 .closing .btn { margin-top: 32px; }
+
+/* Geschichte und Teams */
+.story-text { max-width: 60ch; }
+.story-text p { color: var(--text); font-size: 19px; line-height: 1.6; }
+.story-text p + p { margin-top: 20px; }
+
+.trust-line { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--linie-hell); max-width: 60ch; color: var(--text); font-size: 16px; }
+
+.teams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; max-width: 880px; margin: 0; padding: 0; list-style: none; }
+.teams li { padding: 28px; background: var(--weiss); border: 1px solid var(--linie); }
+.teams h3 { margin-bottom: 8px; }
+.teams p { margin: 0; color: var(--text); font-size: 15px; }
+.teams-note { margin-top: 24px; color: var(--grau); font-size: 15px; }
+
+/* Sicherheitsseite */
+.security .trust { margin-top: 32px; }
 
 
 
@@ -423,7 +446,7 @@ footer p { margin: 0; }
 
 
 .legal h2 { margin-bottom: 24px; }
-.legal h3 { margin: 48px 0 8px; font: 400 22px/1.25 var(--serife); }
+.legal h3 { margin: 48px 0 8px; font: 600 21px/1.25 var(--serife); letter-spacing: -0.015em; }
 .legal p, .legal li { color: var(--text); font-size: 16px; }
 .legal ul { padding-left: 24px; }
 .legal .category { margin-top: 24px; font-weight: 600; }
@@ -435,9 +458,9 @@ footer p { margin: 0; }
   h1 { font-size: 44px; }
 
   .navbar { padding-inline: 16px; gap: 16px; }
-  .navbar-logo a { font-size: 18px; }
+  .navbar-logo img { height: 26px; }
   .navbar-links { gap: 10px; }
-  .navbar-links a { font-size: 10px; letter-spacing: 0.5px; white-space: nowrap; }
+  .navbar-links a { font-size: 14px; white-space: nowrap; }
 
   h2 { font-size: 32px; }
   .page-head h2, .form-card h2, .notice-card h2, .legal h2 { font-size: 28px; }
@@ -453,6 +476,8 @@ footer p { margin: 0; }
   .steps li { grid-template-columns: 48px 1fr; gap: 16px; }
   .types-line { font-size: 24px; }
   .trust > div { grid-template-columns: 1fr; gap: 4px; }
+  .teams { grid-template-columns: 1fr; }
+  .story-text p { font-size: 17px; }
   .field-row { flex-direction: column; gap: 0; }
   .form-card, .notice-card { padding: 24px; }
 
@@ -473,9 +498,9 @@ footer p { margin: 0; }
   tbody td::before {
     content: attr(data-label);
     color: var(--grau);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
   }
 }

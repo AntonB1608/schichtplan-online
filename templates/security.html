@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Security — Shiftmates{% endblock %}
+{% block description %}How Shiftmates protects your account and your data.{% endblock %}
+
+{% block content %}
+
+<section class="wrap wrap-read security">
+  <div class="page-head">
+    <span class="caps">Security</span>
+    <h2 style="margin-top: 8px;">How your data is protected</h2>
+    <p class="muted" style="margin-top: 16px; color: var(--text); font-size: 17px;">
+      Shiftmates stores only what it needs to send your reminders.
+      Your address is used for the reminders and nothing else.
+    </p>
+  </div>
+
+  <dl class="trust">
+    <div>
+      <dt>Your email is verified</dt>
+      <dd>Nobody can sign you up but you.</dd>
+    </div>
+    <div>
+      <dt>Passwords are hashed with bcrypt</dt>
+      <dd>They are never stored in plain text.</dd>
+    </div>
+    <div>
+      <dt>Repeated wrong passwords lock the account</dt>
+      <dd>After five wrong tries it locks for 15 minutes.</dd>
+    </div>
+    <div>
+      <dt>You can stop the emails at any time</dt>
+      <dd>One page in your account turns both reminders off at once.</dd>
+    </div>
+  </dl>
+
+  <p class="fineprint">
+    What is stored and why, in plain words: <a href="/datenschutz">privacy policy</a>.
+  </p>
+</section>
+
+{% endblock %}
