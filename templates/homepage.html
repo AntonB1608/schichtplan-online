@@ -117,8 +117,10 @@
     <div class="section-head">
       <span class="caps">Why it exists</span>
       <h2>Built by someone who worked the shifts</h2>
+
     </div>
 
+    <div>
     <div class="story-text">
       <p>
         I worked full-time at a public swimming pool. Like almost everywhere, the
@@ -136,6 +138,7 @@
     <p class="trust-line">
       Your data stays yours. <a href="/security">How it is protected&nbsp;&rsaquo;</a>
     </p>
+    </div>
   </div>
 </section>
 
@@ -145,8 +148,50 @@
       <span class="caps">For shift leads</span>
       <h2>One roster. Every reminder.</h2>
       <p class="muted">No more photos of the roster in the group chat.</p>
+
+      <figure class="chat" aria-label="Illustration: a team group chat where the roster photo gets lost between questions">
+        <div class="chat-head">
+          <span class="chat-avatar" aria-hidden="true">HB</span>
+          <span class="chat-title">Team Hallenbad<small>14 members</small></span>
+        </div>
+        <div class="chat-body">
+          <div class="chat-day">Monday</div>
+          <div class="msg">
+            <span class="msg-from c1">Sara</span>
+            <span class="msg-text">New roster is up, took a photo</span>
+            <picture>
+              <source srcset="{{ url_for('static', filename='img/dienstplan-chat.webp') }}" type="image/webp">
+              <img class="msg-photo" src="{{ url_for('static', filename='img/dienstplan-chat.jpg') }}" width="480" height="692" loading="lazy"
+                   alt="Photo of a handwritten roster full of corrections">
+            </picture>
+            <span class="msg-time">18:42</span>
+          </div>
+          <div class="msg">
+            <span class="msg-from c2">Dennis</span>
+            <span class="msg-text">Who&rsquo;s on the till Wednesday, Nina or Ute??</span>
+            <span class="msg-time">18:45</span>
+          </div>
+          <div class="msg">
+            <span class="msg-from c3">Ute</span>
+            <span class="msg-text">Nina I think? Someone wrote on it in pen</span>
+            <span class="msg-time">18:51</span>
+          </div>
+          <div class="msg">
+            <span class="msg-from c4">Kim</span>
+            <span class="msg-text">is tuesday cancelled or not</span>
+            <span class="msg-time">22:07</span>
+          </div>
+          <div class="chat-day">Wednesday</div>
+          <div class="msg">
+            <span class="msg-from c5">Lea</span>
+            <span class="msg-text">Nobody&rsquo;s at the till. Who was supposed to be here?</span>
+            <span class="msg-time">06:02</span>
+          </div>
+        </div>
+      </figure>
     </div>
 
+    <div>
     <ul class="teams">
       <li>
         <h3>Enter it once</h3>
@@ -160,6 +205,7 @@
 
     <p class="teams-note">Team rosters are being built now, together with the first teams.</p>
     <a href="/teams" class="btn btn-ghost" style="margin-top: 24px;">Request early access</a>
+    </div>
   </div>
 </section>
 

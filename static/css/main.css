@@ -640,3 +640,21 @@ footer p { margin: 0; }
   .teams { grid-template-columns: 1fr; }
   .story-text p { font-size: 17px; }
 }
+
+/* Gruppenchat als Illustration im Teams-Abschnitt */
+.chat { margin: 32px 0 0; max-width: 360px; background: #efece5; border: 1px solid var(--linie); border-radius: 18px; overflow: hidden; box-shadow: var(--schatten-karte); font-family: var(--sans); }
+.chat-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--weiss); border-bottom: 1px solid var(--linie-hell); }
+.chat-avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #5a6b7a; color: #fff; font-size: 12px; font-weight: 600; letter-spacing: .5px; }
+.chat-title { display: flex; flex-direction: column; font-size: 15px; font-weight: 600; color: var(--tinte); line-height: 1.2; }
+.chat-title small { font-size: 12px; font-weight: 400; color: var(--grau); }
+.chat-body { display: flex; flex-direction: column; gap: 8px; padding: 14px 12px 16px; }
+.chat-day { align-self: center; margin: 4px 0; padding: 3px 10px; border-radius: 8px; background: rgba(255,255,255,.75); color: var(--grau); font-size: 12px; }
+.msg { position: relative; align-self: flex-start; max-width: 86%; padding: 7px 10px 18px; background: var(--weiss); border-radius: 4px 12px 12px 12px; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+.msg-from { display: block; margin-bottom: 2px; font-size: 13px; font-weight: 600; }
+.msg-from.c1 { color: #a0522d; } .msg-from.c2 { color: #2f6f8f; } .msg-from.c3 { color: #7a4f9a; } .msg-from.c4 { color: #3f7d4e; } .msg-from.c5 { color: #9e2b25; }
+.msg-text { display: block; font-size: 15px; line-height: 1.35; color: var(--tinte); }
+.msg-photo { display: block; width: 100%; height: 280px; object-fit: cover; object-position: 50% 30%; margin-top: 6px; border-radius: 8px; }
+.msg-time { position: absolute; right: 9px; bottom: 4px; font-size: 11px; color: var(--grau); }
+@media (max-width: 760px) {
+  .chat { max-width: 100%; margin-top: 24px; }
+}
