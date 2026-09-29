@@ -143,6 +143,60 @@ def security():
     return render_template("security.html")
 
 
+TEAM_SIZES = ["2-10", "11-30", "31-100", "100+"]
+
+
+@app.route("/teams", methods=["GET", "POST"])
+def teams():
+    if request.method == "GET":
+        return render_template("teams.html", form={}, team_sizes=TEAM_SIZES)
+
+    form = {
+        "name": request.form.get("name", "").strip()[:80],
+        "workplace": request.form.get("workplace", "").strip()[:120],
+        "team_size": request.form.get("team_size", ""),
+        "email": request.form.get("email", "").strip()[:120],
+        "message": request.form.get("message", "").strip()[:1000],
+    }
+
+    # Spam-Bot hat das unsichtbare Feld ausgefuellt: so tun, als ob alles geklappt hat
+    if request.form.get("website"):
+        return render_template("teams.html", sent=True, form={}, team_sizes=TEAM_SIZES)
+
+    if not form["name"] or not form["workplace"] or form["team_size"] not in TEAM_SIZES:
+        return render_template("teams.html", form=form, team_sizes=TEAM_SIZES,
+                               error="Please fill in your name, workplace and team size.")
+    if not EMAIL_REGEX.match(form["email"]):
+        return render_template("teams.html", form=form, team_sizes=TEAM_SIZES,
+                               error="Please enter a valid email address.")
+
+    rows = "".join(
+        f'<tr><td style="padding:6px 16px 6px 0;color:#706e69;vertical-align:top;">{label}</td>'
+        f'<td style="padding:6px 0;color:#1d1c1a;white-space:pre-line;">{escape(value) or "&ndash;"}</td></tr>'
+        for label, value in [
+            ("Name", form["name"]),
+            ("Workplace", form["workplace"]),
+            ("Team size", form["team_size"]),
+            ("Email", form["email"]),
+            ("Message", form["message"]),
+        ]
+    )
+    html = (
+        f'<div style="font-family:{MAIL_FONT};font-size:15px;line-height:1.5;">'
+        f'<p style="margin:0 0 16px;font-size:18px;font-weight:600;color:#1d1c1a;">New team request</p>'
+        f'<table role="presentation" cellpadding="0" cellspacing="0" border="0">{rows}</table>'
+        f'<p style="margin:16px 0 0;color:#706e69;">Reply to this email to answer them directly.</p>'
+        f'</div>'
+    )
+    subject = f"Team request: {form['workplace']} ({form['team_size']})"
+    ok = send_email("team@shiftmates.org", subject, html, reply_to=form["email"])
+
+    if not ok:
+        return render_template("teams.html", form=form, team_sizes=TEAM_SIZES,
+                               error="Something went wrong on our side. Please try again in a minute.")
+    return render_template("teams.html", sent=True, form={}, team_sizes=TEAM_SIZES)
+
+
 @app.route("/robots.txt")
 def robots():
     return send_from_directory(app.static_folder, "robots.txt")
@@ -664,14 +718,14 @@ def find_weather_data(user_id):
  
 
  
-def send_email(to, subject, html):
+def send_email(to, subject, html, reply_to="team@shiftmates.org"):
     try:
         resp = requests.post(
             "https://api.resend.com/emails",
             headers={"Authorization": f"Bearer {os.getenv('resend_api_key')}"},
             json={
                 "from": "Shiftmates <noreply@send.shiftmates.org>",
-                "reply_to": "team@shiftmates.org",
+                "reply_to": reply_to,
                 "to": [to],
                 "subject": subject,
                 "html": html,
