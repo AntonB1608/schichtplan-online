@@ -1,6 +1,7 @@
 
 from app import app, db, User, Shift, timedelta, send_email, build_action_mail, build_shift_rows
 from datetime import datetime, timezone, time
+from time import sleep
 
 
 DRY_RUN = False # Set to True to test without sending emails
@@ -116,5 +117,10 @@ def run_daily():
 
 
 if __name__ == "__main__":
-    run_once()
-    run_daily()
+    while True:
+        try:
+            run_once()
+            run_daily()
+        except Exception as e:
+            print(f"Worker error: {e}", flush=True)
+        sleep(60)
