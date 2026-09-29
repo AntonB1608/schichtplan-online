@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Shiftmates for teams{% endblock %}
+{% block description %}Enter your team's roster once. Everyone gets their own shift reminders. Request early access.{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <div class="form-card">
+
+    {% if sent %}
+
+      <h2>Thanks, request received.</h2>
+      <p class="muted">I&rsquo;ll get back to you within a day at the address you gave me.</p>
+      <div class="form-foot">
+        <a href="/">Back to the homepage</a>
+      </div>
+
+    {% else %}
+
+      <h2>Shiftmates for your team</h2>
+      <p class="muted">Team rosters are being built now, together with the first teams.
+        Tell me a little about yours and I&rsquo;ll get in touch.</p>
+
+      {% if error %}
+        <div class="alert alert-error" style="margin-top: 24px;">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="/teams">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="field">
+          <label for="name">Your name</label>
+          <input type="text" id="name" name="name" value="{{ form.name or '' }}"
+                 maxlength="80" autocomplete="name" required autofocus>
+        </div>
+
+        <div class="field">
+          <label for="workplace">Workplace</label>
+          <input type="text" id="workplace" name="workplace" value="{{ form.workplace or '' }}"
+                 maxlength="120" placeholder="e.g. Hallenbad Ludwigshafen" autocomplete="organization" required>
+        </div>
+
+        <div class="field">
+          <label for="team_size">Team size</label>
+          <select id="team_size" name="team_size" required>
+            {% for option in team_sizes %}
+              <option value="{{ option }}"{% if form.team_size == option %} selected{% endif %}>{{ option }} people</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" value="{{ form.email or '' }}"
+                 maxlength="120" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <div class="field">
+          <label for="message">Anything else? <span class="label-hint">Optional</span></label>
+          <textarea id="message" name="message" maxlength="1000">{{ form.message or '' }}</textarea>
+        </div>
+
+        <!-- Leer lassen: Falle fuer Spam-Bots, fuer Menschen unsichtbar -->
+        <div class="visually-hidden" aria-hidden="true">
+          <label for="website">Website</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <button type="submit" class="btn btn-block">Request early access</button>
+      </form>
+
+      <div class="form-foot">
+        Your details are only used to reply to you.
+        <a href="/datenschutz">Privacy policy</a>
+      </div>
+
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
