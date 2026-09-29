@@ -138,6 +138,11 @@ def homepage():
     return render_template("homepage.html")
 
 
+@app.route("/security")
+def security():
+    return render_template("security.html")
+
+
 @app.route("/robots.txt")
 def robots():
     return send_from_directory(app.static_folder, "robots.txt")
@@ -794,6 +799,7 @@ def build_action_mail(subject, headline, intro, button_label, link, note="", shi
           <tr>
             <td align="center" style="padding:16px 24px;font-family:{font};font-size:13px;line-height:1.6;color:#706e69;">
               Shiftmates &middot; <a href="https://www.shiftmates.org" style="color:#706e69;text-decoration:underline;">www.shiftmates.org</a>
+              &middot; <a href="https://www.shiftmates.org/unsubscribe" style="color:#706e69;text-decoration:underline;">Stop these reminders</a>
             </td>
           </tr>
         </table>
