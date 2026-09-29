@@ -8,6 +8,7 @@
     <link rel="icon" href="{{ url_for('static', filename='brand/favicon.svg') }}" type="image/svg+xml">
     <link rel="icon" href="{{ url_for('static', filename='brand/favicon.ico') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='brand/apple-touch-icon.png') }}">
+    <link rel="preload" href="{{ url_for('static', filename='fonts/playfair-display-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% block head %}{% endblock %}
 </head>
@@ -48,6 +49,7 @@
 
     <footer>
         <div class="footer-inner">
+            <img class="footer-mark" src="{{ url_for('static', filename='brand/shiftmates-symbol.svg') }}" alt="" aria-hidden="true">
             <ul class="footer-links">
                 <li><a href="/reset">Reset password</a></li>
                 <li><a href="/unsubscribe">Unsubscribe</a></li>
@@ -58,6 +60,22 @@
         </div>
     </footer>
 
+    <script>
+      (function () {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+        var els = document.querySelectorAll('.band > .wrap > *, .hero-copy, .hero-mail, .form-card, .notice-card, .table-card');
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+          });
+        }, { rootMargin: '0px 0px -8% 0px' });
+        els.forEach(function (el) {
+          if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return;
+          el.classList.add('reveal');
+          io.observe(el);
+        });
+      })();
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
