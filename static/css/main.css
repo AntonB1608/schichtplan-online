@@ -661,3 +661,4 @@ footer p { margin: 0; }
 .chat-body .msg.cont { margin-top: -5px; border-radius: 12px; }
 .msg-from.c6 { color: #8a6d1d; }
 .chat-body .msg { min-width: 76px; }
+.chat-caption { padding: 10px 16px 12px; background: var(--weiss); border-top: 1px solid var(--linie-hell); color: var(--grau); font-size: 13px; }
