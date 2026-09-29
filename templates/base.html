@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shiftmates{% endblock %}</title>
     <meta name="description" content="{% block description %}Email reminders for your work shifts — one the evening before, one before you leave.{% endblock %}">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231d1c1a'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia, serif' font-size='20' fill='%23faf9f6'%3ES%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="{{ url_for('static', filename='brand/favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ url_for('static', filename='brand/favicon.ico') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='brand/apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% block head %}{% endblock %}
 </head>
@@ -14,7 +16,7 @@
     <div class="navbar-wrap">
         <nav class="navbar">
             <div class="navbar-logo">
-                <a href="/">Shiftmates</a>
+                <a href="/"><img src="{{ url_for('static', filename='brand/shiftmates-logo.svg') }}" alt="Shiftmates" height="30" style="display:block;height:30px;width:auto"></a>
             </div>
 
             <div class="navbar-links">
