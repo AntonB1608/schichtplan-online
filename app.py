@@ -754,12 +754,8 @@ def build_action_mail(subject, headline, intro, button_label, link, note="", shi
 
           <tr>
             <td style="padding:16px 24px;border-bottom:1px solid #e8e5df;">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="width:28px;height:28px;background-color:#1d1c1a;border-radius:50%;text-align:center;vertical-align:middle;font-family:Georgia, serif;font-size:15px;line-height:28px;color:#faf9f6;">S</td>
-                  <td style="padding-left:8px;font-family:{font};font-size:15px;font-weight:600;color:#1d1c1a;">Shiftmates</td>
-                </tr>
-              </table>
+              <img src="https://www.shiftmates.org/static/brand/shiftmates-logo.png" width="144" height="26" alt="Shiftmates"
+                   style="display:block;border:0;outline:none;text-decoration:none;width:144px;height:26px;font-family:{font};font-size:15px;font-weight:600;color:#1d1c1a;">
             </td>
           </tr>
 
