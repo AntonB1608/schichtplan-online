@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shiftmates{% endblock %}</title>
-    <meta name="description" content="{% block description %}Email reminders for your work shifts — one the evening before, one before you leave.{% endblock %}">
+    <meta name="description" content="{% block description %}Erinnerungen für deine Schichten per Mail – eine am Abend vorher, eine bevor du losmusst.{% endblock %}">
     <link rel="icon" href="{{ url_for('static', filename='brand/favicon.svg') }}" type="image/svg+xml">
     <link rel="icon" href="{{ url_for('static', filename='brand/favicon.ico') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='brand/apple-touch-icon.png') }}">
     <link rel="preload" href="{{ url_for('static', filename='fonts/playfair-display-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=7">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=8">
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -22,13 +22,13 @@
 
             <div class="navbar-links">
                 {% if session.user_id %}
-                    <a href="/index"{% if request.path == '/index' %} aria-current="page"{% endif %}>Add shift</a>
-                    <a href="/shifts"{% if request.path == '/shifts' %} aria-current="page"{% endif %}>Shifts</a>
-                    <a href="/profile"{% if request.path == '/profile' %} aria-current="page"{% endif %}>Profile</a>
-                    <a href="/logout">Log out</a>
+                    <a href="/index"{% if request.path == '/index' %} aria-current="page"{% endif %}>Schicht eintragen</a>
+                    <a href="/shifts"{% if request.path == '/shifts' %} aria-current="page"{% endif %}>Meine Schichten</a>
+                    <a href="/profile"{% if request.path == '/profile' %} aria-current="page"{% endif %}>Profil</a>
+                    <a href="/logout">Abmelden</a>
                 {% else %}
-                    <a href="/login"{% if request.path == '/login' %} aria-current="page"{% endif %}>Log in</a>
-                    <a href="/register"{% if request.path == '/register' %} aria-current="page"{% endif %}>Sign up</a>
+                    <a href="/login"{% if request.path == '/login' %} aria-current="page"{% endif %}>Anmelden</a>
+                    <a href="/register"{% if request.path == '/register' %} aria-current="page"{% endif %}>Registrieren</a>
                 {% endif %}
             </div>
         </nav>
@@ -51,7 +51,7 @@
         <div class="footer-inner">
             <img class="footer-mark" src="{{ url_for('static', filename='brand/shiftmates-symbol.svg') }}" alt="" aria-hidden="true">
             <ul class="footer-links">
-                <li><a href="/security">Security</a></li>
+                <li><a href="/security">Sicherheit</a></li>
                 <li><a href="/impressum">Impressum</a></li>
                 <li><a href="/datenschutz">Datenschutz</a></li>
             </ul>

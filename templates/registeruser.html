@@ -1,30 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}Set your password — Shiftmates{% endblock %}
+{% block title %}Passwort festlegen – Shiftmates{% endblock %}
 
 {% block content %}
 <div class="wrap">
   <div class="form-card">
 
-    <h2>Set your password</h2>
-    <p class="muted">Min. 8 characters, including one special character.</p>
+    <h2>Passwort festlegen</h2>
+    <p class="muted">Mindestens 8 Zeichen, davon ein Sonderzeichen.</p>
 
     <form method="POST" action="/registeruser">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="field">
-        <label for="password">Password</label>
+        <label for="password">Passwort</label>
         <input type="password" id="password" name="password"
                autocomplete="new-password" required autofocus>
       </div>
 
       <div class="field">
-        <label for="password_again">Repeat password</label>
+        <label for="password_again">Passwort wiederholen</label>
         <input type="password" id="password_again" name="password_again"
                autocomplete="new-password" required>
       </div>
 
-      <button type="submit" class="btn btn-block">Save password</button>
+      <button type="submit" class="btn btn-block">Passwort speichern</button>
     </form>
 
   </div>
