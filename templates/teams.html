@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Shiftmates for teams{% endblock %}
-{% block description %}Enter your team's roster once. Everyone gets their own shift reminders. Request early access.{% endblock %}
+{% block title %}Shiftmates für Teams{% endblock %}
+{% block description %}Den Dienstplan fürs Team einmal eintragen, jeder bekommt seine eigenen Erinnerungen. Jetzt früher Zugang anfragen.{% endblock %}
 
 {% block content %}
 <div class="wrap">
@@ -9,17 +9,17 @@
 
     {% if sent %}
 
-      <h2>Thanks, request received.</h2>
-      <p class="muted">I&rsquo;ll get back to you within a day at the address you gave me.</p>
+      <h2>Danke, Anfrage ist angekommen.</h2>
+      <p class="muted">Ich melde mich innerhalb eines Tages bei dir, an die Adresse, die du angegeben hast.</p>
       <div class="form-foot">
-        <a href="/">Back to the homepage</a>
+        <a href="/">Zurück zur Startseite</a>
       </div>
 
     {% else %}
 
-      <h2>Shiftmates for your team</h2>
-      <p class="muted">Team rosters are being built now, together with the first teams.
-        Tell me a little about yours and I&rsquo;ll get in touch.</p>
+      <h2>Shiftmates für dein Team</h2>
+      <p class="muted">Die Team-Funktion entsteht gerade, zusammen mit den ersten Teams.
+        Erzähl mir kurz von deinem, dann melde ich mich.</p>
 
       {% if error %}
         <div class="alert alert-error" style="margin-top: 24px;">{{ error }}</div>
@@ -29,34 +29,34 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="field">
-          <label for="name">Your name</label>
+          <label for="name">Dein Name</label>
           <input type="text" id="name" name="name" value="{{ form.name or '' }}"
                  maxlength="80" autocomplete="name" required autofocus>
         </div>
 
         <div class="field">
-          <label for="workplace">Workplace</label>
+          <label for="workplace">Arbeitsplatz</label>
           <input type="text" id="workplace" name="workplace" value="{{ form.workplace or '' }}"
-                 maxlength="120" placeholder="e.g. Hallenbad Ludwigshafen" autocomplete="organization" required>
+                 maxlength="120" placeholder="z. B. Hallenbad Ludwigshafen" autocomplete="organization" required>
         </div>
 
         <div class="field">
-          <label for="team_size">Team size</label>
+          <label for="team_size">Teamgröße</label>
           <select id="team_size" name="team_size" required>
             {% for option in team_sizes %}
-              <option value="{{ option }}"{% if form.team_size == option %} selected{% endif %}>{{ option }} people</option>
+              <option value="{{ option }}"{% if form.team_size == option %} selected{% endif %}>{{ option }} Personen</option>
             {% endfor %}
           </select>
         </div>
 
         <div class="field">
-          <label for="email">Email</label>
+          <label for="email">E-Mail</label>
           <input type="email" id="email" name="email" value="{{ form.email or '' }}"
-                 maxlength="120" placeholder="you@example.com" autocomplete="email" required>
+                 maxlength="120" placeholder="du@beispiel.de" autocomplete="email" required>
         </div>
 
         <div class="field">
-          <label for="message">Anything else? <span class="label-hint">Optional</span></label>
+          <label for="message">Sonst noch was? <span class="label-hint">optional</span></label>
           <textarea id="message" name="message" maxlength="1000">{{ form.message or '' }}</textarea>
         </div>
 
@@ -66,12 +66,12 @@
           <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
         </div>
 
-        <button type="submit" class="btn btn-block">Request early access</button>
+        <button type="submit" class="btn btn-block">Früher Zugang anfragen</button>
       </form>
 
       <div class="form-foot">
-        Your details are only used to reply to you.
-        <a href="/datenschutz">Privacy policy</a>
+        Deine Angaben werden nur genutzt, um dir zu antworten.
+        <a href="/datenschutz">Datenschutzerklärung</a>
       </div>
 
     {% endif %}

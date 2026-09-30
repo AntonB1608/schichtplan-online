@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 
-{% block title %}Shiftmates — never miss the start of a shift{% endblock %}
-{% block description %}Save your roster once. Shiftmates emails you the evening before and again before you leave.{% endblock %}
+{% block title %}Shiftmates – nie wieder eine Schicht verpassen{% endblock %}
+{% block description %}Dienstplan einmal eintragen. Shiftmates erinnert dich am Abend vorher und noch einmal, bevor du losmusst.{% endblock %}
 
 {% block content %}
 
 <header class="hero">
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <span class="kicker">Shift reminders</span>
-      <h1>Never miss the start of a shift.</h1>
+      <span class="kicker">Schichterinnerungen</span>
+      <h1>Nie wieder eine Schicht verpassen.</h1>
 
       <p class="lede">
-        Save your roster once. Get an email the evening before, and another
-        before you leave. You pick both times.
+        Trag deinen Dienstplan einmal ein. Du bekommst eine Mail am Abend vorher
+        und eine, bevor du losmusst. Beide Uhrzeiten bestimmst du.
       </p>
 
       <div class="hero-actions">
-        <a href="/register" class="btn btn-lg">Get shift reminders</a>
-        <a href="#how" class="link-more">See how it works&nbsp;&rsaquo;</a>
+        <a href="/register" class="btn btn-lg">Kostenlos starten</a>
+        <a href="#how" class="link-more">So funktioniert&rsquo;s&nbsp;&rsaquo;</a>
       </div>
-      <p class="hero-note">Free for shift workers.</p>
+      <p class="hero-note">Für Schichtarbeiter kostenlos.</p>
     </div>
 
     <div class="hero-mail">
@@ -32,28 +32,28 @@
         </div>
 
         <div class="mail-body">
-          <p class="mail-subject">Reminder: your shifts for tomorrow</p>
-          <p class="mail-line">Hi Marc, here is what tomorrow looks like.</p>
+          <p class="mail-subject">Erinnerung: deine Schichten für morgen</p>
+          <p class="mail-line">Hallo Marc, so sieht dein Tag morgen aus.</p>
 
           <div class="mail-shift">
             <p class="mail-shift-line">
-              <span>Early shift</span>
+              <span>Frühschicht</span>
               <span>06:00 &ndash; 14:30</span>
             </p>
             <p class="mail-shift-meta">
-              Tuesday, 8 September &middot; bring the van keys
+              Dienstag, 8. September &middot; Schlüssel für den Transporter mitbringen
             </p>
           </div>
         </div>
 
         <div class="mail-foot">
-          You can turn reminders off in your profile settings.
+          Erinnerungen kannst du in deinem Profil jederzeit abschalten.
         </div>
       </article>
 
       <p class="mail-caption">
-        An actual reminder. Days off get one too, so a quiet inbox never means
-        a missed shift.
+        Eine echte Erinnerung. Auch freie Tage bekommen eine, damit ein leeres
+        Postfach nie eine verpasste Schicht bedeutet.
       </p>
     </div>
   </div>
@@ -62,34 +62,34 @@
 <section class="band" id="how">
   <div class="wrap">
     <div class="section-head">
-      <span class="caps">How it works</span>
-      <h2>Three steps, then it runs</h2>
-      <p class="muted">Set it up once. Nothing to open again until your roster changes.</p>
+      <span class="caps">So funktioniert&rsquo;s</span>
+      <h2>Drei Schritte, dann läuft es</h2>
+      <p class="muted">Einmal einrichten. Danach musst du nichts mehr öffnen, bis sich dein Plan ändert.</p>
     </div>
 
     <ol class="steps">
       <li>
         <div>
-          <h3>Save a shift</h3>
-          <p>A date, a start and an end time, and the kind of shift it is.</p>
+          <h3>Schicht eintragen</h3>
+          <p>Datum, Beginn, Ende und welche Schicht es ist.</p>
         </div>
       </li>
       <li>
         <div>
-          <h3>One email in the evening</h3>
-          <p>At 18:00 by default, telling you what tomorrow looks like.</p>
+          <h3>Eine Mail am Abend</h3>
+          <p>Standardmäßig um 18 Uhr, mit allem, was morgen ansteht.</p>
         </div>
       </li>
       <li>
         <div>
-          <h3>One before you leave</h3>
-          <p>Anywhere from 30 minutes to 3 hours ahead. You pick the lead time.</p>
+          <h3>Eine, bevor du losmusst</h3>
+          <p>30 Minuten bis 3 Stunden vorher. Wie lange, bestimmst du.</p>
         </div>
       </li>
     </ol>
 
     <p class="fineprint">
-      Both run in your own timezone, and either one can be switched off on its own.
+      Beide laufen in deiner Zeitzone, und jede lässt sich einzeln abschalten.
     </p>
   </div>
 </section>
@@ -97,17 +97,14 @@
 <section class="band">
   <div class="wrap">
     <div class="section-head">
-      <span class="caps">Shift types</span>
-      <h2>Your shifts, your names</h2>
-      <p class="muted">Four types are built in. If your roster calls it something
-        else, type that instead.</p>
+      <span class="caps">Schichtarten</span>
+      <h2>Deine Schichten, deine Namen</h2>
+      <p class="muted">Vier Arten sind schon drin. Heißt es bei euch anders,
+        schreibst du einfach deinen eigenen Namen.</p>
     </div>
 
     <p class="types-line">
-      Early shift<span class="sep"> &middot; </span>Late
-      shift<span class="sep"> &middot; </span>Night
-      shift<span class="sep"> &middot; </span>Day
-      off<span class="sep"> &middot; </span>Your own name
+      Frühschicht<span class="sep"> &middot; </span>Spätschicht<span class="sep"> &middot; </span>Nachtschicht<span class="sep"> &middot; </span>Frei<span class="sep"> &middot; </span>Dein eigener Name
     </p>
   </div>
 </section>
@@ -115,28 +112,28 @@
 <section class="band" id="story">
   <div class="wrap">
     <div class="section-head">
-      <span class="caps">Why it exists</span>
-      <h2>Built by someone who worked the shifts</h2>
+      <span class="caps">Warum es das gibt</span>
+      <h2>Gebaut von jemandem, der selbst Schicht gearbeitet hat</h2>
 
     </div>
 
     <div>
     <div class="story-text">
       <p>
-        I worked full-time at a public swimming pool. Like almost everywhere, the
-        roster hung on the wall. When it changed, whoever was off that day found out
-        late. Nobody&rsquo;s fault, telling everyone one by one just takes too long.
-        I overslept a shift myself.
+        Ich habe Vollzeit in einem Schwimmbad gearbeitet. Wie fast überall hing der
+        Dienstplan an der Wand. Wenn er sich geändert hat, haben es die Kollegen, die
+        gerade frei hatten, erst spät erfahren. Niemandes Schuld: Allen einzeln Bescheid
+        zu geben, dauert einfach zu lange. Ich habe selbst mal eine Schicht verschlafen.
       </p>
       <p>
-        Shiftmates does one thing: it gets your shifts to you, the evening before
-        and again before you leave. It sells nothing, and your address is used for
-        the reminders and nothing else.
+        Shiftmates macht genau eine Sache: Es bringt dir deine Schichten, am Abend
+        vorher und noch einmal, bevor du losmusst. Es verkauft nichts, und deine
+        Adresse wird nur für die Erinnerungen genutzt.
       </p>
     </div>
 
     <p class="trust-line">
-      Your data stays yours. <a href="/security">How it is protected&nbsp;&rsaquo;</a>
+      Deine Daten bleiben deine. <a href="/security">So werden sie geschützt&nbsp;&rsaquo;</a>
     </p>
     </div>
   </div>
@@ -145,95 +142,95 @@
 <section class="band" id="teams">
   <div class="wrap">
     <div class="section-head">
-      <span class="caps">For shift leads</span>
-      <h2>One roster. Every reminder.</h2>
-      <p class="muted">No more photos of the roster in the group chat.</p>
+      <span class="caps">Für Schichtleitungen</span>
+      <h2>Ein Dienstplan. Jede Erinnerung.</h2>
+      <p class="muted">Schluss mit Fotos vom Dienstplan in der Gruppe.</p>
 
-      <figure class="chat" aria-label="Illustration: a team group chat where the roster photo gets lost between questions">
+      <figure class="chat" aria-label="Illustration: ein Gruppenchat, in dem das Foto vom Dienstplan zwischen lauter Fragen untergeht">
         <div class="chat-head">
           <span class="chat-avatar" aria-hidden="true">HB</span>
-          <span class="chat-title">Team Hallenbad<small>14 members</small></span>
+          <span class="chat-title">Team Hallenbad<small>14 Mitglieder</small></span>
         </div>
         <div class="chat-body">
-          <div class="chat-day">Monday</div>
+          <div class="chat-day">Montag</div>
           <div class="msg">
             <span class="msg-from c1">Sara</span>
-            <span class="msg-text">new roster&rsquo;s up</span>
+            <span class="msg-text">neuer plan hängt</span>
             <picture>
               <source srcset="{{ url_for('static', filename='img/dienstplan-chat.webp') }}" type="image/webp">
               <img class="msg-photo" src="{{ url_for('static', filename='img/dienstplan-chat.jpg') }}" width="480" height="692" loading="lazy"
-                   alt="Photo of a handwritten roster full of corrections">
+                   alt="Foto eines handgeschriebenen Dienstplans voller Korrekturen">
             </picture>
             <span class="msg-time">18:42</span>
           </div>
-          <div class="msg cont"><span class="msg-text">sorry it&rsquo;s a bit blurry</span><span class="msg-time">18:42</span></div>
+          <div class="msg cont"><span class="msg-text">sorry ist bisschen unscharf</span><span class="msg-time">18:42</span></div>
 
           <div class="msg">
             <span class="msg-from c2">Dennis</span>
-            <span class="msg-text">can&rsquo;t read a thing lol</span>
+            <span class="msg-text">kann nix lesen haha</span>
             <span class="msg-time">18:45</span>
           </div>
-          <div class="msg cont"><span class="msg-text">who&rsquo;s on front desk wednesday, nina or ute??</span><span class="msg-time">18:45</span></div>
+          <div class="msg cont"><span class="msg-text">wer ist mittwoch an der kasse, nina oder ute??</span><span class="msg-time">18:45</span></div>
 
           <div class="msg">
             <span class="msg-from c3">Ute</span>
-            <span class="msg-text">nina i think? someone wrote over it in pen</span>
+            <span class="msg-text">nina glaub ich? hat jemand mit kuli drübergeschrieben</span>
             <span class="msg-time">18:51</span>
           </div>
 
           <div class="msg">
             <span class="msg-from c6">Nina</span>
-            <span class="msg-text">wait what, i swapped that with ute last week</span>
+            <span class="msg-text">hä, den hab ich doch letzte woche mit ute getauscht</span>
             <span class="msg-time">19:03</span>
           </div>
 
           <div class="msg">
             <span class="msg-from c4">Kim</span>
-            <span class="msg-text">is tuesday cancelled or not</span>
+            <span class="msg-text">fällt dienstag jetzt aus oder nicht</span>
             <span class="msg-time">22:07</span>
           </div>
           <div class="msg cont"><span class="msg-text">?</span><span class="msg-time">22:07</span></div>
 
-          <div class="chat-day">Wednesday</div>
+          <div class="chat-day">Mittwoch</div>
           <div class="msg">
             <span class="msg-from c5">Lea</span>
-            <span class="msg-text">nobody&rsquo;s at front desk</span>
+            <span class="msg-text">keiner an der kasse</span>
             <span class="msg-time">06:02</span>
           </div>
-          <div class="msg cont"><span class="msg-text">who was supposed to be here??</span><span class="msg-time">06:02</span></div>
+          <div class="msg cont"><span class="msg-text">wer hätte hier sein sollen??</span><span class="msg-time">06:02</span></div>
 
           <div class="msg">
             <span class="msg-from c3">Ute</span>
-            <span class="msg-text">omg i thought it was nina</span>
+            <span class="msg-text">oh nein ich dachte nina</span>
             <span class="msg-time">06:19</span>
           </div>
         </div>
-        <figcaption class="chat-caption">A typical week, without Shiftmates. Illustration.</figcaption>
+        <figcaption class="chat-caption">Eine typische Woche ohne Shiftmates. Illustration.</figcaption>
       </figure>
     </div>
 
     <div>
     <ul class="teams">
       <li>
-        <h3>Enter it once</h3>
-        <p>Put your team&rsquo;s roster in once. Everyone gets their own reminders, nobody has to type anything.</p>
+        <h3>Einmal eintragen</h3>
+        <p>Du trägst den Plan fürs ganze Team einmal ein. Jeder bekommt seine eigenen Erinnerungen, keiner muss etwas abtippen.</p>
       </li>
       <li>
-        <h3>Changes reach the right person</h3>
-        <p>When a shift moves, the person affected is told straight away, even on their day off.</p>
+        <h3>Änderungen kommen an</h3>
+        <p>Ändert sich eine Schicht, erfährt es die betroffene Person sofort, auch an ihrem freien Tag.</p>
       </li>
     </ul>
 
-    <p class="teams-note">Team rosters are being built now, together with the first teams.</p>
-    <a href="/teams" class="btn btn-ghost" style="margin-top: 24px;">Request early access</a>
+    <p class="teams-note">Die Team-Funktion entsteht gerade, zusammen mit den ersten Teams.</p>
+    <a href="/teams" class="btn btn-ghost" style="margin-top: 24px;">Früher Zugang anfragen</a>
     </div>
   </div>
 </section>
 
 <section class="band closing">
   <div class="wrap">
-    <h2>Save tomorrow&rsquo;s shift now.</h2>
-    <a href="/register" class="btn btn-lg">Get shift reminders</a>
+    <h2>Trag die Schicht von morgen jetzt ein.</h2>
+    <a href="/register" class="btn btn-lg">Kostenlos starten</a>
   </div>
 </section>
 

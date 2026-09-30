@@ -1,60 +1,60 @@
 {% extends "base.html" %}
 
-{% block title %}Add shift — Shiftmates{% endblock %}
+{% block title %}Schicht eintragen – Shiftmates{% endblock %}
 
 {% block content %}
 <div class="wrap">
   <div class="form-card">
 
-    <h2>Add a shift</h2>
-    <p class="muted">Pick a date, choose a shift type, and add a note if you need one.</p>
+    <h2>Schicht eintragen</h2>
+    <p class="muted">Datum wählen, Schichtart aussuchen und bei Bedarf eine Notiz dazuschreiben.</p>
 
     <form method="POST" action="/index">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="field">
-        <label for="datum">Date</label>
+        <label for="datum">Datum</label>
         <input type="date" id="datum" name="datum" required>
       </div>
 
       <div class="field">
-        <label for="shift_type">Shift type</label>
+        <label for="shift_type">Schichtart</label>
         <select id="shift_type" name="shift_type" required>
           {% for value, label in SHIFT_TYPES.items() %}
             <option value="{{ value }}">{{ label }}</option>
           {% endfor %}
-          <option value="custom">Own name…</option>
+          <option value="custom">Eigener Name …</option>
         </select>
       </div>
 
       <div class="field" id="custom-field" hidden>
-        <label for="shift_type_custom">Name of your shift type</label>
+        <label for="shift_type_custom">Name deiner Schichtart</label>
         <input type="text" id="shift_type_custom" name="shift_type_custom"
-               placeholder="Split shift" maxlength="30">
+               placeholder="Mitteldienst" maxlength="30">
       </div>
 
       <div class="field-row" id="times">
         <div class="field">
-          <label for="zeit_anfang">Starts</label>
+          <label for="zeit_anfang">Beginn</label>
           <input type="time" id="zeit_anfang" name="zeit_anfang" required>
         </div>
         <div class="field">
-          <label for="zeit_ende">Ends</label>
+          <label for="zeit_ende">Ende</label>
           <input type="time" id="zeit_ende" name="zeit_ende" required>
         </div>
       </div>
 
       <div class="field">
-        <label for="note">Note <span class="label-hint">optional</span></label>
+        <label for="note">Notiz <span class="label-hint">optional</span></label>
         <textarea id="note" name="note" rows="2" maxlength="200"
-                  placeholder="Handover at the gate"></textarea>
+                  placeholder="Schlüssel mitnehmen"></textarea>
       </div>
 
-      <button type="submit" class="btn btn-block">Save shift</button>
+      <button type="submit" class="btn btn-block">Schicht speichern</button>
     </form>
 
     <div class="form-foot">
-      <a href="/shifts">See all your shifts</a>
+      <a href="/shifts">Alle deine Schichten ansehen</a>
     </div>
 
   </div>

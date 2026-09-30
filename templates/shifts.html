@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Your shifts — Shiftmates{% endblock %}
+{% block title %}Meine Schichten – Shiftmates{% endblock %}
 
 {% block content %}
 <div class="wrap stack-lg">
 
   <div class="page-head">
-    <h2>Your shifts</h2>
-    <p class="muted">Everything you have saved so far.</p>
+    <h2>Deine Schichten</h2>
+    <p class="muted">Alles, was du bisher eingetragen hast.</p>
   </div>
 
   {% if shifts %}
@@ -15,27 +15,27 @@
       <table>
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Type</th>
-            <th>Time</th>
-            <th>Note</th>
-            <th><span class="visually-hidden">Actions</span></th>
+            <th>Datum</th>
+            <th>Schicht</th>
+            <th>Uhrzeit</th>
+            <th>Notiz</th>
+            <th><span class="visually-hidden">Aktionen</span></th>
           </tr>
         </thead>
         <tbody>
           {% for shift in shifts %}
             <tr>
-              <td data-label="Date">
-                {{ shift.start.strftime('%a, %d.%m.%Y') if shift.start else '—' }}
+              <td data-label="Datum">
+                {{ shift.start|datum_kurz if shift.start else '—' }}
               </td>
 
-              <td data-label="Type">
+              <td data-label="Schicht">
                 <span class="tag{% if shift.shift_type == 'off' %} tag-off{% endif %}">
                   {{ SHIFT_TYPES.get(shift.shift_type, shift.shift_type) }}
                 </span>
               </td>
 
-              <td data-label="Time">
+              <td data-label="Uhrzeit">
                 {% if shift.shift_type == 'off' or not shift.start or not shift.end %}
                   <span class="muted">—</span>
                 {% else %}
@@ -46,14 +46,14 @@
                 {% endif %}
               </td>
 
-              <td data-label="Note">
+              <td data-label="Notiz">
                 {% if shift.note %}{{ shift.note }}{% else %}<span class="muted">—</span>{% endif %}
               </td>
 
               <td class="is-right">
                 <form method="POST" action="/delete/{{ shift.id }}">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button type="submit" class="btn btn-danger">Delete</button>
+                  <button type="submit" class="btn btn-danger">Löschen</button>
                 </form>
               </td>
             </tr>
@@ -62,13 +62,13 @@
       </table>
     </div>
 
-    <a href="/index" class="btn">Add another shift</a>
+    <a href="/index" class="btn">Weitere Schicht eintragen</a>
 
   {% else %}
     <div class="empty-state">
-      <h3>No shifts saved yet</h3>
-      <p>Add your first one and your reminders start arriving.</p>
-      <a href="/index" class="btn">Add a shift</a>
+      <h3>Noch keine Schichten eingetragen</h3>
+      <p>Trag deine erste ein, dann kommen auch die Erinnerungen.</p>
+      <a href="/index" class="btn">Schicht eintragen</a>
     </div>
   {% endif %}
 

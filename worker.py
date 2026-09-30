@@ -27,15 +27,15 @@ def run_once():
 
                 try:
 
-                    subject = f"Reminder: your shift starts at {shift.start.strftime('%H:%M')}"
+                    subject = f"Erinnerung: deine Schicht beginnt um {shift.start.strftime('%H:%M')} Uhr"
 
                     html = build_action_mail(
                         subject=subject,
-                        headline="Your shift starts soon",
-                        intro=f"Hi {user.name}, your shift starts at {shift.start.strftime('%H:%M')}.",
-                        button_label="View my shifts",
+                        headline="Deine Schicht beginnt bald",
+                        intro=f"Hallo {user.name}, deine Schicht beginnt um {shift.start.strftime('%H:%M')} Uhr.",
+                        button_label="Meine Schichten ansehen",
                         link="https://www.shiftmates.org/shifts",
-                        note="You can turn reminders off in your profile settings.",
+                        note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
                         shifts_html=build_shift_rows([shift]),
                     )
                     if DRY_RUN:
@@ -76,26 +76,26 @@ def run_daily():
 
             try:
                 if not shifts or all(shift.shift_type == "off" for shift in shifts):
-                    subject = "Reminder: you are free tomorrow"
+                    subject = "Erinnerung: morgen hast du frei"
 
                     html = build_action_mail(
                         subject=subject,
-                        headline="You are free tomorrow",
-                        intro=f"Hi {user.name}, nothing planned for tomorrow. Enjoy your day off!",
-                        button_label="View my shifts",
+                        headline="Morgen hast du frei",
+                        intro=f"Hallo {user.name}, für morgen ist nichts geplant. Genieß deinen freien Tag!",
+                        button_label="Meine Schichten ansehen",
                         link="https://www.shiftmates.org/shifts",
-                        note="You can turn reminders off in your profile settings.",
+                        note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
                     )
                 else:
-                    subject = "Reminder: your shifts for tomorrow"
+                    subject = "Erinnerung: deine Schichten für morgen"
 
                     html = build_action_mail(
                         subject=subject,
-                        headline="Your shifts for tomorrow",
-                        intro=f"Hi {user.name}, here is what tomorrow looks like.",
-                        button_label="View my shifts",
+                        headline="Deine Schichten für morgen",
+                        intro=f"Hallo {user.name}, so sieht dein Tag morgen aus.",
+                        button_label="Meine Schichten ansehen",
                         link="https://www.shiftmates.org/shifts",
-                        note="You can turn reminders off in your profile settings.",
+                        note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
                         shifts_html=build_shift_rows(shifts),
                     )
 
