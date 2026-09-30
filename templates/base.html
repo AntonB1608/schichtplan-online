@@ -75,6 +75,31 @@
         });
       })();
     </script>
+
+    <script>
+      // Meldungen der Browser-Validierung auf Deutsch, damit kein englisches
+      // System-Popup den Eindruck bricht. Die sofortige Prüfung im Browser
+      // bleibt erhalten, damit niemand seine schon eingetippten Werte verliert.
+      (function () {
+        function message(el) {
+          var v = el.validity;
+          if (v.valueMissing) return "Bitte füll dieses Feld aus.";
+          if (v.typeMismatch && el.type === "email") return "Bitte gib eine gültige E-Mail-Adresse ein.";
+          if (v.tooShort) return "Bitte gib mindestens " + el.minLength + " Zeichen ein.";
+          if (v.tooLong) return "Bitte gib höchstens " + el.maxLength + " Zeichen ein.";
+          if (v.rangeUnderflow || v.rangeOverflow || v.stepMismatch || v.badInput) return "Bitte gib einen gültigen Wert ein.";
+          return "Bitte prüf diese Eingabe.";
+        }
+        document.addEventListener("invalid", function (e) {
+          if (e.target.setCustomValidity) e.target.setCustomValidity(message(e.target));
+        }, true);
+        function clear(e) {
+          if (e.target.setCustomValidity) e.target.setCustomValidity("");
+        }
+        document.addEventListener("input", clear, true);
+        document.addEventListener("change", clear, true);
+      })();
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
