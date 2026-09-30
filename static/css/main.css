@@ -262,6 +262,20 @@ input, select, textarea {
   transition: border-color var(--uebergang), box-shadow var(--uebergang);
 }
 input:hover, select:hover, textarea:hover { border-color: var(--grau); }
+
+/* iPhone/Safari: Datums- und Uhrzeitfelder haben dort eine eigene Mindestbreite
+   und ragen sonst aus der Karte heraus. */
+input[type="date"], input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  line-height: 44px;
+  text-align: left;
+}
+input::-webkit-date-and-time-value { text-align: left; }
+.field, .field-row > .field { min-width: 0; }
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--tinte);
@@ -551,8 +565,8 @@ footer p { margin: 0; }
     gap: 12px;
   }
   .navbar-logo img { height: 26px !important; }
-  .navbar-links { flex-wrap: wrap; gap: 4px 14px; }
-  .navbar-links a { height: 36px; font-size: 10px; letter-spacing: 1px; white-space: nowrap; }
+  .navbar-links { flex-wrap: nowrap; width: 100%; justify-content: space-between; gap: 8px; }
+  .navbar-links a { height: 36px; font-size: 10px; letter-spacing: 0.6px; white-space: nowrap; }
   .navbar-links a::after { bottom: 4px; }
 
   h2 { font-size: 30px; }
@@ -662,3 +676,9 @@ footer p { margin: 0; }
 .msg-from.c6 { color: #8a6d1d; }
 .chat-body .msg { min-width: 76px; }
 .chat-caption { padding: 10px 16px 12px; background: var(--weiss); border-top: 1px solid var(--linie-hell); color: var(--grau); font-size: 13px; }
+
+/* Sehr kleine Handys (z. B. iPhone SE 1. Generation) */
+@media (max-width: 360px) {
+  .navbar-links { gap: 6px; }
+  .navbar-links a { font-size: 9px; letter-spacing: 0.2px; }
+}
