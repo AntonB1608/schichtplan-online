@@ -13,11 +13,9 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="field">
-        <label for="city">Stadt</label>
-        <input type="text" id="city" name="city"
-               placeholder="Ludwigshafen"
-               value="{{ user.city or '' }}" required autofocus>
-        <p class="field-hint">Bestimmt deine Zeitzone. Zeitzonen- und Wetterdaten von <a href="https://openweathermap.org" rel="noopener">OpenWeather</a>.</p>
+        <label>Zeitzone</label>
+        <input type="hidden" id="time_zone" name="time_zone" value="{{ user.time_zone or '' }}">
+        <p class="field-hint">Wird automatisch von deinem Gerät erkannt: <strong id="tz-display">{{ user.time_zone or '…' }}</strong>. Nur dafür, dass deine Erinnerungen zur richtigen Uhrzeit kommen &ndash; wir speichern keinen Ort.</p>
       </div>
 
       <div class="form-section">
@@ -71,4 +69,20 @@
 
   </div>
 </div>
+
+<script>
+  // Zeitzone aus dem Browser lesen und ins versteckte Feld schreiben.
+  // So muss niemand eine Stadt eingeben und es landet kein Ort auf dem Server.
+  (function () {
+    try {
+      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz) {
+        document.getElementById("time_zone").value = tz;
+        document.getElementById("tz-display").textContent = tz;
+      }
+    } catch (e) {
+      // Sehr alter Browser ohne Intl: Feld bleibt leer, der Server fängt das ab.
+    }
+  })();
+</script>
 {% endblock %}

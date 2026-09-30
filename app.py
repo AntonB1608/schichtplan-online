@@ -2,9 +2,8 @@ import os
 import re
 import secrets
 from datetime import time, datetime, timedelta, timezone
-from urllib.parse import quote
+from zoneinfo import ZoneInfo
 import bcrypt
-import emoji
 import requests
 from dotenv import load_dotenv
 from flask import Flask, request, render_template, session, redirect, flash, send_from_directory
@@ -77,6 +76,17 @@ def datum_kurz(d):
 @app.context_processor
 def inject_shift_types():
     return {"SHIFT_TYPES": SHIFT_TYPES, "LEAD_MINUTES": LEAD_MINUTES}
+
+
+def to_user_time(now_utc, tz_name):
+    """Rechnet einen aware UTC-Zeitpunkt in die lokale Wanduhrzeit des Nutzers
+    um und gibt sie als naive datetime zurueck (passend zu den lokal
+    gespeicherten Schichtzeiten). Unbekannte Zeitzonen fallen auf UTC zurueck."""
+    try:
+        tz = ZoneInfo(tz_name) if tz_name else timezone.utc
+    except Exception:
+        tz = timezone.utc
+    return now_utc.astimezone(tz).replace(tzinfo=None)
  
  
 # MODELS
@@ -101,7 +111,6 @@ class User(db.Model):
     password_hash: Mapped[Optional[str]] = mapped_column()
     locked_until: Mapped[Optional[datetime]] = mapped_column()
     failed_login_attempts: Mapped[int] = mapped_column(default=0)
-    city: Mapped[Optional[str]] = mapped_column()
     registration_completed: Mapped[bool] = mapped_column(default=False)
     time_zone: Mapped[Optional[str]] = mapped_column()
     daily_reminder_enabled: Mapped[bool] = mapped_column(default=True, nullable=False)
@@ -383,7 +392,7 @@ def login():
         user.locked_until = None
         session["user_id"] = user.id
         db.session.commit()
-        if not user.city:
+        if not user.time_zone:
             return redirect("/profile")
         else:
             return redirect("/index")
@@ -511,12 +520,18 @@ def show_profile():
     if request.method != "POST":
         return render_template("profile.html", user=user)
     
-    city = request.form.get("city")
+    timezone_name = request.form.get("time_zone")
     daily_reminder_time = request.form.get("daily_reminder_time")
     lead_minutes = request.form.get("shift_reminder_lead_minutes")
 
-    if not city:
-        flash("Bitte gib eine Stadt an.", "error")
+    if not timezone_name:
+        flash("Wir konnten deine Zeitzone nicht ermitteln. Bitte lade die Seite neu.", "error")
+        return render_template("profile.html", user=user)
+
+    try:
+        ZoneInfo(timezone_name)
+    except Exception:
+        flash("Ungültige Zeitzone.", "error")
         return render_template("profile.html", user=user)
 
     
@@ -541,21 +556,7 @@ def show_profile():
     if lead_minutes:
         user.shift_reminder_lead_minutes = lead_minutes
 
-    key = os.getenv("openweather_key")
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(city)}&appid={key}&units=metric&lang=de"
-
-    try:
-        response = requests.get(url, timeout=10).json()
-    except requests.RequestException:
-        flash("Die Stadt kann gerade nicht geprüft werden. Versuch es später noch einmal.", "error")
-        return render_template("profile.html", user=user)
-
-    if str(response.get("cod")) != "200":
-        flash("Stadt nicht gefunden.", "error")
-        return render_template("profile.html", user=user)
-
-    user.city = city
-    user.time_zone = str(response["timezone"])
+    user.time_zone = timezone_name
     
     db.session.commit()
     flash("Profil gespeichert.", "success")
@@ -691,39 +692,6 @@ def datenschutz():
     return tomorrow.strftime("%d.%m.%Y"), now_local.strftime("%d.%m.%Y")
  
 
-# HELPERS - WEATHER
-
-def find_weather_data(user_id):
- 
-    try:
- 
-        user = User.query.filter_by(id=user_id).first()
-        key = os.getenv("openweather_key")
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={quote(user.city)}&appid={key}&units=metric&lang=de"
-        response = requests.get(url, timeout=10).json()
-        mapping = {
-            "Thunderstorm": emoji.emojize("Morgen gibt es Gewitter. :thunder_cloud_and_rain:"),
-            "Drizzle": emoji.emojize("Morgen nieselt es. :cloud_with_rain:"),
-            "Rain": emoji.emojize("Morgen regnet es. :umbrella_with_rain_drops:"),
-            "Snow": emoji.emojize("Morgen schneit es. :snowflake:"),
-            "Atmosphere": emoji.emojize("Morgen wird es neblig. :fog:"),
-            "Clear": "Morgen ist es klar.",
-            "Clouds": "Morgen ist es bewölkt.",
-        }
-        weather_text = mapping.get(response["weather"][0]["main"], "")
-        temp = f"{response['main'] ['temp']}°C"
-        time_zone = response["timezone"]
-        return weather_text, temp, time_zone
- 
-    except Exception as e:
- 
-        print(f"{e}")
-        weather_text = ""
-        temp = ""
-        time_zone = 0
-        return weather_text, temp, time_zone
- 
- 
 
  
  

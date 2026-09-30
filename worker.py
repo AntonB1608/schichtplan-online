@@ -1,5 +1,5 @@
 
-from app import app, db, User, Shift, timedelta, send_email, build_action_mail, build_shift_rows
+from app import app, db, User, Shift, timedelta, send_email, build_action_mail, build_shift_rows, to_user_time
 from datetime import datetime, timezone, time
 from time import sleep
 
@@ -11,11 +11,12 @@ def run_once():
 
     with app.app_context():
 
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now_utc = datetime.now(timezone.utc)
+        now = now_utc.replace(tzinfo=None)
 
         users = User.query.filter_by(shift_reminder_enabled=True).all()
         for user in users:
-            now_user = now + timedelta(seconds=int(user.time_zone or 0))
+            now_user = to_user_time(now_utc, user.time_zone)
 
             shifts = Shift.query.filter(
                 Shift.user_id == user.id,
@@ -58,10 +59,11 @@ def run_once():
 def run_daily():
     with app.app_context():
 
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now_utc = datetime.now(timezone.utc)
+        now = now_utc.replace(tzinfo=None)
         users = User.query.filter_by(daily_reminder_enabled=True).all()
         for user in users:
-            now_user = now + timedelta(seconds=int(user.time_zone or 0))
+            now_user = to_user_time(now_utc, user.time_zone)
             soll = datetime.combine(now_user.date(), user.daily_reminder_time.time())
             if now_user < soll or (user.daily_reminder_sent_at and user.daily_reminder_sent_at >= soll):                continue
 
