@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Unsubscribe your email — Shiftmates{% endblock %}
+{% block title %}Erinnerungen abschalten – Shiftmates{% endblock %}
 
 {% block content %}
 <div class="wrap">
   <div class="form-card">
 
-    <h2>Unsubscribe</h2>
+    <h2>Erinnerungen abschalten</h2>
     <p class="muted">
-      This switches off both the daily email and the reminder before each shift.
-      Your shifts stay saved, and you can turn either one back on in your profile.
+      Damit schaltest du die tägliche Mail und die Erinnerung vor jeder Schicht ab.
+      Deine Schichten bleiben gespeichert, und du kannst beides im Profil jederzeit wieder einschalten.
     </p>
 
     <form method="POST" action="/unsubscribe">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button type="submit" class="btn btn-block">Unsubscribe</button>
+      <button type="submit" class="btn btn-block">Alle Erinnerungen abschalten</button>
     </form>
 
     <div class="form-foot">
-      <a href="/profile">Back to profile</a>
+      <a href="/profile">Zurück zum Profil</a>
     </div>
 
   </div>

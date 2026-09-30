@@ -1,35 +1,35 @@
 {% extends "base.html" %}
  
-{% block title %}Log in — Shiftmates{% endblock %}
+{% block title %}Anmelden – Shiftmates{% endblock %}
  
 {% block content %}
 <div class="wrap">
   <div class="form-card">
  
-    <h2>Log in</h2>
-    <p class="muted">Your shifts are waiting.</p>
+    <h2>Anmelden</h2>
+    <p class="muted">Deine Schichten warten schon.</p>
  
     <form method="POST" action="/login">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
  
       <div class="field">
-        <label for="username">Username</label>
+        <label for="username">Benutzername</label>
         <input type="text" id="username" name="username"
                autocomplete="username" required autofocus>
       </div>
  
       <div class="field">
-        <label for="password">Password</label>
+        <label for="password">Passwort</label>
         <input type="password" id="password" name="password"
                autocomplete="current-password" required>
       </div>
  
-      <button type="submit" class="btn btn-block">Log in</button>
+      <button type="submit" class="btn btn-block">Anmelden</button>
     </form>
  
     <div class="form-foot">
-      <p><a href="/reset">Forgot your password?</a></p>
-      <p>No account yet? <a href="/register">Sign up</a></p>
+      <p><a href="/reset">Passwort vergessen?</a></p>
+      <p>Noch kein Konto? <a href="/register">Registrieren</a></p>
     </div>
  
   </div>
