@@ -57,6 +57,9 @@ SHIFT_TYPES = {
 
 LEAD_MINUTES = [30, 60, 90, 120, 180]
 
+# Feste Farb-Palette für Vorlagen (warm, gedeckt, zum Marken-Look passend)
+TEMPLATE_COLORS = ["#c98a3c", "#c05f45", "#4a5578", "#6f8f6a", "#4f7a8c", "#8a5a7a"]
+
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
           "August", "September", "Oktober", "November", "Dezember"]
@@ -75,7 +78,7 @@ def datum_kurz(d):
 
 @app.context_processor
 def inject_shift_types():
-    return {"SHIFT_TYPES": SHIFT_TYPES, "LEAD_MINUTES": LEAD_MINUTES}
+    return {"SHIFT_TYPES": SHIFT_TYPES, "LEAD_MINUTES": LEAD_MINUTES, "TEMPLATE_COLORS": TEMPLATE_COLORS}
 
 
 def to_user_time(now_utc, tz_name):
@@ -153,6 +156,17 @@ class Shift(db.Model):
     note: Mapped[Optional[str]] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
     shift_reminder_sent_at: Mapped[datetime] = mapped_column(default=None, nullable=True)
+
+
+class ShiftTemplate(db.Model):
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    name: Mapped[str] = mapped_column(String(30))
+    color: Mapped[str] = mapped_column(String(7))
+    start_time: Mapped[Optional[str]] = mapped_column()
+    end_time: Mapped[Optional[str]] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
 
 # ROUTES - PUBLIC
@@ -592,6 +606,10 @@ def schicht_eintragen():
         return redirect("/login")
  
     user_id = session["user_id"]
+    templates = ShiftTemplate.query.filter_by(user_id=user_id).order_by(ShiftTemplate.created_at).all()
+
+    def render_index():
+        return render_template("index.html", templates=templates)
 
     if request.method == "POST":
         date = request.form.get("datum")
@@ -600,26 +618,26 @@ def schicht_eintragen():
 
         if shift_type not in SHIFT_TYPES and shift_type != "custom":
             flash("Bitte wähle eine Schichtart.", "error")
-            return render_template("index.html")
+            return render_index()
 
         if shift_type == "custom":
             shift_type = (request.form.get("shift_type_custom") or "").strip()
             if not shift_type:
                 flash("Bitte gib deiner Schichtart einen Namen.", "error")
-                return render_template("index.html")
+                return render_index()
             if len(shift_type) > 30:
                 flash("Schichtart zu lang (max. 30 Zeichen).", "error")
-                return render_template("index.html")
+                return render_index()
 
         if not date:
             flash("Bitte wähle ein Datum.", "error")
-            return render_template("index.html")
+            return render_index()
 
         try:
             date = datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
             flash("Ungültiges Datum.", "error")
-            return render_template("index.html")
+            return render_index()
 
         if shift_type == "off":
             start = datetime.combine(date, time(0, 0))
@@ -629,13 +647,13 @@ def schicht_eintragen():
             zeit_ende = request.form.get("zeit_ende")
             if not zeit_anfang or not zeit_ende:
                 flash("Bitte füll alle Felder aus.", "error")
-                return render_template("index.html")
+                return render_index()
             try:
                 zeit_anfang = datetime.strptime(zeit_anfang, "%H:%M").time()
                 zeit_ende = datetime.strptime(zeit_ende, "%H:%M").time()
             except ValueError:
                 flash("Ungültige Uhrzeit.", "error")
-                return render_template("index.html")
+                return render_index()
             start = datetime.combine(date, zeit_anfang)
             end = datetime.combine(date, zeit_ende)
             if end <= start:
@@ -644,10 +662,25 @@ def schicht_eintragen():
         db.session.add(Shift(user_id=user_id, start=start, end=end, shift_type=shift_type,
                              note=note, created_at=datetime.now(timezone.utc)))
         db.session.commit()
+
+        # Optional: diese Schicht als Vorlage merken
+        if request.form.get("save_template"):
+            tname = (request.form.get("template_name") or "").strip()[:30]
+            tcolor = request.form.get("template_color")
+            if tname and tcolor in TEMPLATE_COLORS:
+                if shift_type == "off":
+                    t_start = t_end = None
+                else:
+                    t_start = request.form.get("zeit_anfang")
+                    t_end = request.form.get("zeit_ende")
+                db.session.add(ShiftTemplate(user_id=user_id, name=tname, color=tcolor,
+                                             start_time=t_start, end_time=t_end))
+                db.session.commit()
+
         flash("Schicht gespeichert.", "success")
         return redirect("/index")
     else:
-        return render_template("index.html")
+        return render_index()
  
  
 @app.route("/shifts", methods=["GET"])

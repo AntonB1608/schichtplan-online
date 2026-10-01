@@ -12,6 +12,21 @@
     <form method="POST" action="/index">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+      {% if templates %}
+      <div class="templates-quick">
+        <span class="label-hint">Schnell eintragen</span>
+        <div class="template-chips">
+          {% for t in templates %}
+            <button type="button" class="template-chip"
+                    style="--chip: {{ t.color }}"
+                    data-name="{{ t.name }}"
+                    data-start="{{ t.start_time or '' }}"
+                    data-end="{{ t.end_time or '' }}">{{ t.name }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
       <div class="field">
         <label for="datum">Datum</label>
         <input type="date" id="datum" name="datum" required>
@@ -50,6 +65,29 @@
                   placeholder="Schlüssel mitnehmen"></textarea>
       </div>
 
+      <div class="field-inline template-save-toggle">
+        <input type="checkbox" id="save_template" name="save_template">
+        <label for="save_template">Als Vorlage speichern</label>
+      </div>
+
+      <div id="template-save" hidden>
+        <div class="field">
+          <label for="template_name">Name der Vorlage</label>
+          <input type="text" id="template_name" name="template_name" maxlength="30" placeholder="Frühschicht">
+        </div>
+        <div class="field">
+          <label>Farbe</label>
+          <div class="color-swatches">
+            {% for c in TEMPLATE_COLORS %}
+              <label class="swatch">
+                <input type="radio" name="template_color" value="{{ c }}" {% if loop.first %}checked{% endif %}>
+                <span style="background: {{ c }}"></span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
       <button type="submit" class="btn btn-block">Schicht speichern</button>
     </form>
 
@@ -85,6 +123,32 @@
 
     type.addEventListener('change', sync);
     sync();
+  })();
+
+  (function () {
+    // "Als Vorlage speichern" auf-/zuklappen
+    var save = document.getElementById('save_template');
+    var box  = document.getElementById('template-save');
+    if (save && box) {
+      function toggle() { box.hidden = !save.checked; }
+      save.addEventListener('change', toggle);
+      toggle();
+    }
+
+    // Vorlage antippen -> Formular füllen
+    var type       = document.getElementById('shift_type');
+    var customName = document.getElementById('shift_type_custom');
+    var anfang     = document.getElementById('zeit_anfang');
+    var ende       = document.getElementById('zeit_ende');
+    document.querySelectorAll('.template-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        type.value = 'custom';
+        type.dispatchEvent(new Event('change'));
+        customName.value = chip.dataset.name;
+        if (chip.dataset.start) anfang.value = chip.dataset.start;
+        if (chip.dataset.end)   ende.value   = chip.dataset.end;
+      });
+    });
   })();
 </script>
 {% endblock %}

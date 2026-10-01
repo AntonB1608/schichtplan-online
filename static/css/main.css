@@ -682,3 +682,30 @@ footer p { margin: 0; }
   .navbar-links { gap: 6px; }
   .navbar-links a { font-size: 9px; letter-spacing: 0.2px; }
 }
+
+/* Vorlagen: Schnell-Knöpfe */
+.templates-quick { margin-bottom: 20px; }
+.template-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.template-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px;
+  border: 1px solid var(--linie); background: var(--weiss); color: var(--tinte);
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: border-color var(--uebergang), box-shadow var(--uebergang);
+}
+.template-chip::before {
+  content: ""; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--chip, var(--gold)); flex: none;
+}
+.template-chip:hover { border-color: var(--tinte); box-shadow: var(--schatten-karte); }
+
+/* Vorlagen: Farbauswahl */
+.color-swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch { cursor: pointer; margin: 0; line-height: 0; }
+.swatch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.swatch span {
+  display: block; width: 28px; height: 28px; border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--weiss), 0 0 0 1px var(--linie);
+  transition: box-shadow var(--uebergang);
+}
+.swatch input:checked + span { box-shadow: inset 0 0 0 3px var(--weiss), 0 0 0 2px var(--tinte); }
