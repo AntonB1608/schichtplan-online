@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Ohne Konto ausprobieren – Shiftmates{% endblock %}
+{% block description %}Probier Shiftmates aus, ganz ohne Konto. Nichts wird gespeichert – alles bleibt in deinem Browser.{% endblock %}
+
+{% block content %}
+<div class="wrap">
+
+  <div class="demo-banner">
+    <strong>Testmodus.</strong> Alles hier bleibt in deinem Browser – wir speichern nichts, keine Mail nötig.
+    Für echte Erinnerungen brauchst du nur ein Konto.
+  </div>
+
+  <div class="form-card">
+    <h2>Schicht eintragen</h2>
+    <p class="muted">Trag ein paar Schichten ein und schau, wie es sich anfühlt.</p>
+
+    <form id="demo-form">
+      <div class="field">
+        <label for="datum">Datum</label>
+        <input type="date" id="datum" name="datum" required>
+      </div>
+
+      <div class="field">
+        <label for="shift_type">Schichtart</label>
+        <select id="shift_type" name="shift_type" required>
+          {% for value, label in SHIFT_TYPES.items() %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+          <option value="custom">Eigener Name …</option>
+        </select>
+      </div>
+
+      <div class="field" id="custom-field" hidden>
+        <label for="shift_type_custom">Name deiner Schichtart</label>
+        <input type="text" id="shift_type_custom" name="shift_type_custom"
+               placeholder="Mitteldienst" maxlength="30">
+      </div>
+
+      <div class="field-row" id="times">
+        <div class="field">
+          <label for="zeit_anfang">Beginn</label>
+          <input type="time" id="zeit_anfang" name="zeit_anfang" required>
+        </div>
+        <div class="field">
+          <label for="zeit_ende">Ende</label>
+          <input type="time" id="zeit_ende" name="zeit_ende" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="note">Notiz <span class="label-hint">optional</span></label>
+        <textarea id="note" name="note" rows="2" maxlength="200"
+                  placeholder="Schlüssel mitnehmen"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-block">Schicht eintragen</button>
+    </form>
+  </div>
+
+  <div class="form-card" id="demo-list-card" hidden>
+    <h2>Deine Testschichten</h2>
+    <div id="demo-list"></div>
+  </div>
+
+  <div class="demo-cta">
+    <p>Gefällt's dir? Damit die Erinnerungen wirklich kommen, brauchst du nur deine E-Mail.</p>
+    <a href="/register" class="btn btn-lg">Konto anlegen</a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.SHIFT_TYPES = {{ SHIFT_TYPES | tojson }};
+</script>
+<script>
+  (function () {
+    var KEY = "shiftmates_demo";
+    var WT  = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
+    var form   = document.getElementById("demo-form");
+    var type   = document.getElementById("shift_type");
+    var custom = document.getElementById("custom-field");
+    var cname  = document.getElementById("shift_type_custom");
+    var times  = document.getElementById("times");
+    var listCard = document.getElementById("demo-list-card");
+    var list   = document.getElementById("demo-list");
+
+    // Schichtart-Logik wie im echten Formular
+    function sync() {
+      var isOff = type.value === "off", isCustom = type.value === "custom";
+      custom.hidden = !isCustom;
+      cname.required = isCustom;
+      times.hidden = isOff;
+      times.querySelectorAll("input").forEach(function (el) {
+        el.required = !isOff;
+        if (isOff) el.value = "";
+      });
+    }
+    type.addEventListener("change", sync);
+    sync();
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+      catch (e) { return []; }
+    }
+    function save(items) {
+      try { localStorage.setItem(KEY, JSON.stringify(items)); } catch (e) {}
+    }
+
+    function fmtDate(iso) {
+      var d = new Date(iso + "T00:00:00");
+      var dd = String(d.getDate()).padStart(2, "0");
+      var mm = String(d.getMonth() + 1).padStart(2, "0");
+      return WT[d.getDay()] + ", " + dd + "." + mm + "." + d.getFullYear();
+    }
+
+    function render() {
+      var items = load();
+      listCard.hidden = items.length === 0;
+      list.innerHTML = "";
+      items.sort(function (a, b) {
+        return (a.date + (a.start || "")).localeCompare(b.date + (b.start || ""));
+      });
+      items.forEach(function (s, i) {
+        var row = document.createElement("div");
+        row.className = "demo-row";
+        var zeit = s.isOff ? "&mdash;" : (s.start + "&ndash;" + s.end);
+        var note = s.note ? '<span class="demo-note">' + escapeHtml(s.note) + "</span>" : "";
+        row.innerHTML =
+          '<span class="tag' + (s.isOff ? " tag-off" : "") + '">' + escapeHtml(s.label) + "</span>" +
+          '<span class="demo-when">' + fmtDate(s.date) + " &middot; " + zeit + "</span>" +
+          note +
+          '<button type="button" class="demo-del" data-i="' + i + '">Löschen</button>';
+        list.appendChild(row);
+      });
+    }
+
+    function escapeHtml(t) {
+      var d = document.createElement("div"); d.textContent = t; return d.innerHTML;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var isOff = type.value === "off", isCustom = type.value === "custom";
+      var label = isCustom ? (cname.value || "").trim() : (window.SHIFT_TYPES[type.value] || type.value);
+      if (isCustom && !label) { cname.focus(); return; }
+      var shift = {
+        date: document.getElementById("datum").value,
+        label: label,
+        isOff: isOff,
+        start: isOff ? "" : document.getElementById("zeit_anfang").value,
+        end:   isOff ? "" : document.getElementById("zeit_ende").value,
+        note:  (document.getElementById("note").value || "").trim(),
+      };
+      var items = load(); items.push(shift); save(items);
+      render();
+      form.reset(); sync();
+    });
+
+    list.addEventListener("click", function (e) {
+      if (!e.target.classList.contains("demo-del")) return;
+      var items = load();
+      items.splice(parseInt(e.target.dataset.i, 10), 1);
+      save(items); render();
+    });
+
+    render();
+  })();
+</script>
+{% endblock %}

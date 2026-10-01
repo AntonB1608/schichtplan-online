@@ -181,6 +181,12 @@ def security():
     return render_template("security.html")
 
 
+@app.route("/testen")
+def demo():
+    # Ausprobieren ohne Konto: läuft komplett im Browser, nichts wird gespeichert.
+    return render_template("demo.html")
+
+
 TEAM_SIZES = ["2-10", "11-30", "31-100", "100+"]
 
 
