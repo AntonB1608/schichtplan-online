@@ -577,6 +577,8 @@ def show_profile():
         user.shift_reminder_lead_minutes = lead_minutes
 
     user.time_zone = timezone_name
+    user.daily_reminder_enabled = bool(request.form.get("daily_reminder_enabled"))
+    user.shift_reminder_enabled = bool(request.form.get("shift_reminder_enabled"))
     
     db.session.commit()
     flash("Profil gespeichert.", "success")
