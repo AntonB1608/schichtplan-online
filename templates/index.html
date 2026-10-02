@@ -7,7 +7,7 @@
   <div class="form-card">
 
     <h2>Schicht eintragen</h2>
-    <p class="muted">Datum wählen, Schichtart aussuchen und bei Bedarf eine Notiz dazuschreiben.</p>
+    <p class="muted">Tage antippen, Schichtart wählen – du kannst mehrere Tage auf einmal eintragen.</p>
 
     <form method="POST" action="/index">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -28,8 +28,10 @@
       {% endif %}
 
       <div class="field">
-        <label for="datum">Datum</label>
-        <input type="date" id="datum" name="datum" required>
+        <label>Tage</label>
+        <p class="field-hint">Tipp die Tage an, an denen du diese Schicht hast – auch mehrere auf einmal.</p>
+        <div id="day-grid" class="day-grid"></div>
+        <input type="hidden" name="dates" id="dates">
       </div>
 
       <div class="field">
@@ -149,6 +151,58 @@
         if (chip.dataset.end)   ende.value   = chip.dataset.end;
       });
     });
+  })();
+
+  (function () {
+    // Tage-Raster: die nächsten 4 Wochen, antippen zum Auswählen
+    var grid   = document.getElementById('day-grid');
+    var hidden = document.getElementById('dates');
+    if (!grid || !hidden) return;
+
+    var WD = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    var selected = {};
+
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var start = new Date(today);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7)); // Montag dieser Woche
+
+    function iso(d) {
+      return d.getFullYear() + '-' +
+             String(d.getMonth() + 1).padStart(2, '0') + '-' +
+             String(d.getDate()).padStart(2, '0');
+    }
+
+    var head = document.createElement('div');
+    head.className = 'day-head';
+    WD.forEach(function (w) {
+      var s = document.createElement('span'); s.textContent = w; head.appendChild(s);
+    });
+    grid.appendChild(head);
+
+    var cells = document.createElement('div');
+    cells.className = 'day-cells';
+    for (var i = 0; i < 28; i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i);
+      var cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'day-cell';
+      cell.textContent = d.getDate();
+      if (d < today) {
+        cell.disabled = true;
+        cell.classList.add('past');
+      } else {
+        cell.dataset.iso = iso(d);
+        if (d.getTime() === today.getTime()) cell.classList.add('today');
+        cell.addEventListener('click', function () {
+          var k = this.dataset.iso;
+          if (selected[k]) { delete selected[k]; this.classList.remove('sel'); }
+          else { selected[k] = true; this.classList.add('sel'); }
+          hidden.value = Object.keys(selected).sort().join(',');
+        });
+      }
+      cells.appendChild(cell);
+    }
+    grid.appendChild(cells);
   })();
 </script>
 {% endblock %}
