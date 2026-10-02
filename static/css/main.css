@@ -724,3 +724,18 @@ footer p { margin: 0; }
 .demo-del:hover { color: var(--rot); }
 .demo-cta { text-align: center; margin: 32px 0 8px; }
 .demo-cta p { color: var(--text); margin-bottom: 16px; }
+
+/* Tage-Raster (mehrere Tage auf einmal) */
+.day-grid { margin-top: 8px; }
+.day-head, .day-cells { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day-head { margin-bottom: 6px; }
+.day-head span { text-align: center; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--grau); }
+.day-cell {
+  aspect-ratio: 1; border: 1px solid var(--linie); background: var(--weiss);
+  border-radius: 8px; font-family: var(--sans); font-size: 15px; color: var(--tinte);
+  cursor: pointer; transition: border-color var(--uebergang), background var(--uebergang), color var(--uebergang);
+}
+.day-cell:hover:not(:disabled) { border-color: var(--tinte); }
+.day-cell.sel { background: var(--tinte); color: var(--weiss); border-color: var(--tinte); }
+.day-cell.today:not(.sel) { border-color: var(--gold); color: var(--gold); }
+.day-cell.past { border-color: transparent; background: transparent; color: var(--linie); cursor: default; }

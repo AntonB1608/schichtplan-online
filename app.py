@@ -620,7 +620,8 @@ def schicht_eintragen():
         return render_template("index.html", templates=templates)
 
     if request.method == "POST":
-        date = request.form.get("datum")
+        # Mehrere Tage: kommagetrennt aus dem Tage-Raster (datum = Fallback)
+        dates_raw = request.form.get("dates") or request.form.get("datum") or ""
         shift_type = request.form.get("shift_type")
         note = request.form.get("note") or None
 
@@ -637,20 +638,19 @@ def schicht_eintragen():
                 flash("Schichtart zu lang (max. 30 Zeichen).", "error")
                 return render_index()
 
-        if not date:
-            flash("Bitte wähle ein Datum.", "error")
+        date_strs = [d for d in dates_raw.split(",") if d]
+        if not date_strs:
+            flash("Bitte wähle mindestens einen Tag.", "error")
             return render_index()
-
         try:
-            date = datetime.strptime(date, "%Y-%m-%d")
+            dates = [datetime.strptime(d, "%Y-%m-%d") for d in date_strs]
         except ValueError:
             flash("Ungültiges Datum.", "error")
             return render_index()
 
-        if shift_type == "off":
-            start = datetime.combine(date, time(0, 0))
-            end = start
-        else:
+        # Zeiten nur einmal prüfen – sie gelten für alle gewählten Tage
+        zeit_anfang = zeit_ende = None
+        if shift_type != "off":
             zeit_anfang = request.form.get("zeit_anfang")
             zeit_ende = request.form.get("zeit_ende")
             if not zeit_anfang or not zeit_ende:
@@ -662,13 +662,18 @@ def schicht_eintragen():
             except ValueError:
                 flash("Ungültige Uhrzeit.", "error")
                 return render_index()
-            start = datetime.combine(date, zeit_anfang)
-            end = datetime.combine(date, zeit_ende)
-            if end <= start:
-                end = end + timedelta(days=1)
 
-        db.session.add(Shift(user_id=user_id, start=start, end=end, shift_type=shift_type,
-                             note=note, created_at=datetime.now(timezone.utc)))
+        for date in dates:
+            if shift_type == "off":
+                start = datetime.combine(date, time(0, 0))
+                end = start
+            else:
+                start = datetime.combine(date, zeit_anfang)
+                end = datetime.combine(date, zeit_ende)
+                if end <= start:
+                    end = end + timedelta(days=1)
+            db.session.add(Shift(user_id=user_id, start=start, end=end, shift_type=shift_type,
+                                 note=note, created_at=datetime.now(timezone.utc)))
         db.session.commit()
 
         # Optional: diese Schicht als Vorlage merken
@@ -685,7 +690,8 @@ def schicht_eintragen():
                                              start_time=t_start, end_time=t_end))
                 db.session.commit()
 
-        flash("Schicht gespeichert.", "success")
+        n = len(dates)
+        flash(f"{n} Schicht{'en' if n != 1 else ''} gespeichert.", "success")
         return redirect("/index")
     else:
         return render_index()
