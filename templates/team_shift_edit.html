@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Schicht ändern – {{ team.name }} – Shiftmates{% endblock %}
+
+{% set is_known = shift.shift_type in SHIFT_TYPES %}
+
+{% block content %}
+<div class="wrap">
+  <div class="form-card">
+
+    <h2>Schicht ändern</h2>
+    <p class="muted">Schicht von <strong>{{ owner.name }}</strong> im Team {{ team.name }}. {{ owner.name }} bekommt nach dem Speichern eine Mail.</p>
+
+    <form method="POST" action="/team/{{ team.id }}/schicht/{{ shift.id }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="field">
+        <label for="datum">Tag</label>
+        <input type="date" id="datum" name="datum" required
+               value="{{ shift.start.strftime('%Y-%m-%d') }}">
+      </div>
+
+      <div class="field">
+        <label for="shift_type">Schichtart</label>
+        <select id="shift_type" name="shift_type" required>
+          {% for value, label in SHIFT_TYPES.items() %}
+            <option value="{{ value }}"{% if is_known and value == shift.shift_type %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+          <option value="custom"{% if not is_known %} selected{% endif %}>Eigener Name …</option>
+        </select>
+      </div>
+
+      <div class="field" id="custom-field"{% if is_known %} hidden{% endif %}>
+        <label for="shift_type_custom">Name der Schichtart</label>
+        <input type="text" id="shift_type_custom" name="shift_type_custom"
+               placeholder="Mitteldienst" maxlength="30"
+               value="{% if not is_known %}{{ shift.shift_type }}{% endif %}">
+      </div>
+
+      <div class="field-row" id="times"{% if shift.shift_type == 'off' %} hidden{% endif %}>
+        <div class="field">
+          <label for="zeit_anfang">Beginn</label>
+          <input type="time" id="zeit_anfang" name="zeit_anfang"
+                 {% if shift.shift_type != 'off' %}required value="{{ shift.start.strftime('%H:%M') }}"{% endif %}>
+        </div>
+        <div class="field">
+          <label for="zeit_ende">Ende</label>
+          <input type="time" id="zeit_ende" name="zeit_ende"
+                 {% if shift.shift_type != 'off' %}required value="{{ shift.end.strftime('%H:%M') }}"{% endif %}>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="note">Notiz <span class="label-hint">optional</span></label>
+        <textarea id="note" name="note" rows="2" maxlength="200"
+                  placeholder="Schlüssel mitnehmen">{{ shift.note or '' }}</textarea>
+      </div>
+
+      <button type="submit" class="btn btn-block">Änderung speichern</button>
+    </form>
+
+    <div class="form-foot">
+      <a href="/team/{{ team.id }}">&larr; Zurück zum Team</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var type   = document.getElementById('shift_type');
+    var custom = document.getElementById('custom-field');
+    var name   = document.getElementById('shift_type_custom');
+    var times  = document.getElementById('times');
+
+    function sync() {
+      var isOff    = type.value === 'off';
+      var isCustom = type.value === 'custom';
+
+      custom.hidden = !isCustom;
+      name.required = isCustom;
+
+      times.hidden = isOff;
+      times.querySelectorAll('input').forEach(function (el) {
+        el.required = !isOff;
+        if (isOff) { el.value = ''; }
+      });
+    }
+
+    type.addEventListener('change', sync);
+    sync();
+  })();
+</script>
+{% endblock %}
