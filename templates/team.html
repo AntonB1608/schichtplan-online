@@ -14,7 +14,7 @@
       <h3>Dein{{ 'e' if led|length > 1 else '' }} Team{{ 's' if led|length > 1 else '' }}</h3>
       {% for t in led %}
         <div class="team-row">
-          <span class="team-name">{{ t.name }}</span>
+          <a class="team-name" href="/team/{{ t.id }}">{{ t.name }}</a>
           <span class="team-code">Code: <strong>{{ t.invite_code }}</strong></span>
         </div>
       {% endfor %}

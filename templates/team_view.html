@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team.name }} – Team – Shiftmates{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <div class="form-card">
+
+    <h2>{{ team.name }}</h2>
+    <p class="muted">Kommende Schichten deines Teams &middot; Code: <strong>{{ team.invite_code }}</strong></p>
+
+    {% for r in roster %}
+    <div class="form-section">
+      <h3>{{ r.user.name }}{% if r.role == 'leader' %} <span class="label-hint">Leiter</span>{% endif %}</h3>
+      {% if r.shifts %}
+        {% for s in r.shifts %}
+          <div class="demo-row">
+            <span class="tag{% if s.shift_type == 'off' %} tag-off{% endif %}">{{ SHIFT_TYPES.get(s.shift_type, s.shift_type) }}</span>
+            <span class="demo-when">{{ s.start | datum_kurz }}{% if s.shift_type != 'off' and s.start and s.end %} &middot; {{ s.start.strftime('%H:%M') }}&ndash;{{ s.end.strftime('%H:%M') }}{% endif %}</span>
+            {% if s.note %}<span class="demo-note">{{ s.note }}</span>{% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">Keine kommenden Schichten.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="form-foot">
+      <a href="/team">&larr; Zurück zu deinen Teams</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

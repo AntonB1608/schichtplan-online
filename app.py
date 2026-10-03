@@ -735,6 +735,15 @@ def generate_invite_code():
     return secrets.token_hex(4).upper()
 
 
+def team_if_leader(team_id, user_id):
+    """Gibt das Team nur zurueck, wenn dieser Nutzer dessen Leiter ist – sonst None.
+    Das ist die harte Berechtigung fuer alles, was fremde Schichten betrifft."""
+    membership = TeamMember.query.filter_by(user_id=user_id, team_id=team_id, role="leader").first()
+    if membership is None:
+        return None
+    return db.session.get(Team, team_id)
+
+
 @app.route("/team")
 def team_home():
     if "user_id" not in session:
@@ -786,6 +795,33 @@ def team_join():
     db.session.commit()
     flash(f"Du bist dem Team {team.name} beigetreten.", "success")
     return redirect("/team")
+
+
+@app.route("/team/<int:team_id>")
+def team_view(team_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    # Harte Berechtigung: nur der Leiter dieses Teams darf hier rein.
+    team = team_if_leader(team_id, session["user_id"])
+    if team is None:
+        flash("Du bist nicht der Leiter dieses Teams.", "error")
+        return redirect("/team")
+
+    members = TeamMember.query.filter_by(team_id=team_id).all()
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    roster = []
+    for m in members:
+        u = db.session.get(User, m.user_id)
+        if u is None:
+            continue
+        shifts = Shift.query.filter(
+            Shift.user_id == u.id,
+            Shift.start >= today,
+        ).order_by(Shift.start).all()
+        roster.append({"user": u, "role": m.role, "shifts": shifts})
+
+    return render_template("team_view.html", team=team, roster=roster)
 
 
 # ROUTES - INFORMATION
