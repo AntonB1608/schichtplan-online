@@ -720,7 +720,74 @@ def delete_shift(date_id):
         return redirect("/shifts")
 
     return redirect("/shifts")
- 
+
+
+# ROUTES - TEAM
+
+INVITE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # ohne 0/O/1/I/L, leichter vorzulesen
+
+
+def generate_invite_code():
+    for _ in range(20):
+        code = "".join(secrets.choice(INVITE_ALPHABET) for _ in range(6))
+        if not Team.query.filter_by(invite_code=code).first():
+            return code
+    return secrets.token_hex(4).upper()
+
+
+@app.route("/team")
+def team_home():
+    if "user_id" not in session:
+        return redirect("/login")
+    memberships = TeamMember.query.filter_by(user_id=session["user_id"]).all()
+    led, member_of = [], []
+    for m in memberships:
+        team = db.session.get(Team, m.team_id)
+        if team is None:
+            continue
+        (led if m.role == "leader" else member_of).append(team)
+    return render_template("team.html", led=led, member_of=member_of)
+
+
+@app.route("/team/erstellen", methods=["POST"])
+def team_create():
+    if "user_id" not in session:
+        return redirect("/login")
+    name = (request.form.get("team_name") or "").strip()[:60]
+    if not name:
+        flash("Bitte gib dem Team einen Namen.", "error")
+        return redirect("/team")
+    if Team.query.filter_by(name=name).first():
+        flash("Diesen Teamnamen gibt es schon. Wähl einen anderen.", "error")
+        return redirect("/team")
+    team = Team(name=name, invite_code=generate_invite_code())
+    db.session.add(team)
+    db.session.commit()
+    db.session.add(TeamMember(user_id=session["user_id"], team_id=team.id, role="leader"))
+    db.session.commit()
+    flash("Team erstellt. Teile den Code mit deinem Team.", "success")
+    return redirect("/team")
+
+
+@app.route("/team/beitreten", methods=["POST"])
+def team_join():
+    if "user_id" not in session:
+        return redirect("/login")
+    code = (request.form.get("invite_code") or "").strip().upper()
+    team = Team.query.filter_by(invite_code=code).first()
+    if team is None:
+        flash("Diesen Team-Code gibt es nicht.", "error")
+        return redirect("/team")
+    already = TeamMember.query.filter_by(user_id=session["user_id"], team_id=team.id).first()
+    if already:
+        flash("Du bist schon in diesem Team.", "error")
+        return redirect("/team")
+    db.session.add(TeamMember(user_id=session["user_id"], team_id=team.id, role="member"))
+    db.session.commit()
+    flash(f"Du bist dem Team {team.name} beigetreten.", "success")
+    return redirect("/team")
+
+
 # ROUTES - INFORMATION
 
 @app.route("/impressum")

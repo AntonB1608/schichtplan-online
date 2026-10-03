@@ -24,6 +24,7 @@
                 {% if session.user_id %}
                     <a href="/index"{% if request.path == '/index' %} aria-current="page"{% endif %}>Schicht eintragen</a>
                     <a href="/shifts"{% if request.path == '/shifts' %} aria-current="page"{% endif %}>Meine Schichten</a>
+                    <a href="/team"{% if request.path.startswith('/team') %} aria-current="page"{% endif %}>Team</a>
                     <a href="/profile"{% if request.path == '/profile' %} aria-current="page"{% endif %}>Profil</a>
                     <a href="/logout">Abmelden</a>
                 {% else %}

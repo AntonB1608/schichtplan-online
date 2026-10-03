@@ -739,3 +739,10 @@ footer p { margin: 0; }
 .day-cell.sel { background: var(--tinte); color: var(--weiss); border-color: var(--tinte); }
 .day-cell.today:not(.sel) { border-color: var(--gold); color: var(--gold); }
 .day-cell.past { border-color: transparent; background: transparent; color: var(--linie); cursor: default; }
+
+/* Team */
+.team-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 12px 0; border-top: 1px solid var(--linie-hell); }
+.team-row:first-of-type { border-top: none; }
+.team-name { font-size: 16px; font-weight: 600; color: var(--tinte); }
+.team-code { font-size: 15px; color: var(--grau); }
+.team-code strong { color: var(--tinte); letter-spacing: 1px; }
