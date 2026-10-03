@@ -824,6 +824,101 @@ def team_view(team_id):
     return render_template("team_view.html", team=team, roster=roster)
 
 
+@app.route("/team/<int:team_id>/schicht/<int:shift_id>", methods=["GET", "POST"])
+def team_edit_shift(team_id, shift_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    # Harte Berechtigung: nur der Leiter dieses Teams.
+    team = team_if_leader(team_id, session["user_id"])
+    if team is None:
+        flash("Du bist nicht der Leiter dieses Teams.", "error")
+        return redirect("/team")
+
+    shift = db.session.get(Shift, shift_id)
+    if shift is None:
+        flash("Diese Schicht gibt es nicht mehr.", "error")
+        return redirect(f"/team/{team_id}")
+
+    # Die Schicht muss einem Mitglied genau dieses Teams gehören.
+    if TeamMember.query.filter_by(team_id=team_id, user_id=shift.user_id).first() is None:
+        flash("Diese Schicht gehört nicht zu deinem Team.", "error")
+        return redirect(f"/team/{team_id}")
+
+    owner = db.session.get(User, shift.user_id)
+
+    def render_edit():
+        return render_template("team_shift_edit.html", team=team, shift=shift, owner=owner)
+
+    if request.method == "POST":
+        date_str = request.form.get("datum")
+        shift_type = request.form.get("shift_type")
+        note = (request.form.get("note") or "").strip() or None
+
+        if not date_str:
+            flash("Bitte wähle einen Tag.", "error")
+            return render_edit()
+        try:
+            date = datetime.strptime(date_str, "%Y-%m-%d")
+        except ValueError:
+            flash("Ungültiges Datum.", "error")
+            return render_edit()
+
+        if shift_type == "custom":
+            shift_type = (request.form.get("shift_type_custom") or "").strip()[:30]
+            if not shift_type:
+                flash("Bitte gib der Schichtart einen Namen.", "error")
+                return render_edit()
+        elif shift_type not in SHIFT_TYPES:
+            flash("Bitte wähle eine Schichtart.", "error")
+            return render_edit()
+
+        if shift_type == "off":
+            start = datetime.combine(date, time(0, 0))
+            end = start
+        else:
+            za = request.form.get("zeit_anfang")
+            ze = request.form.get("zeit_ende")
+            if not za or not ze:
+                flash("Bitte füll alle Felder aus.", "error")
+                return render_edit()
+            try:
+                za = datetime.strptime(za, "%H:%M").time()
+                ze = datetime.strptime(ze, "%H:%M").time()
+            except ValueError:
+                flash("Ungültige Uhrzeit.", "error")
+                return render_edit()
+            start = datetime.combine(date, za)
+            end = datetime.combine(date, ze)
+            if end <= start:
+                end = end + timedelta(days=1)
+
+        shift.start = start
+        shift.end = end
+        shift.shift_type = shift_type
+        shift.note = note
+        shift.shift_reminder_sent_at = None  # geänderte Schicht: Erinnerung darf neu rausgehen
+        db.session.commit()
+
+        # Das Teammitglied per Mail informieren – aber nicht sich selbst.
+        if owner and owner.id != session["user_id"] and owner.mail:
+            html = build_action_mail(
+                subject="Deine Schicht wurde geändert",
+                headline="Deine Schicht wurde geändert",
+                intro=f"{escape(team.name)} hat eine deiner Schichten angepasst. Hier ist der neue Stand:",
+                button_label="Meine Schichten ansehen",
+                link="https://www.shiftmates.org/shifts",
+                shifts_html=build_shift_rows([shift]),
+            )
+            send_email(owner.mail, "Deine Schicht wurde geändert", html)
+            flash(f"Schicht geändert. {owner.name} wurde per Mail informiert.", "success")
+        else:
+            flash("Schicht geändert.", "success")
+        return redirect(f"/team/{team_id}")
+
+    return render_edit()
+
+
 # ROUTES - INFORMATION
 
 @app.route("/impressum")
