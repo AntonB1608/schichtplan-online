@@ -616,8 +616,15 @@ def schicht_eintragen():
     user_id = session["user_id"]
     templates = ShiftTemplate.query.filter_by(user_id=user_id).order_by(ShiftTemplate.created_at).all()
 
+    # Tage, an denen schon eine Schicht liegt – fürs Tage-Raster, damit man
+    # sieht, wo man sich sonst doppelt einträgt. Ab Montag dieser Woche reicht.
+    week_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start -= timedelta(days=week_start.weekday())
+    booked = Shift.query.filter(Shift.user_id == user_id, Shift.start >= week_start).all()
+    booked_dates = sorted({s.start.strftime("%Y-%m-%d") for s in booked if s.start})
+
     def render_index():
-        return render_template("index.html", templates=templates)
+        return render_template("index.html", templates=templates, booked_dates=booked_dates)
 
     if request.method == "POST":
         # Mehrere Tage: kommagetrennt aus dem Tage-Raster (datum = Fallback)

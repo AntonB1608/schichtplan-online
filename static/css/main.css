@@ -735,6 +735,7 @@ footer p { margin: 0; }
 .day-head { margin-bottom: 6px; }
 .day-head span { text-align: center; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--grau); }
 .day-cell {
+  position: relative;
   aspect-ratio: 1; border: 1px solid var(--linie); background: var(--weiss);
   border-radius: 8px; font-family: var(--sans); font-size: 15px; color: var(--tinte);
   cursor: pointer; transition: border-color var(--uebergang), background var(--uebergang), color var(--uebergang);
@@ -743,6 +744,12 @@ footer p { margin: 0; }
 .day-cell.sel { background: var(--tinte); color: var(--weiss); border-color: var(--tinte); }
 .day-cell.today:not(.sel) { border-color: var(--gold); color: var(--gold); }
 .day-cell.past { border-color: transparent; background: transparent; color: var(--linie); cursor: default; }
+.day-cell.has-shift::after {
+  content: ""; position: absolute; left: 50%; bottom: 5px; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+}
+.day-cell.sel.has-shift::after { background: var(--weiss); }
+.day-cell.past.has-shift::after { background: var(--linie); }
 
 /* Team */
 .team-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 12px 0; border-top: 1px solid var(--linie-hell); }
