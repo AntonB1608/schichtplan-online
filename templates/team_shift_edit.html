@@ -1,30 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}Schicht ändern – {{ team.name }} – Shiftmates{% endblock %}
+{% set is_new = shift is none %}
+{% set is_known = is_new or (shift.shift_type in SHIFT_TYPES) %}
+{% set is_off = (not is_new) and shift.shift_type == 'off' %}
 
-{% set is_known = shift.shift_type in SHIFT_TYPES %}
+{% block title %}{{ 'Schicht hinzufügen' if is_new else 'Schicht ändern' }} – {{ team.name }} – Shiftmates{% endblock %}
 
 {% block content %}
 <div class="wrap">
   <div class="form-card">
 
-    <h2>Schicht ändern</h2>
-    <p class="muted">Schicht von <strong>{{ owner.name }}</strong> im Team {{ team.name }}. {{ owner.name }} bekommt nach dem Speichern eine Mail.</p>
+    <h2>{{ 'Schicht hinzufügen' if is_new else 'Schicht ändern' }}</h2>
+    <p class="muted">
+      {% if is_new %}Neue Schicht für <strong>{{ owner.name }}</strong> im Team {{ team.name }}.
+      {% else %}Schicht von <strong>{{ owner.name }}</strong> im Team {{ team.name }}.{% endif %}
+      {{ owner.name }} bekommt nach dem Speichern eine Mail.
+    </p>
 
-    <form method="POST" action="/team/{{ team.id }}/schicht/{{ shift.id }}">
+    <form method="POST" action="{{ action }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="field">
         <label for="datum">Tag</label>
         <input type="date" id="datum" name="datum" required
-               value="{{ shift.start.strftime('%Y-%m-%d') }}">
+               {% if not is_new %}value="{{ shift.start.strftime('%Y-%m-%d') }}"{% endif %}>
       </div>
 
       <div class="field">
         <label for="shift_type">Schichtart</label>
         <select id="shift_type" name="shift_type" required>
           {% for value, label in SHIFT_TYPES.items() %}
-            <option value="{{ value }}"{% if is_known and value == shift.shift_type %} selected{% endif %}>{{ label }}</option>
+            <option value="{{ value }}"{% if not is_new and is_known and value == shift.shift_type %} selected{% endif %}>{{ label }}</option>
           {% endfor %}
           <option value="custom"{% if not is_known %} selected{% endif %}>Eigener Name …</option>
         </select>
@@ -37,26 +43,28 @@
                value="{% if not is_known %}{{ shift.shift_type }}{% endif %}">
       </div>
 
-      <div class="field-row" id="times"{% if shift.shift_type == 'off' %} hidden{% endif %}>
+      <div class="field-row" id="times"{% if is_off %} hidden{% endif %}>
         <div class="field">
           <label for="zeit_anfang">Beginn</label>
           <input type="time" id="zeit_anfang" name="zeit_anfang"
-                 {% if shift.shift_type != 'off' %}required value="{{ shift.start.strftime('%H:%M') }}"{% endif %}>
+                 {% if not is_off %}required{% endif %}
+                 {% if not is_new and not is_off %}value="{{ shift.start.strftime('%H:%M') }}"{% endif %}>
         </div>
         <div class="field">
           <label for="zeit_ende">Ende</label>
           <input type="time" id="zeit_ende" name="zeit_ende"
-                 {% if shift.shift_type != 'off' %}required value="{{ shift.end.strftime('%H:%M') }}"{% endif %}>
+                 {% if not is_off %}required{% endif %}
+                 {% if not is_new and not is_off %}value="{{ shift.end.strftime('%H:%M') }}"{% endif %}>
         </div>
       </div>
 
       <div class="field">
         <label for="note">Notiz <span class="label-hint">optional</span></label>
         <textarea id="note" name="note" rows="2" maxlength="200"
-                  placeholder="Schlüssel mitnehmen">{{ shift.note or '' }}</textarea>
+                  placeholder="Schlüssel mitnehmen">{% if not is_new %}{{ shift.note or '' }}{% endif %}</textarea>
       </div>
 
-      <button type="submit" class="btn btn-block">Änderung speichern</button>
+      <button type="submit" class="btn btn-block">{{ 'Schicht eintragen' if is_new else 'Änderung speichern' }}</button>
     </form>
 
     <div class="form-foot">

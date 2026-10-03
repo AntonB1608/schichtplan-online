@@ -775,7 +775,7 @@ def team_create():
     db.session.add(TeamMember(user_id=session["user_id"], team_id=team.id, role="leader"))
     db.session.commit()
     flash("Team erstellt. Teile den Code mit deinem Team.", "success")
-    return redirect("/team")
+    return redirect(f"/team/{team.id}")
 
 
 @app.route("/team/beitreten", methods=["POST"])
@@ -846,9 +846,11 @@ def team_edit_shift(team_id, shift_id):
         return redirect(f"/team/{team_id}")
 
     owner = db.session.get(User, shift.user_id)
+    action = f"/team/{team_id}/schicht/{shift_id}"
 
     def render_edit():
-        return render_template("team_shift_edit.html", team=team, shift=shift, owner=owner)
+        return render_template("team_shift_edit.html", team=team, shift=shift, owner=owner,
+                               action=action)
 
     if request.method == "POST":
         date_str = request.form.get("datum")
@@ -917,6 +919,96 @@ def team_edit_shift(team_id, shift_id):
         return redirect(f"/team/{team_id}")
 
     return render_edit()
+
+
+@app.route("/team/<int:team_id>/mitglied/<int:user_id>/neu", methods=["GET", "POST"])
+def team_new_shift(team_id, user_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    # Harte Berechtigung: nur der Leiter dieses Teams.
+    team = team_if_leader(team_id, session["user_id"])
+    if team is None:
+        flash("Du bist nicht der Leiter dieses Teams.", "error")
+        return redirect("/team")
+
+    # Die Schicht darf nur für ein Mitglied genau dieses Teams angelegt werden.
+    if TeamMember.query.filter_by(team_id=team_id, user_id=user_id).first() is None:
+        flash("Diese Person ist nicht in deinem Team.", "error")
+        return redirect(f"/team/{team_id}")
+
+    owner = db.session.get(User, user_id)
+    action = f"/team/{team_id}/mitglied/{user_id}/neu"
+
+    def render_new():
+        return render_template("team_shift_edit.html", team=team, owner=owner,
+                               shift=None, action=action)
+
+    if request.method == "POST":
+        date_str = request.form.get("datum")
+        shift_type = request.form.get("shift_type")
+        note = (request.form.get("note") or "").strip() or None
+
+        if not date_str:
+            flash("Bitte wähle einen Tag.", "error")
+            return render_new()
+        try:
+            date = datetime.strptime(date_str, "%Y-%m-%d")
+        except ValueError:
+            flash("Ungültiges Datum.", "error")
+            return render_new()
+
+        if shift_type == "custom":
+            shift_type = (request.form.get("shift_type_custom") or "").strip()[:30]
+            if not shift_type:
+                flash("Bitte gib der Schichtart einen Namen.", "error")
+                return render_new()
+        elif shift_type not in SHIFT_TYPES:
+            flash("Bitte wähle eine Schichtart.", "error")
+            return render_new()
+
+        if shift_type == "off":
+            start = datetime.combine(date, time(0, 0))
+            end = start
+        else:
+            za = request.form.get("zeit_anfang")
+            ze = request.form.get("zeit_ende")
+            if not za or not ze:
+                flash("Bitte füll alle Felder aus.", "error")
+                return render_new()
+            try:
+                za = datetime.strptime(za, "%H:%M").time()
+                ze = datetime.strptime(ze, "%H:%M").time()
+            except ValueError:
+                flash("Ungültige Uhrzeit.", "error")
+                return render_new()
+            start = datetime.combine(date, za)
+            end = datetime.combine(date, ze)
+            if end <= start:
+                end = end + timedelta(days=1)
+
+        shift = Shift(user_id=user_id, team_id=team_id, start=start, end=end,
+                      shift_type=shift_type, note=note, created_at=datetime.now(timezone.utc))
+        db.session.add(shift)
+        db.session.commit()
+
+        # Das Teammitglied per Mail informieren – aber nicht sich selbst.
+        if owner and owner.id != session["user_id"] and owner.mail:
+            html = build_action_mail(
+                subject="Du hast eine neue Schicht",
+                headline="Du hast eine neue Schicht",
+                intro=f"{escape(team.name)} hat dir eine Schicht eingetragen:",
+                button_label="Meine Schichten ansehen",
+                link="https://www.shiftmates.org/shifts",
+                shifts_html=build_shift_rows([shift]),
+            )
+            send_email(owner.mail, "Du hast eine neue Schicht", html)
+            flash(f"Schicht eingetragen. {owner.name} wurde per Mail informiert.", "success")
+        else:
+            flash("Schicht eingetragen.", "success")
+        return redirect(f"/team/{team_id}")
+
+    return render_new()
 
 
 # ROUTES - INFORMATION
