@@ -24,6 +24,7 @@
       {% else %}
         <p class="muted">Keine kommenden Schichten.</p>
       {% endif %}
+      <a class="add-shift" href="/team/{{ team.id }}/mitglied/{{ r.user.id }}/neu">+ Schicht hinzufügen</a>
     </div>
     {% endfor %}
 

@@ -722,6 +722,8 @@ footer p { margin: 0; }
 .demo-note { color: var(--grau); font-size: 14px; }
 .row-edit { margin-left: auto; font-size: 14px; color: var(--gold); text-decoration: none; white-space: nowrap; }
 .row-edit:hover { text-decoration: underline; }
+.add-shift { display: inline-block; margin-top: 10px; font-size: 14px; color: var(--gold); text-decoration: none; }
+.add-shift:hover { text-decoration: underline; }
 .demo-del { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--grau); font-family: var(--sans); font-size: 14px; }
 .demo-del:hover { color: var(--rot); }
 .demo-cta { text-align: center; margin: 32px 0 8px; }
