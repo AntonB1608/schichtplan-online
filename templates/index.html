@@ -53,11 +53,11 @@
       <div class="field-row" id="times">
         <div class="field">
           <label for="zeit_anfang">Beginn</label>
-          <input type="time" id="zeit_anfang" name="zeit_anfang" required>
+          <input type="time" id="zeit_anfang" name="zeit_anfang" step="300" required>
         </div>
         <div class="field">
           <label for="zeit_ende">Ende</label>
-          <input type="time" id="zeit_ende" name="zeit_ende" required>
+          <input type="time" id="zeit_ende" name="zeit_ende" step="300" required>
         </div>
       </div>
 
@@ -102,6 +102,9 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+  window.BOOKED = {{ booked_dates|tojson }};
+</script>
 <script>
   (function () {
     var type   = document.getElementById('shift_type');
@@ -161,6 +164,8 @@
 
     var WD = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
     var selected = {};
+    var booked = {};
+    (window.BOOKED || []).forEach(function (iso) { booked[iso] = true; });
 
     var today = new Date(); today.setHours(0, 0, 0, 0);
     var start = new Date(today);
@@ -183,15 +188,17 @@
     cells.className = 'day-cells';
     for (var i = 0; i < 28; i++) {
       var d = new Date(start); d.setDate(start.getDate() + i);
+      var dayIso = iso(d);
       var cell = document.createElement('button');
       cell.type = 'button';
       cell.className = 'day-cell';
       cell.textContent = d.getDate();
+      if (booked[dayIso]) cell.classList.add('has-shift');
       if (d < today) {
         cell.disabled = true;
         cell.classList.add('past');
       } else {
-        cell.dataset.iso = iso(d);
+        cell.dataset.iso = dayIso;
         if (d.getTime() === today.getTime()) cell.classList.add('today');
         cell.addEventListener('click', function () {
           var k = this.dataset.iso;

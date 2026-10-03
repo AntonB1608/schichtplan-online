@@ -31,7 +31,7 @@
         <div class="field">
           <label for="daily_reminder_time">Uhrzeit</label>
           <input type="time" id="daily_reminder_time" name="daily_reminder_time"
-                 value="{{ user.daily_reminder_time.strftime('%H:%M') }}" required>
+                 step="300" value="{{ user.daily_reminder_time.strftime('%H:%M') }}" required>
           <p class="field-hint">In deiner Ortszeit.</p>
         </div>
       </div>
