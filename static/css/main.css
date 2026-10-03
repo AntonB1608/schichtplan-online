@@ -731,6 +731,17 @@ footer p { margin: 0; }
 
 /* Tage-Raster (mehrere Tage auf einmal) */
 .day-grid { margin-top: 8px; }
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cal-title { font-family: var(--serife); font-size: 17px; color: var(--tinte); }
+.cal-arrow {
+  width: 38px; height: 38px; border: 1px solid var(--linie); background: var(--weiss);
+  border-radius: 8px; font-size: 20px; line-height: 1; color: var(--tinte); cursor: pointer;
+  transition: border-color var(--uebergang);
+}
+.cal-arrow:hover:not(:disabled) { border-color: var(--tinte); }
+.cal-arrow:disabled { color: var(--linie); border-color: var(--linie-hell); cursor: default; }
+.day-cell.empty { border: none; background: transparent; cursor: default; }
+.day-cell.empty::after { display: none; }
 .day-head, .day-cells { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 .day-head { margin-bottom: 6px; }
 .day-head span { text-align: center; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--grau); }

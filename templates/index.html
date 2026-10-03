@@ -157,19 +157,21 @@
   })();
 
   (function () {
-    // Tage-Raster: die nächsten 4 Wochen, antippen zum Auswählen
+    // Monats-Kalender: Monat für Monat, mit Pfeilen blättern.
+    // Ausgewählte Tage bleiben erhalten, auch wenn man den Monat wechselt.
     var grid   = document.getElementById('day-grid');
     var hidden = document.getElementById('dates');
     if (!grid || !hidden) return;
 
     var WD = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli',
+                  'August', 'September', 'Oktober', 'November', 'Dezember'];
     var selected = {};
     var booked = {};
     (window.BOOKED || []).forEach(function (iso) { booked[iso] = true; });
 
     var today = new Date(); today.setHours(0, 0, 0, 0);
-    var start = new Date(today);
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7)); // Montag dieser Woche
+    var view  = new Date(today.getFullYear(), today.getMonth(), 1); // erster des aktuellen Monats
 
     function iso(d) {
       return d.getFullYear() + '-' +
@@ -177,39 +179,75 @@
              String(d.getDate()).padStart(2, '0');
     }
 
-    var head = document.createElement('div');
-    head.className = 'day-head';
-    WD.forEach(function (w) {
-      var s = document.createElement('span'); s.textContent = w; head.appendChild(s);
-    });
-    grid.appendChild(head);
+    function render() {
+      grid.innerHTML = '';
 
-    var cells = document.createElement('div');
-    cells.className = 'day-cells';
-    for (var i = 0; i < 28; i++) {
-      var d = new Date(start); d.setDate(start.getDate() + i);
-      var dayIso = iso(d);
-      var cell = document.createElement('button');
-      cell.type = 'button';
-      cell.className = 'day-cell';
-      cell.textContent = d.getDate();
-      if (booked[dayIso]) cell.classList.add('has-shift');
-      if (d < today) {
-        cell.disabled = true;
-        cell.classList.add('past');
-      } else {
-        cell.dataset.iso = dayIso;
-        if (d.getTime() === today.getTime()) cell.classList.add('today');
-        cell.addEventListener('click', function () {
-          var k = this.dataset.iso;
-          if (selected[k]) { delete selected[k]; this.classList.remove('sel'); }
-          else { selected[k] = true; this.classList.add('sel'); }
-          hidden.value = Object.keys(selected).sort().join(',');
-        });
+      // Kopf mit Monat und Pfeilen
+      var nav = document.createElement('div');
+      nav.className = 'cal-nav';
+      var prev = document.createElement('button');
+      prev.type = 'button'; prev.className = 'cal-arrow'; prev.textContent = '‹';
+      prev.setAttribute('aria-label', 'Vorheriger Monat');
+      prev.disabled = (view.getFullYear() === today.getFullYear() && view.getMonth() === today.getMonth());
+      var title = document.createElement('span');
+      title.className = 'cal-title';
+      title.textContent = MONATE[view.getMonth()] + ' ' + view.getFullYear();
+      var next = document.createElement('button');
+      next.type = 'button'; next.className = 'cal-arrow'; next.textContent = '›';
+      next.setAttribute('aria-label', 'Nächster Monat');
+      prev.addEventListener('click', function () { view.setMonth(view.getMonth() - 1); render(); });
+      next.addEventListener('click', function () { view.setMonth(view.getMonth() + 1); render(); });
+      nav.appendChild(prev); nav.appendChild(title); nav.appendChild(next);
+      grid.appendChild(nav);
+
+      // Wochentage
+      var head = document.createElement('div');
+      head.className = 'day-head';
+      WD.forEach(function (w) {
+        var s = document.createElement('span'); s.textContent = w; head.appendChild(s);
+      });
+      grid.appendChild(head);
+
+      // Tage
+      var cells = document.createElement('div');
+      cells.className = 'day-cells';
+      var first = new Date(view.getFullYear(), view.getMonth(), 1);
+      var lead  = (first.getDay() + 6) % 7; // wie viele Leerfelder vor dem 1. (Mo=0)
+      var anzahl = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+
+      for (var i = 0; i < lead; i++) {
+        var leer = document.createElement('div');
+        leer.className = 'day-cell empty';
+        cells.appendChild(leer);
       }
-      cells.appendChild(cell);
+      for (var tag = 1; tag <= anzahl; tag++) {
+        var d = new Date(view.getFullYear(), view.getMonth(), tag);
+        var dIso = iso(d);
+        var cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = 'day-cell';
+        cell.textContent = tag;
+        if (booked[dIso]) cell.classList.add('has-shift');
+        if (d < today) {
+          cell.disabled = true;
+          cell.classList.add('past');
+        } else {
+          cell.dataset.iso = dIso;
+          if (d.getTime() === today.getTime()) cell.classList.add('today');
+          if (selected[dIso]) cell.classList.add('sel');
+          cell.addEventListener('click', function () {
+            var k = this.dataset.iso;
+            if (selected[k]) { delete selected[k]; this.classList.remove('sel'); }
+            else { selected[k] = true; this.classList.add('sel'); }
+            hidden.value = Object.keys(selected).sort().join(',');
+          });
+        }
+        cells.appendChild(cell);
+      }
+      grid.appendChild(cells);
     }
-    grid.appendChild(cells);
+
+    render();
   })();
 </script>
 {% endblock %}
