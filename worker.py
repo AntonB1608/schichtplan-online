@@ -1,5 +1,5 @@
 
-from app import app, db, User, Shift, timedelta, send_email, build_action_mail, build_shift_rows, to_user_time
+from app import app, db, User, Shift, timedelta, send_email, build_action_mail, build_shift_rows, to_user_time, unsubscribe_link
 from datetime import datetime, timezone, time
 from time import sleep
 
@@ -17,6 +17,7 @@ def run_once():
         users = User.query.filter_by(shift_reminder_enabled=True).all()
         for user in users:
             now_user = to_user_time(now_utc, user.time_zone)
+            abmelden = unsubscribe_link(user.id)
 
             shifts = Shift.query.filter(
                 Shift.user_id == user.id,
@@ -38,6 +39,7 @@ def run_once():
                         link="https://www.shiftmates.org/shifts",
                         note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
                         shifts_html=build_shift_rows([shift]),
+                        unsubscribe_url=abmelden,
                     )
                     if DRY_RUN:
 
@@ -47,7 +49,7 @@ def run_once():
 
                     else:
 
-                        if send_email(user.mail, subject, html):
+                        if send_email(user.mail, subject, html, unsubscribe_url=abmelden):
                             shift.shift_reminder_sent_at = now
                             db.session.commit()
 
@@ -64,6 +66,7 @@ def run_daily():
         users = User.query.filter_by(daily_reminder_enabled=True).all()
         for user in users:
             now_user = to_user_time(now_utc, user.time_zone)
+            abmelden = unsubscribe_link(user.id)
             soll = datetime.combine(now_user.date(), user.daily_reminder_time.time())
             if now_user < soll or (user.daily_reminder_sent_at and user.daily_reminder_sent_at >= soll):                continue
 
@@ -87,6 +90,7 @@ def run_daily():
                         button_label="Meine Schichten ansehen",
                         link="https://www.shiftmates.org/shifts",
                         note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
+                        unsubscribe_url=abmelden,
                     )
                 else:
                     subject = "Erinnerung: deine Schichten für morgen"
@@ -99,6 +103,7 @@ def run_daily():
                         link="https://www.shiftmates.org/shifts",
                         note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
                         shifts_html=build_shift_rows(shifts),
+                        unsubscribe_url=abmelden,
                     )
 
                 if DRY_RUN:
@@ -109,7 +114,7 @@ def run_daily():
 
                 else:
 
-                    if send_email(user.mail, subject, html):
+                    if send_email(user.mail, subject, html, unsubscribe_url=abmelden):
                         user.daily_reminder_sent_at = now_user
                         db.session.commit()
 

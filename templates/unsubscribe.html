@@ -6,16 +6,24 @@
 <div class="wrap">
   <div class="form-card">
 
+    {% if done %}
+    <h2>Erinnerungen abgeschaltet</h2>
+    <p class="muted">
+      Du bekommst keine tägliche Mail und keine Erinnerung vor deinen Schichten mehr.
+      Deine Schichten bleiben gespeichert, und du kannst beides im Profil jederzeit wieder einschalten.
+    </p>
+    {% else %}
     <h2>Erinnerungen abschalten</h2>
     <p class="muted">
       Damit schaltest du die tägliche Mail und die Erinnerung vor jeder Schicht ab.
       Deine Schichten bleiben gespeichert, und du kannst beides im Profil jederzeit wieder einschalten.
     </p>
 
-    <form method="POST" action="/unsubscribe">
+    <form method="POST" action="{{ action or '/unsubscribe' }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="btn btn-block">Alle Erinnerungen abschalten</button>
     </form>
+    {% endif %}
 
     <div class="form-foot">
       <a href="/profile">Zurück zum Profil</a>

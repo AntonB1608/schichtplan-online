@@ -8,6 +8,7 @@ import requests
 from dotenv import load_dotenv
 from flask import Flask, request, render_template, session, redirect, flash, send_from_directory
 from markupsafe import escape
+from itsdangerous import URLSafeSerializer, BadSignature
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -605,7 +606,30 @@ def unsubscribe():
         db.session.commit()
         flash("Erinnerungen abgeschaltet.", "success")
         return redirect("/profile")
-    
+
+
+# Abmelden direkt aus der Mail, ohne Login. Der Link steht im Fuß der
+# Erinnerungs-Mails und im List-Unsubscribe-Header, über den Gmail & Co. ihren
+# eigenen "Abmelden"-Knopf anbieten (RFC 8058). Das Mailprogramm schickt dafür
+# einen POST ohne Cookie und ohne CSRF-Token; die Signatur im Link ist der Schutz.
+# GET schaltet bewusst nichts ab, weil Link-Scanner jede URL in einer Mail aufrufen.
+@app.route("/unsubscribe/<token>", methods=["POST", "GET"])
+@csrf.exempt
+def unsubscribe_by_link(token):
+    try:
+        user_id = unsubscribe_signer().loads(token)
+    except BadSignature:
+        return redirect("/unsubscribe")
+    user = db.session.get(User, user_id)
+    if user is None:
+        return redirect("/unsubscribe")
+    if request.method == "POST":
+        user.daily_reminder_enabled = False
+        user.shift_reminder_enabled = False
+        db.session.commit()
+        return render_template("unsubscribe.html", done=True)
+    return render_template("unsubscribe.html", action=f"/unsubscribe/{token}")
+
         
  
 # ROUTES - SHIFTS
@@ -1090,18 +1114,43 @@ def datenschutz():
  
 
  
-def send_email(to, subject, html, reply_to="team@shiftmates.org"):
+def unsubscribe_signer():
+    return URLSafeSerializer(app.config["SECRET_KEY"], salt="unsubscribe")
+
+
+def unsubscribe_link(user_id):
+    """Persönlicher Abmelde-Link für die Erinnerungs-Mails, funktioniert ohne Login.
+
+    Gibt None zurück, wenn kein secret_key gesetzt ist (z. B. im Worker-Dienst
+    vergessen). Dann geht die Erinnerung trotzdem raus, nur ohne Abmelde-Header.
+    """
+    try:
+        return f"https://www.shiftmates.org/unsubscribe/{unsubscribe_signer().dumps(user_id)}"
+    except Exception as e:
+        print(f"Abmelde-Link nicht erzeugt (secret_key gesetzt?): {e}", flush=True)
+        return None
+
+
+def send_email(to, subject, html, reply_to="team@shiftmates.org", unsubscribe_url=None):
+    payload = {
+        "from": "Shiftmates <noreply@send.shiftmates.org>",
+        "reply_to": reply_to,
+        "to": [to],
+        "subject": subject,
+        "html": html,
+    }
+    # Nur wiederkehrende Erinnerungen bekommen den Abmelde-Header. Ohne ihn bleibt
+    # genervten Empfängern nur der Spam-Knopf, und der trifft die Zustellung an alle.
+    if unsubscribe_url:
+        payload["headers"] = {
+            "List-Unsubscribe": f"<{unsubscribe_url}>",
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        }
     try:
         resp = requests.post(
             "https://api.resend.com/emails",
             headers={"Authorization": f"Bearer {os.getenv('resend_api_key')}"},
-            json={
-                "from": "Shiftmates <noreply@send.shiftmates.org>",
-                "reply_to": reply_to,
-                "to": [to],
-                "subject": subject,
-                "html": html,
-            },
+            json=payload,
             timeout=10,
         )
         if resp.status_code >= 400:
@@ -1150,8 +1199,10 @@ def build_shift_rows(shifts):
           </tr>"""
 
 
-def build_action_mail(subject, headline, intro, button_label, link, note="", shifts_html=""):
+def build_action_mail(subject, headline, intro, button_label, link, note="", shifts_html="",
+                      unsubscribe_url=None):
     font = MAIL_FONT
+    unsubscribe_url = unsubscribe_url or "https://www.shiftmates.org/unsubscribe"
 
     note_block = ""
     if note:
@@ -1226,7 +1277,7 @@ def build_action_mail(subject, headline, intro, button_label, link, note="", shi
           <tr>
             <td align="center" style="padding:16px 24px;font-family:{font};font-size:13px;line-height:1.6;color:#706e69;">
               Shiftmates &middot; <a href="https://www.shiftmates.org" style="color:#706e69;text-decoration:underline;">www.shiftmates.org</a>
-              &middot; <a href="https://www.shiftmates.org/unsubscribe" style="color:#706e69;text-decoration:underline;">Erinnerungen abschalten</a>
+              &middot; <a href="{unsubscribe_url}" style="color:#706e69;text-decoration:underline;">Erinnerungen abschalten</a>
             </td>
           </tr>
         </table>
