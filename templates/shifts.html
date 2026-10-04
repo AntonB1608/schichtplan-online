@@ -7,70 +7,57 @@
 
   <div class="page-head">
     <h2>Deine Schichten</h2>
-    <p class="muted">Alles, was du bisher eingetragen hast.</p>
+    <p class="muted">Standardmäßig diese Woche. Blättere vor und zurück – nichts wird gelöscht.</p>
   </div>
 
-  {% if shifts %}
-    <div class="table-card">
-      <table>
-        <thead>
-          <tr>
-            <th>Datum</th>
-            <th>Schicht</th>
-            <th>Uhrzeit</th>
-            <th>Notiz</th>
-            <th><span class="visually-hidden">Aktionen</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for shift in shifts %}
-            <tr>
-              <td data-label="Datum">
-                {{ shift.start|datum_kurz if shift.start else '—' }}
-              </td>
-
-              <td data-label="Schicht">
-                <span class="tag{% if shift.shift_type == 'off' %} tag-off{% endif %}">
-                  {{ SHIFT_TYPES.get(shift.shift_type, shift.shift_type) }}
-                </span>
-              </td>
-
-              <td data-label="Uhrzeit">
-                {% if shift.shift_type == 'off' or not shift.start or not shift.end %}
-                  <span class="muted">—</span>
-                {% else %}
-                  {{ shift.start.strftime('%H:%M') }}–{{ shift.end.strftime('%H:%M') }}
-                  {% if shift.end.date() != shift.start.date() %}
-                    <span class="muted">+1</span>
-                  {% endif %}
-                {% endif %}
-              </td>
-
-              <td data-label="Notiz">
-                {% if shift.note %}{{ shift.note }}{% else %}<span class="muted">—</span>{% endif %}
-              </td>
-
-              <td class="is-right">
-                <form method="POST" action="/delete/{{ shift.id }}">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button type="submit" class="btn btn-danger">Löschen</button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="week-nav">
+    <a class="week-arrow" href="/shifts?w={{ prev_w }}">&larr; Vorige</a>
+    <div class="week-nav-center">
+      <span class="week-range">{{ week_label }}</span>
+      {% if rel_label %}<span class="week-rel">{{ rel_label }}</span>{% endif %}
     </div>
-
-    <a href="/index" class="btn">Weitere Schicht eintragen</a>
-
-  {% else %}
-    <div class="empty-state">
-      <h3>Noch keine Schichten eingetragen</h3>
-      <p>Trag deine erste ein, dann kommen auch die Erinnerungen.</p>
-      <a href="/index" class="btn">Schicht eintragen</a>
-    </div>
+    <a class="week-arrow" href="/shifts?w={{ next_w }}">Nächste &rarr;</a>
+  </div>
+  {% if offset != 0 %}
+    <div class="week-today-row"><a href="/shifts">Zurück zu dieser Woche</a></div>
   {% endif %}
+
+  <div class="week-list">
+    {% for day in days %}
+      <div class="week-day{% if day.is_today %} is-today{% endif %}">
+        <div class="week-day-head">
+          <span class="week-day-name">{{ day.weekday[:2] }}</span>
+          <span class="week-day-date">{{ day.date.day }}.{{ '%02d'|format(day.date.month) }}.</span>
+        </div>
+        <div class="week-day-body">
+          {% if day.shifts %}
+            {% for s in day.shifts %}
+              <div class="week-shift">
+                <span class="tag{% if s.shift_type == 'off' %} tag-off{% endif %}">{{ SHIFT_TYPES.get(s.shift_type, s.shift_type) }}</span>
+                {% if s.shift_type != 'off' and s.start and s.end %}
+                  <span class="week-time">{{ s.start.strftime('%H:%M') }}&ndash;{{ s.end.strftime('%H:%M') }}{% if s.end.date() != s.start.date() %} +1{% endif %}</span>
+                {% endif %}
+                {% if s.note %}<span class="week-note">{{ s.note }}</span>{% endif %}
+                <form method="POST" action="/delete/{{ s.id }}" class="week-del">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="w" value="{{ offset }}">
+                  <button type="submit" class="link-del">Löschen</button>
+                </form>
+              </div>
+            {% endfor %}
+          {% else %}
+            <span class="week-empty">&ndash;</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if not has_any %}
+    <p class="muted week-hint">In dieser Woche hast du nichts eingetragen.</p>
+  {% endif %}
+
+  <a href="/index" class="btn">Weitere Schicht eintragen</a>
 
 </div>
 {% endblock %}

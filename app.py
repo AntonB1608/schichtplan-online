@@ -63,6 +63,8 @@ TEMPLATE_COLORS = ["#c98a3c", "#c05f45", "#4a5578", "#6f8f6a", "#4f7a8c", "#8a5a
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
           "August", "September", "Oktober", "November", "Dezember"]
+MONATE_KURZ = ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli",
+               "Aug.", "Sept.", "Okt.", "Nov.", "Dez."]
 
 
 def datum_lang(d):
@@ -710,8 +712,48 @@ def show_shift():
         return redirect("/login")
 
     user_id = session["user_id"]
-    shifts = Shift.query.filter_by(user_id=user_id).order_by(Shift.start).all()
-    return render_template("shifts.html", shifts=shifts)
+
+    # Woche fürs Blättern: w=0 ist diese Woche, w=-1 letzte, w=1 nächste.
+    offset = request.args.get("w", 0, type=int)
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    monday = today - timedelta(days=today.weekday())
+    week_start = monday + timedelta(weeks=offset)
+    week_end = week_start + timedelta(days=7)  # exklusiv
+
+    shifts = Shift.query.filter(
+        Shift.user_id == user_id,
+        Shift.start >= week_start,
+        Shift.start < week_end,
+    ).order_by(Shift.start).all()
+
+    # Pro Tag der Woche die Schichten sammeln (Mo–So).
+    days = []
+    for i in range(7):
+        d = week_start + timedelta(days=i)
+        days.append({
+            "date": d,
+            "weekday": WOCHENTAGE[d.weekday()],
+            "is_today": d.date() == today.date(),
+            "shifts": [s for s in shifts if s.start and s.start.date() == d.date()],
+        })
+
+    def kurz(d):
+        return f"{d.day}. {MONATE_KURZ[d.month - 1]}"
+
+    last_day = week_start + timedelta(days=6)
+    week_label = f"{kurz(week_start)} – {kurz(last_day)} {last_day.year}"
+    rel = {0: "Diese Woche", 1: "Nächste Woche", -1: "Letzte Woche"}.get(offset)
+
+    return render_template(
+        "shifts.html",
+        days=days,
+        has_any=bool(shifts),
+        week_label=week_label,
+        rel_label=rel,
+        offset=offset,
+        prev_w=offset - 1,
+        next_w=offset + 1,
+    )
  
  
 @app.route("/delete/<int:date_id>", methods=["POST"])
@@ -719,14 +761,17 @@ def delete_shift(date_id):
     if "user_id" not in session:
             return redirect("/login")
     
+    # Auf der Woche bleiben, aus der gelöscht wurde.
+    w = request.form.get("w", 0, type=int)
+    target = f"/shifts?w={w}" if w else "/shifts"
+
     shift = Shift.query.filter_by(id=date_id, user_id=session["user_id"]).first()
     if shift:
         db.session.delete(shift)
         db.session.commit()
         flash("Schicht gelöscht.", "deleted")
-        return redirect("/shifts")
 
-    return redirect("/shifts")
+    return redirect(target)
 
 
 # ROUTES - TEAM

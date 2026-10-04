@@ -725,6 +725,33 @@ footer p { margin: 0; }
 .row-edit:hover { text-decoration: underline; }
 .add-shift { display: inline-block; margin-top: 10px; font-size: 14px; color: var(--gold); text-decoration: none; }
 .add-shift:hover { text-decoration: underline; }
+
+/* Wochen-Ansicht auf "Meine Schichten" */
+.week-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.week-nav-center { text-align: center; }
+.week-range { display: block; font-family: var(--serife); font-size: 18px; color: var(--tinte); }
+.week-rel { display: block; font-size: 13px; color: var(--gold); margin-top: 2px; }
+.week-arrow { font-size: 15px; color: var(--tinte); text-decoration: none; white-space: nowrap; padding: 8px 12px; border: 1px solid var(--linie); border-radius: 8px; transition: border-color var(--uebergang); }
+.week-arrow:hover { border-color: var(--tinte); }
+.week-today-row { text-align: center; }
+.week-today-row a { font-size: 14px; color: var(--gold); }
+.week-list { display: flex; flex-direction: column; border: 1px solid var(--linie); border-radius: 10px; background: var(--weiss); overflow: hidden; }
+.week-day { display: grid; grid-template-columns: 68px 1fr; gap: 16px; padding: 14px 18px; border-top: 1px solid var(--linie-hell); }
+.week-day:first-child { border-top: none; }
+.week-day.is-today { background: var(--papier); }
+.week-day-head { display: flex; flex-direction: column; }
+.week-day-name { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--grau); }
+.week-day.is-today .week-day-name { color: var(--gold); }
+.week-day-date { font-size: 15px; color: var(--tinte); }
+.week-day-body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.week-shift { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.week-time { font-size: 15px; color: var(--text); }
+.week-note { font-size: 14px; color: var(--grau); }
+.week-del { margin-left: auto; }
+.link-del { background: none; border: none; padding: 0; font-family: var(--sans); font-size: 13px; color: var(--grau); cursor: pointer; text-decoration: underline; }
+.link-del:hover { color: var(--tinte); }
+.week-empty { color: var(--linie); }
+.week-hint { margin-top: 4px; }
 .demo-del { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--grau); font-family: var(--sans); font-size: 14px; }
 .demo-del:hover { color: var(--rot); }
 .demo-cta { text-align: center; margin: 32px 0 8px; }
