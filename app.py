@@ -11,6 +11,7 @@ from markupsafe import escape
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
+from itsdangerous import URLSafeTimedSerializer, BadSignature
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from typing import Optional
@@ -158,6 +159,7 @@ class Shift(db.Model):
     note: Mapped[Optional[str]] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
     shift_reminder_sent_at: Mapped[datetime] = mapped_column(default=None, nullable=True)
+    confirmed_at: Mapped[Optional[datetime]] = mapped_column(default=None, nullable=True)
 
 
 class ShiftTemplate(db.Model):
@@ -947,11 +949,13 @@ def team_edit_shift(team_id, shift_id):
             if end <= start:
                 end = end + timedelta(days=1)
 
+        shift.team_id = team_id          # vom Leiter verwaltet -> Bestätigung sichtbar
         shift.start = start
         shift.end = end
         shift.shift_type = shift_type
         shift.note = note
         shift.shift_reminder_sent_at = None  # geänderte Schicht: Erinnerung darf neu rausgehen
+        shift.confirmed_at = None            # Änderung muss neu bestätigt werden
         db.session.commit()
 
         # Das Teammitglied per Mail informieren – aber nicht sich selbst.
@@ -960,8 +964,9 @@ def team_edit_shift(team_id, shift_id):
                 subject="Deine Schicht wurde geändert",
                 headline="Deine Schicht wurde geändert",
                 intro=f"{escape(team.name)} hat eine deiner Schichten angepasst. Hier ist der neue Stand:",
-                button_label="Meine Schichten ansehen",
-                link="https://www.shiftmates.org/shifts",
+                button_label="Gesehen & bestätigen",
+                link=make_confirm_link(shift.id),
+                note='Alle deine Schichten: <a href="https://www.shiftmates.org/shifts" style="color:#1d1c1a;">shiftmates.org</a>',
                 shifts_html=build_shift_rows([shift]),
             )
             send_email(owner.mail, "Deine Schicht wurde geändert", html)
@@ -1050,8 +1055,9 @@ def team_new_shift(team_id, user_id):
                 subject="Du hast eine neue Schicht",
                 headline="Du hast eine neue Schicht",
                 intro=f"{escape(team.name)} hat dir eine Schicht eingetragen:",
-                button_label="Meine Schichten ansehen",
-                link="https://www.shiftmates.org/shifts",
+                button_label="Gesehen & bestätigen",
+                link=make_confirm_link(shift.id),
+                note='Alle deine Schichten: <a href="https://www.shiftmates.org/shifts" style="color:#1d1c1a;">shiftmates.org</a>',
                 shifts_html=build_shift_rows([shift]),
             )
             send_email(owner.mail, "Du hast eine neue Schicht", html)
@@ -1061,6 +1067,36 @@ def team_new_shift(team_id, user_id):
         return redirect(f"/team/{team_id}")
 
     return render_new()
+
+
+# Signierter Link zum Bestätigen – trägt die Schicht-ID, mit dem SECRET_KEY
+# signiert, fälschungssicher. Kein Login, nichts extra in der DB zu speichern.
+def confirm_serializer():
+    return URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="shift-confirm")
+
+
+def make_confirm_link(shift_id):
+    token = confirm_serializer().dumps(shift_id)
+    return f"https://www.shiftmates.org/schicht/bestaetigen/{token}"
+
+
+@app.route("/schicht/bestaetigen/<token>")
+def confirm_shift(token):
+    # Kein Login nötig – der signierte Link ist der Nachweis.
+    try:
+        shift_id = confirm_serializer().loads(token, max_age=60 * 60 * 24 * 60)  # 60 Tage
+    except BadSignature:
+        return render_template("confirm.html", ok=False), 400
+
+    shift = db.session.get(Shift, shift_id)
+    if shift is None:
+        return render_template("confirm.html", ok=False), 404
+
+    if shift.confirmed_at is None:
+        shift.confirmed_at = datetime.now(timezone.utc)
+        db.session.commit()
+
+    return render_template("confirm.html", ok=True, shift=shift)
 
 
 # ROUTES - INFORMATION

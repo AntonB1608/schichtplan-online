@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Bestätigt' if ok else 'Link ungültig' }} – Shiftmates{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <div class="form-card confirm-card">
+    {% if ok %}
+      <div class="confirm-mark" aria-hidden="true">✓</div>
+      <h2>Bestätigt</h2>
+      <p class="muted">Danke – deine Schichtleitung sieht jetzt, dass du die Schicht gesehen hast.</p>
+      {% if shift and shift.start %}
+        <div class="confirm-shift">
+          <span class="tag{% if shift.shift_type == 'off' %} tag-off{% endif %}">{{ SHIFT_TYPES.get(shift.shift_type, shift.shift_type) }}</span>
+          <span class="confirm-when">{{ shift.start | datum_kurz }}{% if shift.shift_type != 'off' and shift.start and shift.end %} &middot; {{ shift.start.strftime('%H:%M') }}&ndash;{{ shift.end.strftime('%H:%M') }}{% endif %}</span>
+        </div>
+      {% endif %}
+      <div class="form-foot"><a href="/shifts">Alle deine Schichten ansehen</a></div>
+    {% else %}
+      <h2>Link ungültig oder abgelaufen</h2>
+      <p class="muted">Dieser Bestätigungs-Link funktioniert nicht mehr. Frag deine Schichtleitung, dir die Schicht noch einmal zu schicken.</p>
+      <div class="form-foot"><a href="/">Zur Startseite</a></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

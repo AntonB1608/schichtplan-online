@@ -18,6 +18,13 @@
             <span class="tag{% if s.shift_type == 'off' %} tag-off{% endif %}">{{ SHIFT_TYPES.get(s.shift_type, s.shift_type) }}</span>
             <span class="demo-when">{{ s.start | datum_kurz }}{% if s.shift_type != 'off' and s.start and s.end %} &middot; {{ s.start.strftime('%H:%M') }}&ndash;{{ s.end.strftime('%H:%M') }}{% endif %}</span>
             {% if s.note %}<span class="demo-note">{{ s.note }}</span>{% endif %}
+            {% if s.team_id == team.id and r.user.id != session.user_id %}
+              {% if s.confirmed_at %}
+                <span class="confirm-yes">&#10003; Bestätigt</span>
+              {% else %}
+                <span class="confirm-no">Noch nicht bestätigt</span>
+              {% endif %}
+            {% endif %}
             <a class="row-edit" href="/team/{{ team.id }}/schicht/{{ s.id }}">Ändern</a>
           </div>
         {% endfor %}
