@@ -26,6 +26,7 @@
     </div>
 
     <div class="hero-mail">
+      <span class="mail-label">Am Abend vorher</span>
       <article class="mail">
         <div class="mail-bar">
           <img class="mail-avatar" src="{{ url_for('static', filename='brand/mail-avatar.png') }}" alt="" aria-hidden="true">
@@ -36,6 +37,34 @@
         <div class="mail-body">
           <p class="mail-subject">Erinnerung: deine Schichten für morgen</p>
           <p class="mail-line">Hallo Marc, so sieht dein Tag morgen aus.</p>
+
+          <div class="mail-shift">
+            <p class="mail-shift-line">
+              <span>Frühschicht</span>
+              <span>06:00 &ndash; 14:30</span>
+            </p>
+            <p class="mail-shift-meta">
+              Dienstag, 8. September &middot; Schlüssel für den Transporter mitbringen
+            </p>
+          </div>
+        </div>
+
+        <div class="mail-foot">
+          Erinnerungen kannst du in deinem Profil jederzeit abschalten.
+        </div>
+      </article>
+
+      <span class="mail-label mail-label-2">Kurz bevor du losmusst</span>
+      <article class="mail">
+        <div class="mail-bar">
+          <img class="mail-avatar" src="{{ url_for('static', filename='brand/mail-avatar.png') }}" alt="" aria-hidden="true">
+          <span class="mail-from">Shiftmates</span>
+          <span class="mail-time">05:00</span>
+        </div>
+
+        <div class="mail-body">
+          <p class="mail-subject">Erinnerung: deine Schicht beginnt um 06:00 Uhr</p>
+          <p class="mail-line">Hallo Marc, deine Schicht beginnt um 06:00 Uhr.</p>
 
           <div class="mail-shift">
             <p class="mail-shift-line">
