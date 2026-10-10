@@ -77,36 +77,26 @@ def run_daily():
             tomorrow, tomorrow_end = tomorrow_window(now_user)
             shifts = Shift.query.filter(
                 Shift.user_id == user.id,
+                Shift.shift_type != "off",   # freie Tage: keine Mail – Ruhe am freien Tag
                 Shift.start >= tomorrow,
                 Shift.start < tomorrow_end,
             ).order_by(Shift.start).all()
 
-            
+            if not shifts:
+                continue  # morgen nichts zu tun -> keine Mail
 
             try:
-                if not shifts or all(shift.shift_type == "off" for shift in shifts):
-                    subject = "Erinnerung: morgen hast du frei"
+                subject = "Erinnerung: deine Schichten für morgen"
 
-                    html = build_action_mail(
-                        subject=subject,
-                        headline="Morgen hast du frei",
-                        intro=f"Hallo {user.name}, für morgen ist nichts geplant. Genieß deinen freien Tag!",
-                        button_label="Meine Schichten ansehen",
-                        link="https://www.shiftmates.org/shifts",
-                        note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
-                    )
-                else:
-                    subject = "Erinnerung: deine Schichten für morgen"
-
-                    html = build_action_mail(
-                        subject=subject,
-                        headline="Deine Schichten für morgen",
-                        intro=f"Hallo {user.name}, so sieht dein Tag morgen aus.",
-                        button_label="Meine Schichten ansehen",
-                        link="https://www.shiftmates.org/shifts",
-                        note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
-                        shifts_html=build_shift_rows(shifts),
-                    )
+                html = build_action_mail(
+                    subject=subject,
+                    headline="Deine Schichten für morgen",
+                    intro=f"Hallo {user.name}, so sieht dein Tag morgen aus.",
+                    button_label="Meine Schichten ansehen",
+                    link="https://www.shiftmates.org/shifts",
+                    note="Erinnerungen kannst du in deinem Profil jederzeit abschalten.",
+                    shifts_html=build_shift_rows(shifts),
+                )
 
                 if DRY_RUN:
 

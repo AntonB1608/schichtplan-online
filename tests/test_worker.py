@@ -68,3 +68,43 @@ def test_run_once_skips_off_shifts(monkeypatch):
 
     assert recorded == [("tester@example.de", recorded[0][1])]
     assert len(recorded) == 1
+
+
+def _daily_user():
+    # Erinnerungszeit 00:00, damit das Zeit-Tor in run_daily immer offen ist.
+    u = User(name="daily", mail="daily@example.de", mail_verified=True,
+             registration_completed=True, daily_reminder_enabled=True,
+             daily_reminder_time=datetime(2020, 1, 1, 0, 0), time_zone="Europe/Berlin")
+    db.session.add(u)
+    db.session.commit()
+    return u
+
+
+def test_run_daily_silent_on_day_off(monkeypatch):
+    recorded = []
+    monkeypatch.setattr(worker, "send_email",
+                        lambda to, subject, html, **kw: recorded.append(to) or True)
+    with app.app_context():
+        u = _daily_user()
+        now_user = to_user_time(datetime.now(timezone.utc), "Europe/Berlin")
+        tmrw = now_user.replace(hour=10, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        db.session.add(Shift(user_id=u.id, start=tmrw, end=tmrw, shift_type="off"))
+        db.session.commit()
+
+    worker.run_daily()
+    assert recorded == []  # freier Tag -> keine Mail, Ruhe
+
+
+def test_run_daily_sends_for_real_shift(monkeypatch):
+    recorded = []
+    monkeypatch.setattr(worker, "send_email",
+                        lambda to, subject, html, **kw: recorded.append(to) or True)
+    with app.app_context():
+        u = _daily_user()
+        now_user = to_user_time(datetime.now(timezone.utc), "Europe/Berlin")
+        tmrw = now_user.replace(hour=6, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        db.session.add(Shift(user_id=u.id, start=tmrw, end=tmrw + timedelta(hours=8), shift_type="early"))
+        db.session.commit()
+
+    worker.run_daily()
+    assert recorded == ["daily@example.de"]  # echte Schicht -> genau eine Mail

@@ -22,7 +22,7 @@ phone at 11pm.
 - Four built-in shift types, or name your own; optional note per shift
 - Daily reminder at a time you choose (18:00 by default), shift reminder 30–180 minutes before the start
 - A background worker sends both reminders in each user's own timezone and never sends the same mail twice
-- Days off get a short all-clear mail, so a quiet inbox never means a missed shift
+- On days off you get no mail at all — your time off stays quiet
 - Turn either reminder off on its own, or both at once from the app
 - Enter several days at once by tapping them in a month calendar, and save a shift as a reusable template (name, colour, times)
 - Try it without an account at `/testen` — a browser-only demo that stores nothing
