@@ -24,6 +24,10 @@ phone at 11pm.
 - A background worker sends both reminders in each user's own timezone and never sends the same mail twice
 - Days off get a short all-clear mail, so a quiet inbox never means a missed shift
 - Turn either reminder off on its own, or both at once from the app
+- Enter several days at once by tapping them in a month calendar, and save a shift as a reusable template (name, colour, times)
+- Try it without an account at `/testen` — a browser-only demo that stores nothing
+- Teams: a shift lead creates a team, members join with a short code, the lead sees and edits their shifts, and every change mails the affected person
+- When the lead adds or changes a shift, the member confirms it with one click via a signed link (no login), and the lead sees the confirmation status
 
 ## Screenshots
 
@@ -37,7 +41,7 @@ phone at 11pm.
 |---|---|
 | Web | Flask, Jinja2, gunicorn |
 | Data | PostgreSQL in production, SQLite locally, SQLAlchemy + Alembic |
-| Auth | bcrypt, Flask-WTF (CSRF), server-side sessions |
+| Auth | bcrypt, Flask-WTF (CSRF), signed cookie sessions |
 | Jobs | Separate worker process, deduplicated via sent-at timestamps |
 | Email | Resend API, hand-written table-based HTML |
 | Hosting | Railway, custom domain with SPF, DKIM and DMARC |
@@ -89,17 +93,15 @@ python worker.py
 |---|---|
 | `secret_key` | Signs the session cookie. Any long random string. |
 | `resend_api_key` | API key from resend.com |
-| `openweather_key` | API key from openweathermap.org — resolves the city on your profile to a timezone |
 | `DATABASE_URL` | Postgres URL. Falls back to local SQLite if unset. |
 | `SESSION_COOKIE_SECURE` | `true` when serving over HTTPS |
 | `FLASK_DEBUG` | `true` during development only |
 
 ## Roadmap
 
-- Store IANA timezone names instead of a fixed UTC offset, so reminders stay
-  correct across daylight-saving changes
-- Weather for the next day in the daily reminder
-- Teams: share a roster, with a team lead who manages the shifts
+- Mark vacation / absence, visible to the team lead
+- Recurring shift patterns (e.g. 4-on / 4-off) entered once instead of day by day
+- A more reliable delivery channel (WhatsApp or SMS) alongside email
 
 ## Notes
 

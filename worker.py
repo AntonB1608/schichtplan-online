@@ -7,6 +7,13 @@ from time import sleep
 DRY_RUN = False # Set to True to test without sending emails
 
 
+def tomorrow_window(now_user):
+    """Fenster für 'morgen' in der LOKALEN Zeit des Nutzers – nicht in UTC.
+    Sonst listet die Mail nachts die falschen Schichten (z.B. Erinnerung 00:30)."""
+    start = datetime.combine(now_user.date() + timedelta(days=1), time(0, 0))
+    return start, start + timedelta(days=1)
+
+
 def run_once():
 
     with app.app_context():
@@ -21,6 +28,7 @@ def run_once():
             shifts = Shift.query.filter(
                 Shift.user_id == user.id,
                 Shift.shift_reminder_sent_at == None,
+                Shift.shift_type != "off",   # freie Tage lösen keine "Schicht beginnt"-Mail aus
                 Shift.start > now_user,
                 Shift.start <= now_user + timedelta(minutes=user.shift_reminder_lead_minutes),
             ).all()
@@ -60,18 +68,17 @@ def run_daily():
     with app.app_context():
 
         now_utc = datetime.now(timezone.utc)
-        now = now_utc.replace(tzinfo=None)
         users = User.query.filter_by(daily_reminder_enabled=True).all()
         for user in users:
             now_user = to_user_time(now_utc, user.time_zone)
             soll = datetime.combine(now_user.date(), user.daily_reminder_time.time())
             if now_user < soll or (user.daily_reminder_sent_at and user.daily_reminder_sent_at >= soll):                continue
 
-            tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0, 0))
+            tomorrow, tomorrow_end = tomorrow_window(now_user)
             shifts = Shift.query.filter(
                 Shift.user_id == user.id,
                 Shift.start >= tomorrow,
-                Shift.start < tomorrow + timedelta(days=1),
+                Shift.start < tomorrow_end,
             ).order_by(Shift.start).all()
 
             
